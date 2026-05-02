@@ -37,7 +37,7 @@ export const Footer = () => {
             </li>
             <li className="flex gap-3">
               <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-              <a href="mailto:pleasurepharmaceuticals@gmail.com" className="break-all hover:text-primary-foreground">
+              <a href="mailto:pleasurepharmaceuticals@gmail.com" className="whitespace-nowrap hover:text-primary-foreground">
                 pleasurepharmaceuticals@gmail.com
               </a>
             </li>
