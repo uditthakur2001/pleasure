@@ -17,7 +17,7 @@ export const Logo = ({
       aria-label="Pleasure Pharmaceuticals home"
     >
       <span className="grid h-10 w-10 place-items-center rounded-md  text-primary-foreground shadow-soft transition-smooth group-hover:bg-primary-glow">
-        <img src="/public/pleasaure logo.svg" alt="logo" className="h-10 w-10" />
+        <img src="/pleasaurelogo.svg" alt="logo" className="h-10 w-10" />
       </span>
       <span className="leading-tight">
         <span className={`block font-display text-lg ${text}`}>
