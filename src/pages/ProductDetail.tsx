@@ -49,7 +49,7 @@ const ProductDetail = () => {
               <img
                 src={product.images[selected]}
                 alt={product.name}
-                className="w-full h-full object-contain p-4"
+                className="w-full h-full object-cover"
               />
 
               {/* LENS */}

@@ -1,8 +1,50 @@
+// import injectionImg from "@/assets/product-injection.jpg";
+// import bolusImg from "@/assets/product-bolus.jpg";
+// import powderImg from "@/assets/product-powder.jpg";
+// import syrupImg from "@/assets/product-syrup.jpg";
+// import pecImg from "@/assets/p-cef.png";
+// import zoonilImg from "@/assets/zoonil.png";
+// Category images
 import injectionImg from "@/assets/product-injection.jpg";
 import bolusImg from "@/assets/product-bolus.jpg";
 import powderImg from "@/assets/product-powder.jpg";
 import syrupImg from "@/assets/product-syrup.jpg";
-import pecImg from "@/assets/p-cef.png";
+
+
+
+// P-CEF range
+import pcefXp from "@/assets/p-cef.png";
+import pcefForte from "@/assets/p-cef-forte.jpg";
+import pcef3 from "@/assets/pcef-3.jpg";
+import pcef3ii from "@/assets/pcef-3-ii.jpg";
+import pcefSb from "@/assets/pcef-sb.i.jpg";
+import pcefSbii from "@/assets/pcef-sb.ii.jpg";
+
+// CSURE
+import csure1 from "@/assets/csure.i.jpg";
+import csure2 from "@/assets/csure.ii.jpg";
+
+// F-STAR PLUS
+import fstarPlus1 from "@/assets/f-star-plus.i.png";
+import fstarPlus2 from "@/assets/f-star-plus.ii.jpg";
+
+// FMS-C
+import fmsC1 from "@/assets/fms-c.i.jpg";
+import fmsC2 from "@/assets/fms-c.ii.png";
+
+// Mastanil
+import mastanil1 from "@/assets/mastanil.i.jpg";
+import mastanil2 from "@/assets/mastanil.ii.jpg";
+
+// ZOONIL
+import zoonil from "@/assets/zoonil.png";
+import zoonilPlus1 from "@/assets/zoonil-plus.png";
+import zoonilPlus2 from "@/assets/zoonil-plus.ii.jpg";
+
+// Others
+import utroC from "@/assets/utro-c.png";
+import permethrin1 from "@/assets/permethrin1.jpg";
+import permethrin2 from "@/assets/permethrin2.jpg";
 
 export type ProductCategory = "Injection" | "Bolus" | "Powder" | "Syrup";
 
@@ -32,7 +74,7 @@ export const products: Product[] = [
     name: "P-CEF XP",
     tagline: "Cefoperazone + Sulbactam Injection",
     category: "Injection",
-    images:[ pecImg,
+    images:[ pcefXp,
       injectionImg,
       syrupImg
     ],
@@ -57,7 +99,7 @@ export const products: Product[] = [
     name: "P-CEF SB 4.5 gm",
     tagline: "Ceftriaxone + Sulbactam Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [pcefSb,pcefSbii],
     composition: "Ceftriaxone Sodium 3 g + Sulbactam Sodium 1.5 g",
     indications: [
       "Severe systemic infections",
@@ -223,7 +265,7 @@ export const products: Product[] = [
     name: "P-CEF FORTE",
     tagline: "Ceftriaxone Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [pcefForte],
     composition: "Ceftriaxone Injection",
     indications: ["Mastitis", "Pneumonia", "Post-operative infections"],
     dosage: "5–6 mg/kg body weight",
@@ -235,7 +277,7 @@ export const products: Product[] = [
     name: "C-SURE",
     tagline: "Ascorbic Acid Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [csure1, csure2],
     composition: "Vitamin C (Ascorbic Acid)",
     indications: ["Stress", "Mastitis", "Recovery"],
     dosage: "5–10 ml",
@@ -271,7 +313,7 @@ export const products: Product[] = [
     name: "F-STAR PLUS",
     tagline: "Piroxicam + Paracetamol Bolus",
     category: "Bolus",
-    images: [bolusImg],
+    images: [fstarPlus1, fstarPlus2],
     composition: "Piroxicam + Paracetamol + Serratiopeptidase",
     indications: ["Pain", "Fever", "Inflammation"],
     dosage: "2 bolus daily",
@@ -307,7 +349,7 @@ export const products: Product[] = [
     name: "ZOONIL PLUS",
     tagline: "Advanced Dewormer",
     category: "Bolus",
-    images: [bolusImg],
+    images: [zoonilPlus1,zoonilPlus2],
     composition: "Oxyclozanide + Levamisole + Silymarin",
     indications: ["Roundworms", "Flukes"],
     dosage: "As directed",
@@ -319,7 +361,7 @@ export const products: Product[] = [
     name: "ZOONIL INJECTION",
     tagline: "Ivermectin Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [zoonil],
     composition: "Ivermectin",
     indications: ["Parasites", "Ticks"],
     dosage: "1 ml per 50 kg",
@@ -331,7 +373,9 @@ export const products: Product[] = [
     name: "ZOONIL XP SOAP",
     tagline: "Anti-parasitic Soap",
     category: "Powder",
-    images: [powderImg],
+    images: [
+      // permethrin1,
+       permethrin2],
     composition: "Permethrin",
     indications: ["Ticks", "Lice"],
     dosage: "External use",
@@ -343,7 +387,7 @@ export const products: Product[] = [
     name: "FMS-C",
     tagline: "Flunixin + Magnesium Bolus",
     category: "Bolus",
-    images: [bolusImg],
+    images: [fmsC1, fmsC2],
     composition: "Flunixin + Serratiopeptidase",
     indications: ["Pain", "Fever"],
     dosage: "As directed",
@@ -355,7 +399,7 @@ export const products: Product[] = [
     name: "MASTANIL",
     tagline: "Mastitis Control Powder",
     category: "Powder",
-    images: [powderImg],
+    images: [mastanil1, mastanil2],
     composition: "Multi-action formula",
     indications: ["Mastitis", "Milk drop"],
     dosage: "20 gm daily",
@@ -379,7 +423,7 @@ export const products: Product[] = [
     name: "UTRO-C",
     tagline: "Uterine Tonic",
     category: "Syrup",
-    images: [syrupImg],
+    images: [utroC],
     composition: "Herbal formulation",
     indications: ["Retention of placenta", "Infertility"],
     dosage: "As directed",
