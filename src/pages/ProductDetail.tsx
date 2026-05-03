@@ -36,12 +36,11 @@ const handleMouseMove = (e) => {
         {/* <div className="overflow-hidden rounded-2xl border border-border bg-tan shadow-card">
           <img src={product.image} alt={`${product.name} — ${product.tagline}`} loading="lazy" width={1024} height={1024} className="h-full w-full object-cover" />
         </div> */}
-        <div className="relative flex gap-8 items-start">
-  
+<div className="relative flex flex-col lg:flex-row gap-8 items-start ">  
   {/* LEFT IMAGE */}
   <div className="space-y-4">
     <div
-      className="relative w-[400px] h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
+      className="relative w-full max-w-[400px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
       onMouseEnter={() => setShowZoom(true)}
       onMouseLeave={() => setShowZoom(false)}
       onMouseMove={handleMouseMove}
@@ -55,7 +54,7 @@ const handleMouseMove = (e) => {
       {/* LENS */}
       {showZoom && (
         <div
-          className="absolute w-20 h-20 border border-gray-400 bg-white/20 rounded-full pointer-events-none"
+          className="hidden lg:block absolute w-20 h-20 border border-gray-400 bg-white/20 rounded-full pointer-events-none"
           style={{
             left: `${zoomPos.x}%`,
             top: `${zoomPos.y}%`,
