@@ -2,6 +2,7 @@ import injectionImg from "@/assets/product-injection.jpg";
 import bolusImg from "@/assets/product-bolus.jpg";
 import powderImg from "@/assets/product-powder.jpg";
 import syrupImg from "@/assets/product-syrup.jpg";
+import pecImg from "@/assets/p-cef.png";
 
 export type ProductCategory = "Injection" | "Bolus" | "Powder" | "Syrup";
 
@@ -31,7 +32,7 @@ export const products: Product[] = [
     name: "P-CEF XP",
     tagline: "Cefoperazone + Sulbactam Injection",
     category: "Injection",
-    image: injectionImg,
+    image: pecImg,
     composition: "Cefoperazone Sodium 3 g + Sulbactam Sodium 1.5 g (per vial)",
     indications: [
       "Mastitis in dairy cattle",
