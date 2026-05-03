@@ -18,7 +18,12 @@ export interface Product {
   packSize?: string;
 }
 
-export const categories: ProductCategory[] = ["Injection", "Bolus", "Powder", "Syrup"];
+export const categories: ProductCategory[] = [
+  "Injection",
+  "Bolus",
+  "Powder",
+  "Syrup",
+];
 
 export const products: Product[] = [
   {
@@ -34,7 +39,8 @@ export const products: Product[] = [
       "Urinary tract infections",
       "Septicemia and soft tissue infections",
     ],
-    dosage: "Large animals: 1 vial (4.5 g) IV/IM once or twice daily for 3–5 days, or as directed by a veterinarian.",
+    dosage:
+      "Large animals: 1 vial (4.5 g) IV/IM once or twice daily for 3–5 days, or as directed by a veterinarian.",
     benefits: [
       "Broad-spectrum bactericidal action",
       "Effective against beta-lactamase producing organisms",
@@ -54,7 +60,8 @@ export const products: Product[] = [
       "Pneumonia and respiratory infections",
       "Post-surgical prophylaxis",
     ],
-    dosage: "1 vial IV/IM once daily for 3–5 days as advised by a veterinarian.",
+    dosage:
+      "1 vial IV/IM once daily for 3–5 days as advised by a veterinarian.",
     benefits: [
       "Extended spectrum cephalosporin",
       "Once-a-day dosing convenience",
@@ -74,7 +81,8 @@ export const products: Product[] = [
       "Bovine respiratory disease complex",
       "Skin and soft tissue infections",
     ],
-    dosage: "Cattle/buffalo: 1 ml per 40 kg body weight, IM/SC once daily for 3 days.",
+    dosage:
+      "Cattle/buffalo: 1 ml per 40 kg body weight, IM/SC once daily for 3 days.",
     benefits: [
       "Broad-spectrum fluoroquinolone",
       "Excellent tissue penetration",
@@ -134,7 +142,8 @@ export const products: Product[] = [
       "Poor growth, weakness, anorexia",
       "Stress, post-illness recovery",
     ],
-    dosage: "Cattle/buffalo: 50–100 ml daily; calves: 20–30 ml daily for 5–7 days.",
+    dosage:
+      "Cattle/buffalo: 50–100 ml daily; calves: 20–30 ml daily for 5–7 days.",
     benefits: [
       "Restores vitality & appetite",
       "Improves milk yield & fertility",
@@ -148,13 +157,15 @@ export const products: Product[] = [
     tagline: "Herbal Liver Tonic",
     category: "Syrup",
     image: syrupImg,
-    composition: "Andrographis, Phyllanthus, Boerhavia, Tephrosia, Eclipta extracts",
+    composition:
+      "Andrographis, Phyllanthus, Boerhavia, Tephrosia, Eclipta extracts",
     indications: [
       "Liver dysfunction & jaundice",
       "Aflatoxicosis",
       "Loss of appetite, indigestion",
     ],
-    dosage: "Cattle: 50 ml twice daily; calves: 20 ml twice daily for 7–10 days.",
+    dosage:
+      "Cattle: 50 ml twice daily; calves: 20 ml twice daily for 7–10 days.",
     benefits: [
       "Hepato-protective & restorative",
       "Improves digestion and FCR",
@@ -188,7 +199,8 @@ export const products: Product[] = [
     tagline: "Mineral Mixture Powder",
     category: "Powder",
     image: powderImg,
-    composition: "Chelated minerals — Zn, Cu, Mn, Fe, Co, I, Se with vitamins A, D3, E",
+    composition:
+      "Chelated minerals — Zn, Cu, Mn, Fe, Co, I, Se with vitamins A, D3, E",
     indications: [
       "Mineral deficiency syndromes",
       "Anestrus, repeat breeding",
@@ -201,6 +213,197 @@ export const products: Product[] = [
       "Enhances milk production & quality",
     ],
     packSize: "1 kg, 5 kg & 25 kg pack",
+  },
+  {
+    slug: "p-cef-forte",
+    name: "P-CEF FORTE",
+    tagline: "Ceftriaxone Injection",
+    category: "Injection",
+    image: injectionImg,
+    composition: "Ceftriaxone Injection",
+    indications: ["Mastitis", "Pneumonia", "Post-operative infections"],
+    dosage: "5–6 mg/kg body weight",
+    benefits: ["Fast absorption", "High surface area"],
+  },
+
+  {
+    slug: "c-sure",
+    name: "C-SURE",
+    tagline: "Ascorbic Acid Injection",
+    category: "Injection",
+    image: injectionImg,
+    composition: "Vitamin C (Ascorbic Acid)",
+    indications: ["Stress", "Mastitis", "Recovery"],
+    dosage: "5–10 ml",
+    benefits: ["Boost immunity", "Improves recovery"],
+  },
+
+  {
+    slug: "i-perdone",
+    name: "I-PERDONE",
+    tagline: "Isoflupredone Injection",
+    category: "Injection",
+    image: injectionImg,
+    composition: "Isoflupredone",
+    indications: ["Ketosis", "Inflammation"],
+    dosage: "As directed",
+    benefits: ["Fast acting", "Multi-purpose"],
+  },
+
+  {
+    slug: "b-choline",
+    name: "B-CHOLINE",
+    tagline: "Choline Chloride Injection",
+    category: "Injection",
+    image: injectionImg,
+    composition: "Choline Chloride + B-Complex",
+    indications: ["Liver disorders", "Fatty liver"],
+    dosage: "5–10 ml",
+    benefits: ["Improves metabolism"],
+  },
+
+  {
+    slug: "f-star-plus",
+    name: "F-STAR PLUS",
+    tagline: "Piroxicam + Paracetamol Bolus",
+    category: "Bolus",
+    image: bolusImg,
+    composition: "Piroxicam + Paracetamol + Serratiopeptidase",
+    indications: ["Pain", "Fever", "Inflammation"],
+    dosage: "2 bolus daily",
+    benefits: ["Fast relief"],
+  },
+
+  {
+    slug: "vetofex",
+    name: "VETOFEX",
+    tagline: "Ofloxacin Bolus",
+    category: "Bolus",
+    image: bolusImg,
+    composition: "Ofloxacin",
+    indications: ["Diarrhea", "Respiratory infections"],
+    dosage: "As directed",
+    benefits: ["Strong antibacterial"],
+  },
+
+  {
+    slug: "vetofex-iu",
+    name: "VETOFEX-IU",
+    tagline: "Ofloxacin + Ornidazole Liquid",
+    category: "Syrup",
+    image: syrupImg,
+    composition: "Ofloxacin + Ornidazole",
+    indications: ["Gynecological infections", "Uterine infections"],
+    dosage: "As directed",
+    benefits: ["Broad spectrum"],
+  },
+
+  {
+    slug: "zoonil-plus",
+    name: "ZOONIL PLUS",
+    tagline: "Advanced Dewormer",
+    category: "Bolus",
+    image: bolusImg,
+    composition: "Oxyclozanide + Levamisole + Silymarin",
+    indications: ["Roundworms", "Flukes"],
+    dosage: "As directed",
+    benefits: ["Improves milk yield"],
+  },
+
+  {
+    slug: "zoonil-injection",
+    name: "ZOONIL INJECTION",
+    tagline: "Ivermectin Injection",
+    category: "Injection",
+    image: injectionImg,
+    composition: "Ivermectin",
+    indications: ["Parasites", "Ticks"],
+    dosage: "1 ml per 50 kg",
+    benefits: ["Long action"],
+  },
+
+  {
+    slug: "zoonil-xp-soap",
+    name: "ZOONIL XP SOAP",
+    tagline: "Anti-parasitic Soap",
+    category: "Powder",
+    image: powderImg,
+    composition: "Permethrin",
+    indications: ["Ticks", "Lice"],
+    dosage: "External use",
+    benefits: ["Kills parasites"],
+  },
+
+  {
+    slug: "fms-c",
+    name: "FMS-C",
+    tagline: "Flunixin + Magnesium Bolus",
+    category: "Bolus",
+    image: bolusImg,
+    composition: "Flunixin + Serratiopeptidase",
+    indications: ["Pain", "Fever"],
+    dosage: "As directed",
+    benefits: ["Fast pain relief"],
+  },
+
+  {
+    slug: "mastanil",
+    name: "MASTANIL",
+    tagline: "Mastitis Control Powder",
+    category: "Powder",
+    image: powderImg,
+    composition: "Multi-action formula",
+    indications: ["Mastitis", "Milk drop"],
+    dosage: "20 gm daily",
+    benefits: ["Improves milk quality"],
+  },
+
+  {
+    slug: "min-sure-gold",
+    name: "MIN SURE GOLD",
+    tagline: "Chelated Powder Supplement",
+    category: "Powder",
+    image: powderImg,
+    composition: "Minerals + Vitamins",
+    indications: ["Fertility", "Milk production"],
+    dosage: "50 gm daily",
+    benefits: ["Boost performance"],
+  },
+
+  {
+    slug: "utro-c",
+    name: "UTRO-C",
+    tagline: "Uterine Tonic",
+    category: "Syrup",
+    image: syrupImg,
+    composition: "Herbal formulation",
+    indications: ["Retention of placenta", "Infertility"],
+    dosage: "As directed",
+    benefits: ["Improves fertility"],
+  },
+
+  {
+    slug: "milkover",
+    name: "MILKOVER",
+    tagline: "Milk Enhancer Syrup",
+    category: "Syrup",
+    image: syrupImg,
+    composition: "Minerals + Vitamins",
+    indications: ["Low milk yield"],
+    dosage: "As directed",
+    benefits: ["Increases milk"],
+  },
+
+  {
+    slug: "cal-d-sure-advance",
+    name: "CAL-D SURE ADVANCE",
+    tagline: "Calcium Gel",
+    category: "Syrup",
+    image: syrupImg,
+    composition: "Calcium + Vitamin D",
+    indications: ["Milk fever"],
+    dosage: "As directed",
+    benefits: ["Strong bones"],
   },
 ];
 

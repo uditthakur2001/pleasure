@@ -70,14 +70,7 @@ const ProductDetail = () => {
             <Button asChild variant="hero" size="lg">
               <Link to={`/contact?product=${encodeURIComponent(product.name)}`}>Enquire Now</Link>
             </Button>
-            <Button asChild variant="warm" size="lg">
-              <a
-                href={`https://wa.me/919999999999?text=${encodeURIComponent(`Hi, I am interested in ${product.name}.`)}`}
-                target="_blank" rel="noopener noreferrer"
-              >
-                <MessageCircle className="h-4 w-4" /> WhatsApp Enquiry
-              </a>
-            </Button>
+
           </div>
         </div>
       </section>
