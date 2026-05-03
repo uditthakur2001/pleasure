@@ -15,12 +15,13 @@ const ProductDetail = () => {
   const [showZoom, setShowZoom] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
 
-const handleMouseMove = (e) => {
-  const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-  const x = ((e.clientX - left) / width) * 100;
-  const y = ((e.clientY - top) / height) * 100;
-  setZoomPos({ x, y });
-};
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPos({ x, y });
+  };
   return (
     <article>
       <div className="container-prose pt-10">
@@ -36,64 +37,64 @@ const handleMouseMove = (e) => {
         {/* <div className="overflow-hidden rounded-2xl border border-border bg-tan shadow-card">
           <img src={product.image} alt={`${product.name} — ${product.tagline}`} loading="lazy" width={1024} height={1024} className="h-full w-full object-cover" />
         </div> */}
-<div className="relative flex flex-col lg:flex-row gap-8 items-start ">  
-  {/* LEFT IMAGE */}
-  <div className="space-y-4">
-    <div
-      className="relative w-full max-w-[400px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
-      onMouseEnter={() => setShowZoom(true)}
-      onMouseLeave={() => setShowZoom(false)}
-      onMouseMove={handleMouseMove}
-    >
-      <img
-        src={product.images[selected]}
-        alt={product.name}
-        className="w-full h-full object-contain p-4"
-      />
+        <div className="relative flex flex-col lg:flex-row gap-8 items-start ">
+          {/* LEFT IMAGE */}
+          <div className="space-y-4">
+            <div
+              className="relative w-[400px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
+              onMouseEnter={() => setShowZoom(true)}
+              onMouseLeave={() => setShowZoom(false)}
+              onMouseMove={handleMouseMove}
+            >
+              <img
+                src={product.images[selected]}
+                alt={product.name}
+                className="w-full h-full object-contain p-4"
+              />
 
-      {/* LENS */}
-      {showZoom && (
-        <div
-          className="hidden lg:block absolute w-20 h-20 border border-gray-400 bg-white/20 rounded-full pointer-events-none"
-          style={{
-            left: `${zoomPos.x}%`,
-            top: `${zoomPos.y}%`,
-            transform: "translate(-50%, -50%)",
-          }}
-        />
-      )}
-    </div>
+              {/* LENS */}
+              {showZoom && (
+                <div
+                  className="hidden lg:block absolute w-20 h-20 border border-gray-400 bg-white/20 rounded-full pointer-events-none"
+                  style={{
+                    left: `${zoomPos.x}%`,
+                    top: `${zoomPos.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+              )}
+            </div>
 
-    {/* THUMBNAILS */}
-    <div className="flex gap-2">
-      {product.images.map((img, i) => (
-        <img
-          key={i}
-          src={img}
-          onClick={() => setSelected(i)}
-          className={`h-16 w-16 cursor-pointer rounded-md border object-contain p-1 ${
-            selected === i ? "border-primary" : "border-border"
-          }`}
-        />
-      ))}
-    </div>
-  </div>
+            {/* THUMBNAILS */}
+            <div className="flex gap-2">
+              {product.images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  onClick={() => setSelected(i)}
+                  className={`h-16 w-16 cursor-pointer rounded-md border object-contain p-1 ${
+                    selected === i ? "border-primary" : "border-border"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
-  {/* FLOATING ZOOM PANEL */}
-  {showZoom && (
-    <div className="absolute left-[420px] top-0 w-[450px] h-[450px] z-50 pointer-events-none">
-      <div className="w-full h-full rounded-2xl border bg-white shadow-xl overflow-hidden">
-        <img
-          src={product.images[selected]}
-          className="w-full h-full object-contain scale-[2.5]"
-          style={{
-            transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-          }}
-        />
-      </div>
-    </div>
-  )}
-</div>
+          {/* FLOATING ZOOM PANEL */}
+          {showZoom && (
+            <div className="absolute left-[420px] top-0 w-[450px] h-[450px] z-50 pointer-events-none">
+              <div className="w-full h-full rounded-2xl border bg-white shadow-xl overflow-hidden">
+                <img
+                  src={product.images[selected]}
+                  className="w-full h-full object-contain scale-[2.5]"
+                  style={{
+                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
         <div>
           <span className="eyebrow mb-3">{product.category}</span>
           <h1 className="text-balance text-5xl text-primary md:text-6xl">
