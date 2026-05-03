@@ -9,7 +9,7 @@ export const ProductCard = ({ product }: { product: Product }) => (
   >
     <div className="relative aspect-[4/3] overflow-hidden bg-tan">
       <img
-        src={product.image}
+        src={product.images[0]}
         alt={`${product.name} — ${product.tagline}`}
         loading="lazy"
         width={1024}
