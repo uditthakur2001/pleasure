@@ -2,6 +2,11 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getProductBySlug, products } from "@/data/products";
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+
+import "yet-another-react-lightbox/styles.css";
+
 import { useState } from "react";
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -22,6 +27,8 @@ const ProductDetail = () => {
     const y = ((e.clientY - top) / height) * 100;
     setZoomPos({ x, y });
   };
+
+  const [openLightbox, setOpenLightbox] = useState(false);
   return (
     <article>
       <div className="container-prose pt-10">
@@ -49,7 +56,8 @@ const ProductDetail = () => {
               <img
                 src={product.images[selected]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover cursor-zoom-in"
+                onClick={() => setOpenLightbox(true)}
               />
 
               {/* LENS */}
@@ -185,6 +193,13 @@ const ProductDetail = () => {
           </div>
         </section>
       )}
+      <Lightbox
+        open={openLightbox}
+        close={() => setOpenLightbox(false)}
+        slides={product.images.map((img) => ({ src: img }))}
+        index={selected}
+        plugins={[Zoom]}
+      />
     </article>
   );
 };

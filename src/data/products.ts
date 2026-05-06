@@ -10,8 +10,6 @@ import bolusImg from "@/assets/product-bolus.jpg";
 import powderImg from "@/assets/product-powder.jpg";
 import syrupImg from "@/assets/product-syrup.jpg";
 
-
-
 // P-CEF range
 import pcefXp from "@/assets/p-cef.png";
 import pcefForte from "@/assets/p-cef-forte.jpg";
@@ -74,9 +72,8 @@ export const products: Product[] = [
     name: "P-CEF XP",
     tagline: "Cefoperazone + Sulbactam Injection",
     category: "Injection",
-    images:[ pcefXp,
-      injectionImg,
-      syrupImg
+    images: [pcefXp, 
+      // injectionImg, syrupImg
     ],
     composition: "Cefoperazone Sodium 3 g + Sulbactam Sodium 1.5 g (per vial)",
     indications: [
@@ -99,7 +96,7 @@ export const products: Product[] = [
     name: "P-CEF SB 4.5 gm",
     tagline: "Ceftriaxone + Sulbactam Injection",
     category: "Injection",
-    images: [pcefSb,pcefSbii],
+    images: [pcefSb, pcefSbii],
     composition: "Ceftriaxone Sodium 3 g + Sulbactam Sodium 1.5 g",
     indications: [
       "Severe systemic infections",
@@ -349,7 +346,7 @@ export const products: Product[] = [
     name: "ZOONIL PLUS",
     tagline: "Advanced Dewormer",
     category: "Bolus",
-    images: [zoonilPlus1,zoonilPlus2],
+    images: [zoonilPlus1, zoonilPlus2],
     composition: "Oxyclozanide + Levamisole + Silymarin",
     indications: ["Roundworms", "Flukes"],
     dosage: "As directed",
@@ -373,15 +370,42 @@ export const products: Product[] = [
     name: "ZOONIL XP SOAP",
     tagline: "Anti-parasitic Soap",
     category: "Powder",
-    images: [
-      // permethrin1,
-       permethrin2],
+    images: [permethrin1, permethrin2],
     composition: "Permethrin",
     indications: ["Ticks", "Lice"],
     dosage: "External use",
     benefits: ["Kills parasites"],
   },
+  {
+    slug: "p-cef-3",
+    name: "P-CEF 3",
+    tagline: "Broad Spectrum Veterinary Antibiotic Injection",
+    category: "Injection",
 
+    images: [pcef3, pcef3ii],
+
+    composition: "Ceftriaxone Sodium Injection IP",
+
+    indications: [
+      "Mastitis",
+      "Respiratory tract infections",
+      "Urinary tract infections",
+      "Post-operative infections",
+      "Bacterial fever and inflammation",
+    ],
+
+    dosage:
+      "Administer as directed by the veterinarian. Dose depends on body weight and severity of infection.",
+
+    benefits: [
+      "Broad spectrum antibacterial action",
+      "Fast recovery support",
+      "Highly effective against gram-positive and gram-negative bacteria",
+      "Improves animal health and productivity",
+    ],
+
+    packSize: "3 gm Injection Pack",
+  },
   {
     slug: "fms-c",
     name: "FMS-C",
