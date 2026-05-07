@@ -11,36 +11,36 @@ import powderImg from "@/assets/product-powder.jpg";
 import syrupImg from "@/assets/product-syrup.jpg";
 
 // P-CEF range
-import pcefXp from "@/assets/p-cef.png";
+import pcefXp from "@/assets/p-cef.webp";
 import pcefForte from "@/assets/p-cef-forte.jpg";
-import pcef3 from "@/assets/pcef-3.jpg";
-import pcef3ii from "@/assets/pcef-3-ii.jpg";
+import pcef3 from "@/assets/pcef-3.webp";
+import pcef3ii from "@/assets/pcef-3-ii.webp";
 import pcefSb from "@/assets/pcef-sb.i.jpg";
 import pcefSbii from "@/assets/pcef-sb.ii.jpg";
 
 // CSURE
-import csure1 from "@/assets/csure.i.jpg";
-import csure2 from "@/assets/csure.ii.jpg";
+import csure1 from "@/assets/csure.i.webp";
+import csure2 from "@/assets/csure.ii.webp";
 
 // F-STAR PLUS
-import fstarPlus1 from "@/assets/f-star-plus.i.png";
+import fstarPlus1 from "@/assets/f-star-plus.i.webp";
 import fstarPlus2 from "@/assets/f-star-plus.ii.jpg";
 
 // FMS-C
-import fmsC1 from "@/assets/fms-c.i.jpg";
-import fmsC2 from "@/assets/fms-c.ii.png";
+import fmsC1 from "@/assets/fms-c.i.webp";
+import fmsC2 from "@/assets/fms-c.ii.webp";
 
 // Mastanil
 import mastanil1 from "@/assets/mastanil.i.jpg";
-import mastanil2 from "@/assets/mastanil.ii.jpg";
+import mastanil2 from "@/assets/mastanil.ii.webp";
 
 // ZOONIL
-import zoonil from "@/assets/zoonil.png";
-import zoonilPlus1 from "@/assets/zoonil-plus.png";
+import zoonil from "@/assets/zoonil.webp";
+import zoonilPlus1 from "@/assets/zoonil-plus.webp";
 import zoonilPlus2 from "@/assets/zoonil-plus.ii.jpg";
 
 // Others
-import utroC from "@/assets/utro-c.png";
+import utroC from "@/assets/utro-c.webp";
 import permethrin1 from "@/assets/permethrin1.jpg";
 import permethrin2 from "@/assets/permethrin2.jpg";
 

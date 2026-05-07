@@ -2,12 +2,13 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getProductBySlug, products } from "@/data/products";
-import Lightbox from "yet-another-react-lightbox";
+// import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 import "yet-another-react-lightbox/styles.css";
 
-import { useState } from "react";
+import { useState, useRef, lazy, Suspense } from "react";
+const Lightbox = lazy(() => import("yet-another-react-lightbox"));
 const ProductDetail = () => {
   const { slug } = useParams();
   const product = slug ? getProductBySlug(slug) : undefined;
@@ -18,14 +19,39 @@ const ProductDetail = () => {
     .slice(0, 3);
   const [selected, setSelected] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+  const zoomRef = useRef<HTMLImageElement | null>(null);
+  const lensRef = useRef<HTMLDivElement | null>(null);
+  const rectRef = useRef<DOMRect | null>(null);
 
-  const handleMouseMove = (e) => {
-    const { left, top, width, height } =
-      e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomPos({ x, y });
+  const frameRef = useRef<number | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+    }
+
+    frameRef.current = requestAnimationFrame(() => {
+      const rect = rectRef.current;
+
+      if (!rect) return;
+
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      if (zoomRef.current) {
+        zoomRef.current.style.transformOrigin = `${x}% ${y}%`;
+      }
+
+      if (lensRef.current) {
+        lensRef.current.style.left = `${x}%`;
+        lensRef.current.style.top = `${y}%`;
+      }
+    });
   };
 
   const [openLightbox, setOpenLightbox] = useState(false);
@@ -49,7 +75,10 @@ const ProductDetail = () => {
           <div className="space-y-4">
             <div
               className="relative w-[300px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
-              onMouseEnter={() => setShowZoom(true)}
+              onMouseEnter={(e) => {
+                setShowZoom(true);
+                handleMouseEnter(e);
+              }}
               onMouseLeave={() => setShowZoom(false)}
               onMouseMove={handleMouseMove}
             >
@@ -63,10 +92,11 @@ const ProductDetail = () => {
               {/* LENS */}
               {showZoom && (
                 <div
+                  ref={lensRef}
                   className="hidden lg:block absolute w-20 h-20 border border-gray-400 bg-white/20 rounded-full pointer-events-none"
                   style={{
-                    left: `${zoomPos.x}%`,
-                    top: `${zoomPos.y}%`,
+                    // left: `${zoomPos.x}%`,
+                    // top: `${zoomPos.y}%`,
                     transform: "translate(-50%, -50%)",
                   }}
                 />
@@ -93,11 +123,9 @@ const ProductDetail = () => {
             <div className="absolute left-[420px] top-0 w-[450px] h-[450px] z-50 pointer-events-none">
               <div className="w-full h-full rounded-2xl border bg-white shadow-xl overflow-hidden">
                 <img
+                  ref={zoomRef}
                   src={product.images[selected]}
                   className="w-full h-full object-contain scale-[2.5]"
-                  style={{
-                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                  }}
                 />
               </div>
             </div>
@@ -193,13 +221,19 @@ const ProductDetail = () => {
           </div>
         </section>
       )}
-      <Lightbox
-        open={openLightbox}
-        close={() => setOpenLightbox(false)}
-        slides={product.images.map((img) => ({ src: img }))}
-        index={selected}
-        plugins={[Zoom]}
-      />
+      <Suspense fallback={null}>
+        {openLightbox && (
+          <Lightbox
+            open={openLightbox}
+            close={() => setOpenLightbox(false)}
+            slides={product.images.map((img) => ({
+              src: img,
+            }))}
+            index={selected}
+            plugins={[Zoom]}
+          />
+        )}
+      </Suspense>
     </article>
   );
 };

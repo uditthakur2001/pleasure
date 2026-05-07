@@ -3,8 +3,9 @@ import { ArrowRight, Award, ShieldCheck, Sprout, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/ProductCard";
 import { products } from "@/data/products";
-import heroImg from "@/assets/hero-farmer-cattle.jpg";
-import cattleImg from "@/assets/cattle-field.jpg";
+import heroImg from "@/assets/hero-farmer-cattle.webp";
+// import cattleImg from "@/assets/cattle-field.jpg";
+import storeImg  from "@/assets/store.webp";
 
 const Home = () => {
   const highlights = products.slice(0, 6);
@@ -18,58 +19,110 @@ const Home = () => {
   return (
     <>
       {/* HERO — split screen */}
-      <section className="relative overflow-hidden border-b border-border/60">
-        <div className="grid lg:grid-cols-2">
-          <div className="bg-gradient-warm">
-            <div className="mx-auto flex h-full max-w-2xl flex-col justify-center px-6 py-20 sm:px-10 lg:px-14 lg:py-32">
-              <span className="eyebrow mb-6 animate-fade-in">Veterinary Pharmaceuticals · Est. 2006</span>
-              <h1 className="text-balance text-5xl leading-[1.05] text-primary sm:text-6xl lg:text-7xl animate-fade-up">
-                Committed to <em className="not-italic text-accent">Better</em> Animal Health.
-              </h1>
-              <p className="mt-6 max-w-xl text-lg text-muted-foreground animate-fade-up [animation-delay:120ms]">
-                Veterinary pharmaceutical solutions engineered for healthier livestock, stronger farms and higher productivity — trusted by farmers and veterinarians across India.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3 animate-fade-up [animation-delay:240ms]">
-                <Button asChild variant="hero" size="lg">
-                  <Link to="/products">View Products <ArrowRight className="h-4 w-4" /></Link>
-                </Button>
-                <Button asChild variant="warm" size="lg">
-                  <Link to="/distributor">Become a Distributor</Link>
-                </Button>
-              </div>
-              <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-border/70 pt-8">
-                <div>
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">Founded</dt>
-                  <dd className="mt-1 font-display text-3xl text-primary">2006</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">Products</dt>
-                  <dd className="mt-1 font-display text-3xl text-primary">{products.length}+</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">Based in</dt>
-                  <dd className="mt-1 font-display text-3xl text-primary">Delhi</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-          <div className="relative min-h-[420px] lg:min-h-[720px]">
-            <img
-              src={heroImg}
-              alt="Farmer caring for healthy cattle in a green pasture"
-              width={1080}
-              height={1920}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 via-transparent to-transparent" />
-          </div>
+<section className="relative overflow-hidden border-b border-border/60">
+
+  <div className="grid items-center lg:grid-cols-2">
+
+    {/* LEFT CONTENT */}
+    <div className="bg-gradient-warm">
+
+      <div className="mx-auto flex max-w-2xl flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
+
+        <span className="eyebrow mb-4">
+          Veterinary Pharmaceuticals · Est. 2006
+        </span>
+
+        <h1 className="text-balance text-4xl leading-[1.05] text-primary sm:text-5xl lg:text-6xl">
+          Committed to{" "}
+          <em className="not-italic text-accent">
+            Better
+          </em>{" "}
+          Animal Health.
+        </h1>
+
+        <p className="mt-4 max-w-xl text-base text-muted-foreground">
+          Veterinary pharmaceutical solutions engineered for healthier
+          livestock, stronger farms and higher productivity.
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+
+          <Button asChild variant="hero" size="lg">
+            <Link to="/products">
+              View Products
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+
+          <Button asChild variant="warm" size="lg">
+            <Link to="/distributor">
+              Become a Distributor
+            </Link>
+          </Button>
+
         </div>
-      </section>
+
+        <dl className="mt-8 grid max-w-lg grid-cols-3 gap-4 border-t border-border/70 pt-6">
+
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+              Founded
+            </dt>
+
+            <dd className="mt-1 font-display text-2xl text-primary">
+              2006
+            </dd>
+          </div>
+
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+              Products
+            </dt>
+
+            <dd className="mt-1 font-display text-2xl text-primary">
+              {products.length}+
+            </dd>
+          </div>
+
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+              Based in
+            </dt>
+
+            <dd className="mt-1 font-display text-2xl text-primary">
+              Delhi
+            </dd>
+          </div>
+
+        </dl>
+
+      </div>
+    </div>
+
+    {/* RIGHT IMAGE */}
+    <div className="relative h-[320px] lg:h-[500px]">
+
+      <img
+        src={heroImg}
+        alt="Farmer caring for healthy cattle in a green pasture"
+        width={1080}
+        height={1920}
+        // fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 via-transparent to-transparent" />
+
+    </div>
+
+  </div>
+</section>
 
       {/* ABOUT PREVIEW */}
       <section className="container-prose grid gap-12 py-20 lg:grid-cols-2 lg:py-28">
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-tan shadow-card">
-          <img src={cattleImg} alt="Healthy cow and buffalo in green field" loading="lazy" width={1600} height={1024} className="h-full w-full object-cover" />
+          <img src={storeImg} alt="Healthy cow and buffalo in green field" loading="lazy" width={1600} height={1024} className="h-full w-full object-cover" />
         </div>
         <div className="flex flex-col justify-center">
           <span className="eyebrow mb-4">Our Story</span>

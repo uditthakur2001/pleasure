@@ -13,7 +13,7 @@ export const Footer = () => {
           </p>
         </div>
         <div>
-          <h4 className="mb-4 font-display text-xl">Explore</h4>
+          <h2 className="mb-4 font-display text-xl">Explore</h2>
           <ul className="space-y-2 text-sm text-primary-foreground/80">
             <li><Link to="/about" className="hover:text-primary-foreground">About Us</Link></li>
             <li><Link to="/products" className="hover:text-primary-foreground">Products</Link></li>
@@ -22,14 +22,14 @@ export const Footer = () => {
           </ul>
         </div>
         <div>
-          <h4 className="mb-4 font-display text-xl">Partner</h4>
+          <h2 className="mb-4 font-display text-xl">Partner</h2>
           <ul className="space-y-2 text-sm text-primary-foreground/80">
             <li><Link to="/distributor" className="hover:text-primary-foreground">Become a Distributor</Link></li>
             <li><Link to="/contact" className="hover:text-primary-foreground">Contact Sales</Link></li>
           </ul>
         </div>
         <div>
-          <h4 className="mb-4 font-display text-xl">Reach Us</h4>
+          <h2 className="mb-4 font-display text-xl">Reach Us</h2>
           <ul className="space-y-3 text-sm text-primary-foreground/80">
             <li className="flex gap-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
