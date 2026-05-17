@@ -35,7 +35,8 @@ import mastanil1 from "@/assets/mastanil.i.jpg";
 import mastanil2 from "@/assets/mastanil.ii.webp";
 
 // ZOONIL
-import zoonil from "@/assets/zoonil.webp";
+import zoonil from "@/assets/zoonil.png";
+import zoonil2 from "@/assets/zoonil2.png";
 import zoonilPlus1 from "@/assets/zoonil-plus.webp";
 import zoonilPlus2 from "@/assets/zoonil-plus.ii.jpg";
 
@@ -43,6 +44,9 @@ import zoonilPlus2 from "@/assets/zoonil-plus.ii.jpg";
 import utroC from "@/assets/utro-c.webp";
 import permethrin1 from "@/assets/permethrin1.jpg";
 import permethrin2 from "@/assets/permethrin2.jpg";
+
+import enroff from "@/assets/enroff.png"
+import enroff2 from "@/assets/enroff2.png"
 
 export type ProductCategory = "Injection" | "Bolus" | "Powder" | "Syrup";
 
@@ -69,7 +73,7 @@ export const categories: ProductCategory[] = [
 export const products: Product[] = [
   {
     slug: "p-cef-xp",
-    name: "P-CEF XP",
+    name: "P-CEF XP 4.5gm",
     tagline: "Cefoperazone + Sulbactam Injection",
     category: "Injection",
     images: [pcefXp, 
@@ -114,10 +118,10 @@ export const products: Product[] = [
   },
   {
     slug: "enroff",
-    name: "ENROFF",
+    name: "ENROFF Injection",
     tagline: "Enrofloxacin Injection 10%",
     category: "Injection",
-    images: [injectionImg],
+    images: [enroff, enroff2],
     composition: "Enrofloxacin 100 mg per ml",
     indications: [
       "Bacterial enteritis & calf scours",
@@ -355,10 +359,12 @@ export const products: Product[] = [
 
   {
     slug: "zoonil-injection",
-    name: "ZOONIL INJECTION",
+    name: "ZOONIL PLUS INJECTION",
     tagline: "Ivermectin Injection",
     category: "Injection",
-    images: [zoonil],
+    images: [zoonil,
+      zoonil2
+    ],
     composition: "Ivermectin",
     indications: ["Parasites", "Ticks"],
     dosage: "1 ml per 50 kg",
