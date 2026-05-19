@@ -8,6 +8,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
 import "./lightbox.css";
+import { cn } from "@/lib/utils";
 
 import { useState, useRef, lazy, Suspense } from "react";
 const Lightbox = lazy(() => import("yet-another-react-lightbox"));
@@ -56,6 +57,10 @@ const ProductDetail = () => {
     });
   };
 
+  const [selectedVariant, setSelectedVariant] = useState(
+    product.variants?.[0] || null,
+  );
+
   const [openLightbox, setOpenLightbox] = useState(false);
   return (
     <article>
@@ -85,7 +90,11 @@ const ProductDetail = () => {
               onMouseMove={handleMouseMove}
             >
               <img
-                src={product.images[selected]}
+                src={
+                  selectedVariant
+                    ? selectedVariant.images[selected]
+                    : product.images[selected]
+                }
                 alt={product.name}
                 className="max-w-full max-h-full object-contain p-6 cursor-zoom-in"
                 onClick={() => setOpenLightbox(true)}
@@ -108,17 +117,42 @@ const ProductDetail = () => {
 
             {/* THUMBNAILS */}
             <div className="flex gap-2">
-              {product.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  onClick={() => setSelected(i)}
-                  className={`h-16 w-16 cursor-pointer rounded-md border object-contain p-1 ${
-                    selected === i ? "border-primary" : "border-border"
-                  }`}
-                />
-              ))}
+              {(selectedVariant ? selectedVariant.images : product.images).map(
+                (img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    onClick={() => setSelected(i)}
+                    className={`h-16 w-16 cursor-pointer rounded-md border object-contain p-1 ${
+                      selected === i ? "border-primary" : "border-border"
+                    }`}
+                  />
+                ),
+              )}
             </div>
+
+            {/* SIZE VARIANTS */}
+            {product.variants && (
+              <div className="flex flex-wrap gap-3 pt-4">
+                {product.variants.map((variant) => (
+                  <button
+                    key={variant.size}
+                    onClick={() => {
+                      setSelectedVariant(variant);
+                      setSelected(0);
+                    }}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-medium transition-smooth",
+                      selectedVariant?.size === variant.size
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-[#F5E6CC] text-primary",
+                    )}
+                  >
+                    {variant.size}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* FLOATING ZOOM PANEL */}
@@ -210,7 +244,7 @@ const ProductDetail = () => {
                   <img
                     src={p.images[0]}
                     alt={p.name}
-                    className="h-20 w-20 rounded-md object-contain p-1"
+                    className="h-20 w-20 bg-tan rounded-md object-contain p-1"
                   />{" "}
                   <div>
                     <h3 className="font-display text-xl text-primary">

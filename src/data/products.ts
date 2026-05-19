@@ -46,10 +46,14 @@ import utroC from "@/assets/utro-c.webp";
 import permethrin1 from "@/assets/permethrin1.jpg";
 import permethrin2 from "@/assets/permethrin2.jpg";
 
-import enroff from "@/assets/enroff.png"
-import enroff2 from "@/assets/enroff2.png"
+import enroff from "@/assets/enroff.png";
+import enroff2 from "@/assets/enroff2.png";
 // import vitahp from '@/assets/vitahp.png'
-import vitahp from '@/assets/vitahpn.png'
+import vitahp from "@/assets/vitahp.png";
+import vitahp25 from "@/assets/vitahp2.0.png";
+import vitahp250 from "@/assets/vitahp2.1.png";
+import vitahp5 from "@/assets/vitahp5.png";
+import vitahp5000 from "@/assets/vitahp5.1.png";
 
 import noflam from "@/assets/noflam.png";
 import noflam2 from "@/assets/noflam2.png";
@@ -62,8 +66,23 @@ import bCholine3 from "@/assets/b-choline3.png";
 import vetofex from "@/assets/vetofex1.png";
 import vetofex2 from "@/assets/vetofex2.1.png";
 import vetofexIu from "@/assets/vetofex-iu.png";
+import caldsureadv from "@/assets/caldsureadv.png";
+import caldsureadv2 from "@/assets/caldsureadv2.png";
+
+//new
+import caldsure from "@/assets/caldsure.png";
+import caldsure2 from "@/assets/caldsure (2).png";
+import leptad from "@/assets/leptad.png";
+import leptad2 from "@/assets/leptad2.png";
+import milkover from "@/assets/milkover.png";
+import milkover2 from "@/assets/milkover2.png";
 
 export type ProductCategory = "Injection" | "Bolus" | "Powder" | "Syrup";
+
+export interface ProductVariant {
+  size: string;
+  images: string[];
+}
 
 export interface Product {
   slug: string;
@@ -76,6 +95,8 @@ export interface Product {
   dosage: string;
   benefits: string[];
   packSize?: string;
+
+  variants?: ProductVariant[];
 }
 
 export const categories: ProductCategory[] = [
@@ -91,7 +112,8 @@ export const products: Product[] = [
     name: "P-CEF XP 4.5gm",
     tagline: "Cefoperazone + Sulbactam Injection",
     category: "Injection",
-    images: [pcefXp, 
+    images: [
+      pcefXp,
       // injectionImg, syrupImg
     ],
     composition: "Cefoperazone Sodium 3 g + Sulbactam Sodium 1.5 g (per vial)",
@@ -131,41 +153,41 @@ export const products: Product[] = [
     ],
     packSize: "4.5 g vial with diluent",
   },
-{
-  slug: "enroff",
-  name: "ENROFF Injection",
-  tagline: "Enrofloxacin Injection 10%",
-  category: "Injection",
-  images: [enroff, enroff2],
+  {
+    slug: "enroff",
+    name: "ENROFF Injection",
+    tagline: "Enrofloxacin Injection 10%",
+    category: "Injection",
+    images: [enroff, enroff2],
 
-  composition: "Each ml contains: Enrofloxacin 100 mg",
+    composition: "Each ml contains: Enrofloxacin 100 mg",
 
-indications: [
-  "Complicated bacterial infections",
-  "Bacterial diarrhea and calf scours",
-  "Haemorrhagic septicaemia",
-  "Metritis and mastitis",
-  "Skin, wound, and soft tissue infections",
-],
+    indications: [
+      "Complicated bacterial infections",
+      "Bacterial diarrhea and calf scours",
+      "Haemorrhagic septicaemia",
+      "Metritis and mastitis",
+      "Skin, wound, and soft tissue infections",
+    ],
 
-  dosage:
-    "Cattle/Buffalo: 1 ml per 40 kg body weight by IM/SC route once daily for 3 days or as directed by a veterinarian.",
+    dosage:
+      "Cattle/Buffalo: 1 ml per 40 kg body weight by IM/SC route once daily for 3 days or as directed by a veterinarian.",
 
-  benefits: [
-    "Broad-spectrum fluoroquinolone antibiotic",
-    "Excellent tissue penetration",
-    "Rapid clinical recovery",
-    "Effective against mastitis-causing pathogens",
-  ],
+    benefits: [
+      "Broad-spectrum fluoroquinolone antibiotic",
+      "Excellent tissue penetration",
+      "Rapid clinical recovery",
+      "Effective against mastitis-causing pathogens",
+    ],
 
-  packSize: "30 ml and 100 ml vials",
-},
+    packSize: "30 ml and 100 ml vials",
+  },
   {
     slug: "noflam",
     name: "NOFLAM",
     tagline: "Piroxicam + Paracetamol Injection",
     category: "Injection",
-    images: [noflam,noflam2],
+    images: [noflam, noflam2],
     composition: "Piroxicam 20 mg + Paracetamol 150 mg per ml",
     indications: [
       "Post-operative pain & inflammation",
@@ -206,6 +228,21 @@ indications: [
     tagline: "High-Potency Vitamin Tonic",
     category: "Syrup",
     images: [vitahp],
+
+    variants: [
+      {
+        size: "250 ml",
+        images: [vitahp25,vitahp250],
+      },
+      {
+        size: "500 ml",
+        images: [vitahp],
+      },
+      {
+        size: "5 L",
+        images: [vitahp5,vitahp5000],
+      },
+    ],
     composition: "Vitamins A, D3, E, B-Complex with essential minerals",
     indications: [
       "Vitamin & mineral deficiency",
@@ -219,7 +256,7 @@ indications: [
       "Improves milk yield & fertility",
       "Boosts immunity",
     ],
-    packSize: "1 L & 5 L pack",
+    packSize: "250ml, 500ml & 5l pack",
   },
   {
     slug: "liv-sure",
@@ -248,7 +285,7 @@ indications: [
     name: "CAL-D SURE",
     tagline: "Calcium + Phosphorus + Vitamin D3",
     category: "Syrup",
-    images: [syrupImg],
+    images: [caldsure, caldsure2],
     composition: "Calcium 25 mg, Phosphorus 11.5 mg, Vitamin D3 600 IU per ml",
     indications: [
       "Milk fever & hypocalcemia",
@@ -268,7 +305,7 @@ indications: [
     name: "LEPTA-D",
     tagline: "Mineral Mixture Powder",
     category: "Powder",
-    images: [powderImg],
+    images: [leptad, leptad2],
     composition:
       "Chelated minerals — Zn, Cu, Mn, Fe, Co, I, Se with vitamins A, D3, E",
     indications: [
@@ -313,7 +350,7 @@ indications: [
     name: "I-PERDONE",
     tagline: "Isoflupredone Injection",
     category: "Injection",
-    images: [iPerdone,iPerdone2],
+    images: [iPerdone, iPerdone2],
     composition: "Isoflupredone",
     indications: ["Ketosis", "Inflammation"],
     dosage: "As directed",
@@ -325,7 +362,7 @@ indications: [
     name: "B-CHOLINE",
     tagline: "Choline Chloride Injection",
     category: "Injection",
-    images: [bCholine,bCholine2,bCholine3],
+    images: [bCholine, bCholine2, bCholine3],
     composition: "Choline Chloride + B-Complex",
     indications: ["Liver disorders", "Fatty liver"],
     dosage: "5–10 ml",
@@ -349,7 +386,7 @@ indications: [
     name: "VETOFEX",
     tagline: "Ofloxacin Bolus",
     category: "Bolus",
-    images: [vetofex,vetofex2],
+    images: [vetofex, vetofex2],
     composition: "Ofloxacin",
     indications: ["Diarrhea", "Respiratory infections"],
     dosage: "As directed",
@@ -385,9 +422,7 @@ indications: [
     name: "ZOONIL PLUS INJECTION",
     tagline: "Ivermectin Injection",
     category: "Injection",
-    images: [zoonil,
-      zoonil2
-    ],
+    images: [zoonil, zoonil2],
     composition: "Ivermectin",
     indications: ["Parasites", "Ticks"],
     dosage: "1 ml per 50 kg",
@@ -488,7 +523,7 @@ indications: [
     name: "MILKOVER",
     tagline: "Milk Enhancer Syrup",
     category: "Syrup",
-    images: [syrupImg],
+    images: [milkover, milkover2],
     composition: "Minerals + Vitamins",
     indications: ["Low milk yield"],
     dosage: "As directed",
@@ -500,7 +535,7 @@ indications: [
     name: "CAL-D SURE ADVANCE",
     tagline: "Calcium Gel",
     category: "Syrup",
-    images: [syrupImg],
+    images: [caldsureadv, caldsureadv2],
     composition: "Calcium + Vitamin D",
     indications: ["Milk fever"],
     dosage: "As directed",

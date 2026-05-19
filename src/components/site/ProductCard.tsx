@@ -7,6 +7,8 @@ type ProductCardProps = {
   product: Product;
 };
 
+
+
 export const ProductCard = memo(({ product }: ProductCardProps) => (
   <Link
     to={`/products/${product.slug}`}
