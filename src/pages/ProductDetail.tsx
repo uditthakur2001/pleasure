@@ -76,7 +76,7 @@ const ProductDetail = () => {
           {/* LEFT IMAGE */}
           <div className="space-y-4">
             <div
-              className="relative w-[500px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card flex items-center justify-center"
+              className="relative w-[300px] lg:w-[500px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card flex items-center justify-center"
               onMouseEnter={(e) => {
                 setShowZoom(true);
                 handleMouseEnter(e);
