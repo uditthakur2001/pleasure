@@ -7,6 +7,8 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 import "yet-another-react-lightbox/styles.css";
 
+import "./lightbox.css";
+
 import { useState, useRef, lazy, Suspense } from "react";
 const Lightbox = lazy(() => import("yet-another-react-lightbox"));
 const ProductDetail = () => {
@@ -74,7 +76,7 @@ const ProductDetail = () => {
           {/* LEFT IMAGE */}
           <div className="space-y-4">
             <div
-              className="relative w-[300px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card"
+              className="relative w-[500px] h-[300px] sm:h-[400px] overflow-hidden rounded-2xl border border-border bg-tan shadow-card flex items-center justify-center"
               onMouseEnter={(e) => {
                 setShowZoom(true);
                 handleMouseEnter(e);
@@ -85,9 +87,10 @@ const ProductDetail = () => {
               <img
                 src={product.images[selected]}
                 alt={product.name}
-                className="w-full h-full object-cover cursor-zoom-in"
+                className="max-w-full max-h-full object-contain p-6 cursor-zoom-in"
                 onClick={() => setOpenLightbox(true)}
               />
+              {/* </div> */}
 
               {/* LENS */}
               {showZoom && (
@@ -121,7 +124,7 @@ const ProductDetail = () => {
           {/* FLOATING ZOOM PANEL */}
           {showZoom && (
             <div className="absolute left-[420px] top-0 w-[450px] h-[450px] z-50 pointer-events-none">
-              <div className="w-full h-full rounded-2xl border bg-white shadow-xl overflow-hidden">
+              <div className="w-full h-full rounded-2xl border bg-tan shadow-xl overflow-hidden">
                 <img
                   ref={zoomRef}
                   src={product.images[selected]}
@@ -231,6 +234,11 @@ const ProductDetail = () => {
             }))}
             index={selected}
             plugins={[Zoom]}
+            styles={{
+              container: {
+                backgroundColor: "#EDDCC0",
+              },
+            }}
           />
         )}
       </Suspense>

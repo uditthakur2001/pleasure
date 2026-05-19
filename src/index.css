@@ -27,9 +27,9 @@
     --accent: 28 35% 55%; /* warm light brown #b08968 */
     --accent-foreground: 40 50% 97%;
 
-    --tan: 38 55% 84%; /* #f4ead5 light brown */
+    --tan: 34 68% 94%; /* #f4ead5 light brown */
     --tan-foreground: 145 56% 18%;
-
+/* hsl(34, 68, 94) */
     --destructive: 0 70% 45%;
     --destructive-foreground: 40 50% 97%;
 

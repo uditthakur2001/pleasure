@@ -15,7 +15,8 @@ import pcefXp from "@/assets/p-cef.webp";
 import pcefForte from "@/assets/p-cef-forte.jpg";
 import pcef3 from "@/assets/pcef-3.webp";
 import pcef3ii from "@/assets/pcef-3-ii.webp";
-import pcefSb from "@/assets/pcef-sb.i.jpg";
+import pcefSbi from "@/assets/pcef-sb.i.jpg";
+import pcefSb from "@/assets/p-cef-sb.png";
 import pcefSbii from "@/assets/pcef-sb.ii.jpg";
 
 // CSURE
@@ -47,6 +48,20 @@ import permethrin2 from "@/assets/permethrin2.jpg";
 
 import enroff from "@/assets/enroff.png"
 import enroff2 from "@/assets/enroff2.png"
+// import vitahp from '@/assets/vitahp.png'
+import vitahp from '@/assets/vitahpn.png'
+
+import noflam from "@/assets/noflam.png";
+import noflam2 from "@/assets/noflam2.png";
+import livSure from "@/assets/livsure.png";
+import iPerdone from "@/assets/i-perdone.png";
+import iPerdone2 from "@/assets/i-perdone2.png";
+import bCholine from "@/assets/b-choline.png";
+import bCholine2 from "@/assets/b-choline2.png";
+import bCholine3 from "@/assets/b-choline3.png";
+import vetofex from "@/assets/vetofex1.png";
+import vetofex2 from "@/assets/vetofex2.1.png";
+import vetofexIu from "@/assets/vetofex-iu.png";
 
 export type ProductCategory = "Injection" | "Bolus" | "Powder" | "Syrup";
 
@@ -100,7 +115,7 @@ export const products: Product[] = [
     name: "P-CEF SB 4.5 gm",
     tagline: "Ceftriaxone + Sulbactam Injection",
     category: "Injection",
-    images: [pcefSb, pcefSbii],
+    images: [pcefSb, pcefSbi, pcefSbii],
     composition: "Ceftriaxone Sodium 3 g + Sulbactam Sodium 1.5 g",
     indications: [
       "Severe systemic infections",
@@ -116,33 +131,41 @@ export const products: Product[] = [
     ],
     packSize: "4.5 g vial with diluent",
   },
-  {
-    slug: "enroff",
-    name: "ENROFF Injection",
-    tagline: "Enrofloxacin Injection 10%",
-    category: "Injection",
-    images: [enroff, enroff2],
-    composition: "Enrofloxacin 100 mg per ml",
-    indications: [
-      "Bacterial enteritis & calf scours",
-      "Bovine respiratory disease complex",
-      "Skin and soft tissue infections",
-    ],
-    dosage:
-      "Cattle/buffalo: 1 ml per 40 kg body weight, IM/SC once daily for 3 days.",
-    benefits: [
-      "Broad-spectrum fluoroquinolone",
-      "Excellent tissue penetration",
-      "Fast clinical recovery",
-    ],
-    packSize: "30 ml & 100 ml vials",
-  },
+{
+  slug: "enroff",
+  name: "ENROFF Injection",
+  tagline: "Enrofloxacin Injection 10%",
+  category: "Injection",
+  images: [enroff, enroff2],
+
+  composition: "Each ml contains: Enrofloxacin 100 mg",
+
+indications: [
+  "Complicated bacterial infections",
+  "Bacterial diarrhea and calf scours",
+  "Haemorrhagic septicaemia",
+  "Metritis and mastitis",
+  "Skin, wound, and soft tissue infections",
+],
+
+  dosage:
+    "Cattle/Buffalo: 1 ml per 40 kg body weight by IM/SC route once daily for 3 days or as directed by a veterinarian.",
+
+  benefits: [
+    "Broad-spectrum fluoroquinolone antibiotic",
+    "Excellent tissue penetration",
+    "Rapid clinical recovery",
+    "Effective against mastitis-causing pathogens",
+  ],
+
+  packSize: "30 ml and 100 ml vials",
+},
   {
     slug: "noflam",
     name: "NOFLAM",
     tagline: "Piroxicam + Paracetamol Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [noflam,noflam2],
     composition: "Piroxicam 20 mg + Paracetamol 150 mg per ml",
     indications: [
       "Post-operative pain & inflammation",
@@ -182,7 +205,7 @@ export const products: Product[] = [
     name: "VITA-HP",
     tagline: "High-Potency Vitamin Tonic",
     category: "Syrup",
-    images: [syrupImg],
+    images: [vitahp],
     composition: "Vitamins A, D3, E, B-Complex with essential minerals",
     indications: [
       "Vitamin & mineral deficiency",
@@ -203,7 +226,7 @@ export const products: Product[] = [
     name: "LIV-SURE",
     tagline: "Herbal Liver Tonic",
     category: "Syrup",
-    images: [syrupImg],
+    images: [livSure],
     composition:
       "Andrographis, Phyllanthus, Boerhavia, Tephrosia, Eclipta extracts",
     indications: [
@@ -290,7 +313,7 @@ export const products: Product[] = [
     name: "I-PERDONE",
     tagline: "Isoflupredone Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [iPerdone,iPerdone2],
     composition: "Isoflupredone",
     indications: ["Ketosis", "Inflammation"],
     dosage: "As directed",
@@ -302,7 +325,7 @@ export const products: Product[] = [
     name: "B-CHOLINE",
     tagline: "Choline Chloride Injection",
     category: "Injection",
-    images: [injectionImg],
+    images: [bCholine,bCholine2,bCholine3],
     composition: "Choline Chloride + B-Complex",
     indications: ["Liver disorders", "Fatty liver"],
     dosage: "5–10 ml",
@@ -326,7 +349,7 @@ export const products: Product[] = [
     name: "VETOFEX",
     tagline: "Ofloxacin Bolus",
     category: "Bolus",
-    images: [bolusImg],
+    images: [vetofex,vetofex2],
     composition: "Ofloxacin",
     indications: ["Diarrhea", "Respiratory infections"],
     dosage: "As directed",
@@ -338,7 +361,7 @@ export const products: Product[] = [
     name: "VETOFEX-IU",
     tagline: "Ofloxacin + Ornidazole Liquid",
     category: "Syrup",
-    images: [syrupImg],
+    images: [vetofexIu],
     composition: "Ofloxacin + Ornidazole",
     indications: ["Gynecological infections", "Uterine infections"],
     dosage: "As directed",
