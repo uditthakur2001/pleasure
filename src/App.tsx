@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { lazy, Suspense } from "react";
 
-
 import { Navbar } from "@/components/layout/Navbar";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -19,17 +18,14 @@ const Certifications = lazy(() => import("./pages/Certifications"));
 const Careers = lazy(() => import("./pages/Careers"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Profile = lazy(() => import("./pages/Profile"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
-
-
-function ProtectedRoute({
-  children,
-}: {
-  children: JSX.Element;
-}) {
+function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   if (!isLoggedIn) {
@@ -38,7 +34,6 @@ function ProtectedRoute({
 
   return children;
 }
-
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -51,40 +46,71 @@ const App = () => (
           v7_relativeSplatPath: true,
         }}
       >
-              <Navbar />
-
-        {" "}
+        <Navbar />{" "}
         <Suspense
           fallback={
             <div className="flex min-h-screen items-center justify-center">
               Loading...
             </div>
           }
-          
         >
           {" "}
           <Routes>
-            <Route element={<SiteLayout />}/>
+            {/* Public Website Layout */}
+            <Route element={<SiteLayout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:slug" element={<ProductDetail />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/distributor" element={<Distributor />} />
-              <Route path="/certifications" element={<Certifications />} />
-              <Route path="/careers" element={<Careers />} />
-               {/* Worker Login */}
-              <Route path="/login" element={<Login />} />
 
-              {/* Protected Dashboard */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-                />
+              <Route path="/about" element={<About />} />
+
+              <Route path="/products" element={<Products />} />
+
+              <Route path="/products/:slug" element={<ProductDetail />} />
+
+              <Route path="/contact" element={<Contact />} />
+
+              <Route path="/distributor" element={<Distributor />} />
+
+              <Route path="/certifications" element={<Certifications />} />
+
+              <Route path="/careers" element={<Careers />} />
+            </Route>
+
+            {/* Login */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Dashboard */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Profile */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+  path="/signup"
+  element={<Signup />}
+/>
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

@@ -38,9 +38,22 @@ export default function Login() {
 
     localStorage.setItem("isLoggedIn", "true");
 
-    localStorage.setItem("workerName", matchedUser.username);
+localStorage.setItem(
+  "workerName",
+  matchedUser.username
+);
 
-    navigate("/dashboard");
+localStorage.setItem(
+  "employeeId",
+  matchedUser.id
+);
+    localStorage.setItem("role", matchedUser.role);
+
+    if (matchedUser.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
   };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -83,6 +96,15 @@ export default function Login() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          <div className="mt-5 text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/signup")}
+              className="text-sm text-primary hover:underline"
+            >
+              Create new account
+            </button>
+          </div>
         </form>
       </div>
     </div>
