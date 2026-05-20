@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import Select from "react-select";
+
+import { gapi } from "gapi-script";
 
 import { supabase } from "@/lib/supabase";
 
@@ -10,394 +11,341 @@ import { products } from "@/data/products";
 interface RowData {
   id?: number;
 
-  isNew?: boolean;
-
   date: string;
 
   doctorName: string;
 
+  doctorPhone: string;
+
   product: string[];
 }
-const productOptions = products.map((product) => ({
-  value: product.name,
-  label: product.name,
-}));
 
-export default function Dashboard() {
-  const navigate = useNavigate();
-
-  const [rows, setRows] = useState<RowData[]>([
-  {
-    isNew: true,
-    date: "",
-    doctorName: "",
-    product: [],
-  },
-]);
-
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-    if (!isLoggedIn) {
-      navigate("/login");
-    }
-
-    fetchData();
-  }, [navigate]);
-
-  const fetchData = async () => {
-    const employeeId = localStorage.getItem("employeeId");
-
-    const { data, error } = await supabase
-      .from("doctor_entries")
-      .select("*")
-      .eq("employee_id", employeeId)
-      .order("id", { ascending: false });
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data && data.length > 0) {
-    const formattedData = data.map(
-  (item) => ({
-    id: item.id,
-
-    isNew: false,
-
-    date: item.visit_date || "",
-
-    doctorName:
-      item.doctor_name || "",
-
-    product: item.products || [],
+const productOptions = products.map(
+  (product) => ({
+    value: product.name,
+    label: product.name,
   })
 );
 
-      setRows([
-        {
-          date: "",
-          doctorName: "",
-          product: [],
-        },
-        ...formattedData,
-      ]);
-    } else {
-      setRows([
-        {
-          date: "",
-          doctorName: "",
-          product: [],
-        },
-      ]);
-    }
-  };
-
-  const handleChange = (
-  index: number,
-  field: keyof RowData,
-  value: string | string[]
-) => {
-  const updatedRows = [...rows];
-
-  updatedRows[index] = {
-    ...updatedRows[index],
-    [field]: value,
-  };
-
-  setRows(updatedRows);
-};
- const addRow = () => {
-  setRows([
+export default function Dashboard() {
+  const [rows, setRows] = useState<
+    RowData[]
+  >([
     {
-      isNew: true,
       date: "",
+
       doctorName: "",
+
+      doctorPhone: "",
+
       product: [],
     },
-    ...rows,
   ]);
-};
 
- const deleteRow = async (
-  index: number
-) => {
-  const row = rows[index];
+  const [contacts, setContacts] =
+    useState<any[]>([]);
 
-  // If row exists in database
-  if (row.id) {
-    const { error } = await supabase
-      .from("doctor_entries")
-      .delete()
-      .eq("id", row.id);
+  useEffect(() => {
+    fetchData();
+
+    const initClient = () => {
+      gapi.load(
+        "client:auth2",
+        async () => {
+          await gapi.client.init({
+            clientId:
+              import.meta.env
+                .VITE_GOOGLE_CLIENT_ID,
+
+            scope:
+              "https://www.googleapis.com/auth/contacts.readonly",
+          });
+        }
+      );
+    };
+
+    initClient();
+  }, []);
+
+  const fetchData = async () => {
+    const employeeId =
+      localStorage.getItem(
+        "employeeId"
+      );
+
+    if (!employeeId) return;
+
+    const { data, error } =
+      await supabase
+        .from("doctor_entries")
+        .select("*")
+        .eq(
+          "employee_id",
+          Number(employeeId)
+        )
+        .order("id", {
+          ascending: false,
+        });
 
     if (error) {
       console.log(error);
-
-      alert("Error deleting row");
-
       return;
     }
-  }
 
-  // Remove from UI
-  const updatedRows = rows.filter(
-    (_, i) => i !== index
-  );
+    const formattedRows =
+      data.map((item) => ({
+        id: item.id,
 
-  setRows(updatedRows);
+        date:
+          item.visit_date || "",
 
-  // Always keep one empty row
-  if (updatedRows.length === 0) {
+        doctorName:
+          item.doctor_name || "",
+
+        doctorPhone:
+          item.doctor_phone || "",
+
+        product:
+          item.products || [],
+      }));
+
     setRows([
       {
         date: "",
+
         doctorName: "",
+
+        doctorPhone: "",
+
         product: [],
       },
+
+      ...formattedRows,
     ]);
-  }
-};
+  };
 
-const saveData = async () => {
-  const employeeId =
-    localStorage.getItem("employeeId");
+  const connectGoogle =
+    async () => {
+      const authInstance =
+        gapi.auth2.getAuthInstance();
 
-  if (!employeeId) {
-    alert("Employee not found");
-    return;
-  }
+      await authInstance.signIn();
 
-  // INSERT NEW ROWS
-  const newRows = rows.filter(
-    (row) =>
-      !row.id &&
-      row.date &&
-      row.doctorName &&
-      row.product.length > 0
-  );
+      const response =
+        await gapi.client.request({
+          path:
+            "https://people.googleapis.com/v1/people/me/connections",
 
-  if (newRows.length > 0) {
-    const { error } = await supabase
-      .from("doctor_entries")
-      .insert(
-        newRows.map((row) => ({
-          employee_id:
-            Number(employeeId),
+          params: {
+            personFields:
+              "names,phoneNumbers",
+          },
+        });
 
-          visit_date: row.date,
+      const connections =
+        response.result
+          .connections || [];
 
-          doctor_name:
-            row.doctorName,
+      const formattedContacts =
+        connections.map(
+          (c: any) => ({
+            name:
+              c.names?.[0]
+                ?.displayName ||
+              "",
 
-          products: row.product,
-        }))
+            phone:
+              c.phoneNumbers?.[0]
+                ?.value || "",
+          })
+        );
+
+      setContacts(
+        formattedContacts
       );
 
-    if (error) {
-      console.log(error);
+      alert(
+        "Google Contacts Connected"
+      );
+    };
 
-      alert(error.message);
+  const handleChange = (
+    index: number,
+    field: keyof RowData,
+    value: any
+  ) => {
+    const updatedRows = [...rows];
+
+    updatedRows[index] = {
+      ...updatedRows[index],
+
+      [field]: value,
+    };
+
+    setRows(updatedRows);
+  };
+
+  const addRow = () => {
+    setRows([
+      {
+        date: "",
+
+        doctorName: "",
+
+        doctorPhone: "",
+
+        product: [],
+      },
+
+      ...rows,
+    ]);
+  };
+
+  const deleteRow = async (
+    index: number
+  ) => {
+    const row = rows[index];
+
+    if (row.id) {
+      const { error } =
+        await supabase
+          .from("doctor_entries")
+          .delete()
+          .eq("id", row.id);
+
+      if (error) {
+        alert(
+          "Error deleting row"
+        );
+
+        return;
+      }
+    }
+
+    const updatedRows =
+      rows.filter(
+        (_, i) => i !== index
+      );
+
+    setRows(updatedRows);
+  };
+
+  const saveData = async () => {
+    const employeeId =
+      localStorage.getItem(
+        "employeeId"
+      );
+
+    if (!employeeId) {
+      alert(
+        "Employee not found"
+      );
 
       return;
     }
-  }
 
-  // UPDATE EXISTING ROWS
-  const existingRows = rows.filter(
-    (row) =>
-      row.id &&
-      row.date &&
-      row.doctorName &&
-      row.product.length > 0
-  );
+    const newRows = rows.filter(
+      (row) =>
+        !row.id &&
+        row.date &&
+        row.doctorName &&
+        row.product.length > 0
+    );
 
-  for (const row of existingRows) {
-    const { error } = await supabase
-      .from("doctor_entries")
-      .update({
-        visit_date: row.date,
+    if (newRows.length > 0) {
+      const { error } =
+        await supabase
+          .from("doctor_entries")
+          .insert(
+            newRows.map((row) => ({
+              employee_id:
+                Number(
+                  employeeId
+                ),
 
-        doctor_name:
-          row.doctorName,
+              visit_date:
+                row.date,
 
-        products: row.product,
-      })
-      .eq("id", row.id);
+              doctor_name:
+                row.doctorName,
 
-    if (error) {
-      console.log(error);
+              doctor_phone:
+                row.doctorPhone,
 
-      alert(error.message);
+              products:
+                row.product,
+            }))
+          );
 
-      return;
+      if (error) {
+        console.log(error);
+
+        alert(error.message);
+
+        return;
+      }
     }
-  }
 
-  // FETCH UPDATED DATA
-  const { data, error } = await supabase
-    .from("doctor_entries")
-    .select("*")
-    .eq(
-      "employee_id",
-      Number(employeeId)
-    )
-    .order("id", {
-      ascending: false,
-    });
+    const existingRows =
+      rows.filter(
+        (row) =>
+          row.id &&
+          row.date &&
+          row.doctorName &&
+          row.product.length > 0
+      );
 
-  if (error) {
-    console.log(error);
+    for (const row of existingRows) {
+      const { error } =
+        await supabase
+          .from("doctor_entries")
+          .update({
+            visit_date:
+              row.date,
 
-    alert(error.message);
+            doctor_name:
+              row.doctorName,
 
-    return;
-  }
+            doctor_phone:
+              row.doctorPhone,
 
-  const formattedRows = data.map(
-    (item) => ({
-      id: item.id,
+            products:
+              row.product,
+          })
+          .eq("id", row.id);
 
-      date: item.visit_date || "",
+      if (error) {
+        console.log(error);
 
-      doctorName:
-        item.doctor_name || "",
+        alert(error.message);
 
-      product: item.products || [],
-    })
-  );
+        return;
+      }
+    }
 
-  // FINAL STATE
-  setRows([
-    {
-      date: "",
-      doctorName: "",
-      product: [],
-    },
+    await fetchData();
 
-    ...formattedRows,
-  ]);
+    alert(
+      "Data saved successfully"
+    );
+  };
 
-  alert("Data saved successfully");
-};
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-3xl font-bold">
+              Dashboard
+            </h1>
 
-            <p className="text-muted-foreground">Doctor Product Database</p>
+            <p className="text-muted-foreground">
+              Doctor Product Database
+            </p>
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-border">
-          <table className="w-full min-w-[850px] border-collapse">
-            <thead>
-              <tr className="bg-secondary">
-                <th className="p-4 text-left">Date</th>
-
-                <th className="p-4 text-left">Doctor Name</th>
-
-                <th className="p-4 text-left">Products</th>
-
-                <th className="p-4 text-left">Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {rows.map((row, index) => (
-                <tr key={index} className="border-t border-border align-top">
-                  <td className="p-4">
-                    <input
-                      type="date"
-                      value={row.date}
-                      onChange={(e) =>
-                        handleChange(index, "date", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-border px-3 py-2"
-                    />
-                  </td>
-
-                  <td className="p-4">
-                    <input
-                      type="text"
-                      placeholder="Doctor name"
-                      value={row.doctorName}
-                      onChange={(e) =>
-                        handleChange(index, "doctorName", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-border px-3 py-2"
-                    />
-                  </td>
-
-                  <td className="p-4 min-w-[320px]">
-                    <Select
-                      isMulti
-                      closeMenuOnSelect={false}
-                      hideSelectedOptions={false}
-                      options={productOptions}
-                      value={productOptions.filter((option) =>
-                        row.product.includes(option.value),
-                      )}
-                      onChange={(selectedOptions) =>
-                        handleChange(
-                          index,
-                          "product",
-                          selectedOptions.map((option) => option.value),
-                        )
-                      }
-                      placeholder="Select Products"
-                      className="text-sm"
-                      menuPortalTarget={document.body}
-                      styles={{
-                        menuPortal: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-
-                        control: (base) => ({
-                          ...base,
-                          minHeight: "44px",
-                          borderRadius: "10px",
-                        }),
-
-                        valueContainer: (base) => ({
-                          ...base,
-                          maxHeight: "70px",
-                          overflowY: "auto",
-                          padding: "4px",
-                        }),
-
-                        multiValue: (base) => ({
-                          ...base,
-                          fontSize: "12px",
-                        }),
-
-                        menu: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                      }}
-                    />
-                  </td>
-
-                  <td className="p-4">
-                    <button
-                      onClick={() => deleteRow(index)}
-                      className="rounded-lg bg-red-500 px-4 py-2 text-white"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mb-5 flex flex-wrap gap-3">
           <button
             onClick={addRow}
             className="rounded-lg bg-secondary px-5 py-3 font-medium"
@@ -411,6 +359,204 @@ const saveData = async () => {
           >
             Save Data
           </button>
+
+          <button
+            onClick={
+              connectGoogle
+            }
+            className="rounded-lg border border-border px-5 py-3"
+          >
+            Connect Contacts
+          </button>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-border">
+          <table className="w-full min-w-[1100px] border-collapse">
+            <thead>
+              <tr className="bg-secondary">
+                <th className="p-4 text-left">
+                  Date
+                </th>
+
+                <th className="p-4 text-left">
+                  Doctor
+                </th>
+
+                <th className="p-4 text-left">
+                  Phone
+                </th>
+
+                <th className="p-4 text-left">
+                  Products
+                </th>
+
+                <th className="p-4 text-left">
+                  Action
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.map(
+                (row, index) => (
+                  <tr
+                    key={index}
+                    className="border-t border-border align-top"
+                  >
+                    <td className="p-4">
+                      <input
+                        type="date"
+                        value={row.date}
+                        onChange={(
+                          e
+                        ) =>
+                          handleChange(
+                            index,
+                            "date",
+                            e.target
+                              .value
+                          )
+                        }
+                        className="w-full rounded-lg border border-border px-3 py-2"
+                      />
+                    </td>
+
+                    <td className="p-4">
+                      <input
+                        list={`doctor-list-${index}`}
+                        type="text"
+                        placeholder="Doctor name"
+                        value={
+                          row.doctorName
+                        }
+                        onChange={(
+                          e
+                        ) => {
+                          const value =
+                            e.target
+                              .value;
+
+                          handleChange(
+                            index,
+                            "doctorName",
+                            value
+                          );
+
+                          const matched =
+                            contacts.find(
+                              (
+                                c
+                              ) =>
+                                c.name ===
+                                value
+                            );
+
+                          if (
+                            matched
+                          ) {
+                            handleChange(
+                              index,
+                              "doctorPhone",
+                              matched.phone
+                            );
+                          }
+                        }}
+                        className="w-full rounded-lg border border-border px-3 py-2"
+                      />
+
+                      <datalist
+                        id={`doctor-list-${index}`}
+                      >
+                        {contacts.map(
+                          (
+                            contact,
+                            i
+                          ) => (
+                            <option
+                              key={
+                                i
+                              }
+                              value={
+                                contact.name
+                              }
+                            />
+                          )
+                        )}
+                      </datalist>
+                    </td>
+
+                    <td className="p-4">
+                      <input
+                        type="text"
+                        placeholder="Phone"
+                        value={
+                          row.doctorPhone
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          handleChange(
+                            index,
+                            "doctorPhone",
+                            e.target
+                              .value
+                          )
+                        }
+                        className="w-full rounded-lg border border-border px-3 py-2"
+                      />
+                    </td>
+
+                    <td className="min-w-[350px] p-4">
+                      <Select
+                        isMulti
+                        closeMenuOnSelect={
+                          false
+                        }
+                        options={
+                          productOptions
+                        }
+                        value={productOptions.filter(
+                          (
+                            option
+                          ) =>
+                            row.product.includes(
+                              option.value
+                            )
+                        )}
+                        onChange={(
+                          selected
+                        ) =>
+                          handleChange(
+                            index,
+                            "product",
+                            selected.map(
+                              (
+                                item
+                              ) =>
+                                item.value
+                            )
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td className="p-4">
+                      <button
+                        onClick={() =>
+                          deleteRow(
+                            index
+                          )
+                        }
+                        className="rounded-lg bg-red-500 px-4 py-2 text-white"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
