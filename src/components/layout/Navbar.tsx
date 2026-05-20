@@ -8,6 +8,11 @@ import {
 
 import { Menu, X } from "lucide-react";
 
+import {
+  successAlert,
+  confirmAlert,
+} from "@/lib/alert";
+
 import { Logo } from "@/components/site/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -56,13 +61,46 @@ const location = useLocation();
   );
 }, [location]);
 
-  const logout = () => {
-    localStorage.removeItem("isLoggedIn");
+const logout = async () => {
+  const result =
+    await confirmAlert(
+      "Logout?",
+      "You will be logged out of your account",
+    );
 
-    window.dispatchEvent(new Event("storage"));
+  if (
+    !result.isConfirmed
+  )
+    return;
 
+  localStorage.removeItem(
+    "isLoggedIn",
+  );
+
+  localStorage.removeItem(
+    "workerName",
+  );
+
+  localStorage.removeItem(
+    "employeeId",
+  );
+
+  localStorage.removeItem(
+    "role",
+  );
+
+  window.dispatchEvent(
+    new Event("storage"),
+  );
+
+  successAlert(
+    "Logged Out Successfully",
+  );
+
+  setTimeout(() => {
     navigate("/");
-  };
+  }, 1000);
+};
 
   const links = isLoggedIn
     ? privateLinks

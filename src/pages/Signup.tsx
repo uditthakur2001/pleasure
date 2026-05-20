@@ -4,8 +4,15 @@ import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/lib/supabase";
 
+import {
+  successAlert,
+  errorAlert,
+  warningAlert,
+} from "@/lib/alert";
+
 export default function Signup() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const [loading, setLoading] =
     useState(false);
@@ -31,7 +38,9 @@ export default function Signup() {
     e.preventDefault();
 
     const trimmedUsername =
-      username.trim().toLowerCase();
+      username
+        .trim()
+        .toLowerCase();
 
     const trimmedFullName =
       fullName.trim();
@@ -40,7 +49,9 @@ export default function Signup() {
       phone.trim();
 
     const trimmedEmail =
-      email.trim().toLowerCase();
+      email
+        .trim()
+        .toLowerCase();
 
     // FULL NAME VALIDATION
     if (
@@ -48,8 +59,9 @@ export default function Signup() {
         trimmedFullName,
       )
     ) {
-      alert(
-        "Enter valid full name",
+      warningAlert(
+        "Invalid Full Name",
+        "Name should contain only letters and spaces",
       );
 
       return;
@@ -61,8 +73,9 @@ export default function Signup() {
         trimmedPhone,
       )
     ) {
-      alert(
-        "Enter valid 10 digit phone number",
+      warningAlert(
+        "Invalid Phone Number",
+        "Enter valid 10 digit Indian mobile number",
       );
 
       return;
@@ -75,7 +88,8 @@ export default function Signup() {
         trimmedEmail,
       )
     ) {
-      alert(
+      warningAlert(
+        "Invalid Email",
         "Enter valid email address",
       );
 
@@ -88,16 +102,20 @@ export default function Signup() {
         trimmedUsername,
       )
     ) {
-      alert(
-        "Username must be 4-20 characters",
+      warningAlert(
+        "Invalid Username",
+        "Username must be 4-20 characters without spaces",
       );
 
       return;
     }
 
     // PASSWORD VALIDATION
-    if (password.length < 6) {
-      alert(
+    if (
+      password.length < 6
+    ) {
+      warningAlert(
+        "Weak Password",
         "Password must be at least 6 characters",
       );
 
@@ -121,8 +139,9 @@ export default function Signup() {
     if (existingUser) {
       setLoading(false);
 
-      alert(
-        "Username already exists",
+      warningAlert(
+        "Username Exists",
+        "Try another username",
       );
 
       return;
@@ -134,14 +153,18 @@ export default function Signup() {
     } = await supabase
       .from("employee")
       .select("id")
-      .eq("phone", trimmedPhone)
+      .eq(
+        "phone",
+        trimmedPhone,
+      )
       .maybeSingle();
 
     if (existingPhone) {
       setLoading(false);
 
-      alert(
-        "Phone number already exists",
+      warningAlert(
+        "Phone Already Exists",
+        "Try another phone number",
       );
 
       return;
@@ -163,8 +186,9 @@ export default function Signup() {
       if (existingEmail) {
         setLoading(false);
 
-        alert(
-          "Email already exists",
+        warningAlert(
+          "Email Already Exists",
+          "Try another email",
         );
 
         return;
@@ -182,8 +206,10 @@ export default function Signup() {
             password,
             full_name:
               trimmedFullName,
-            phone: trimmedPhone,
-            email: trimmedEmail,
+            phone:
+              trimmedPhone,
+            email:
+              trimmedEmail,
             role: "employee",
           },
         ]);
@@ -191,16 +217,22 @@ export default function Signup() {
     setLoading(false);
 
     if (error) {
-      alert(error.message);
+      errorAlert(
+        "Signup Failed",
+        error.message,
+      );
 
       return;
     }
 
-    alert(
-      "Account created successfully",
+    successAlert(
+      "Account Created",
+      "Employee account created successfully",
     );
 
-    navigate("/login");
+    setTimeout(() => {
+      navigate("/login");
+    }, 1200);
   };
 
   return (
@@ -215,7 +247,9 @@ export default function Signup() {
         </p>
 
         <form
-          onSubmit={handleSignup}
+          onSubmit={
+            handleSignup
+          }
           className="space-y-5"
         >
           {/* FULL NAME */}
@@ -236,7 +270,7 @@ export default function Signup() {
                   ),
                 )
               }
-              className="w-full rounded-lg border border-border px-4 py-3"
+              className="w-full rounded-lg border border-border px-4 py-3 outline-none focus:border-primary"
               required
             />
           </div>
@@ -260,7 +294,7 @@ export default function Signup() {
                   ),
                 )
               }
-              className="w-full rounded-lg border border-border px-4 py-3"
+              className="w-full rounded-lg border border-border px-4 py-3 outline-none focus:border-primary"
               required
             />
           </div>
@@ -280,7 +314,7 @@ export default function Signup() {
                   e.target.value,
                 )
               }
-              className="w-full rounded-lg border border-border px-4 py-3"
+              className="w-full rounded-lg border border-border px-4 py-3 outline-none focus:border-primary"
               required
             />
           </div>
@@ -305,7 +339,7 @@ export default function Signup() {
                     ),
                 )
               }
-              className="w-full rounded-lg border border-border px-4 py-3"
+              className="w-full rounded-lg border border-border px-4 py-3 outline-none focus:border-primary"
               required
             />
           </div>
@@ -325,7 +359,7 @@ export default function Signup() {
                   e.target.value,
                 )
               }
-              className="w-full rounded-lg border border-border px-4 py-3"
+              className="w-full rounded-lg border border-border px-4 py-3 outline-none focus:border-primary"
               required
             />
           </div>
@@ -346,12 +380,14 @@ export default function Signup() {
             <button
               type="button"
               onClick={() =>
-                navigate("/login")
+                navigate(
+                  "/login",
+                )
               }
               className="text-sm text-primary hover:underline"
             >
-              Already have account?
-              Login
+              Already have
+              account? Login
             </button>
           </div>
         </form>

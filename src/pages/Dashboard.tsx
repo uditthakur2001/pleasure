@@ -6,6 +6,13 @@ import { supabase } from "@/lib/supabase";
 
 import { products } from "@/data/products";
 
+import {
+  successAlert,
+  errorAlert,
+  warningAlert,
+  confirmAlert,
+} from "@/lib/alert";
+
 interface RowData {
   id?: number;
   date: string;
@@ -91,7 +98,9 @@ export default function Dashboard() {
 
       setContacts(formattedContacts);
     } catch (err) {
-      console.log(err);
+      errorAlert(
+  "Failed To Load Contacts",
+);
     }
   };
 
@@ -144,7 +153,7 @@ export default function Dashboard() {
     });
 
     if (error) {
-      alert(error.message);
+      errorAlert("Connection Failed", error.message);
     }
   };
 
@@ -161,7 +170,9 @@ export default function Dashboard() {
         handleChange(index, "doctorPhone", contacts[0].tel?.[0] || "");
       }
     } catch (err) {
-      console.log(err);
+      errorAlert(
+  "Contact Access Failed",
+);
     }
   };
 
@@ -189,8 +200,16 @@ export default function Dashboard() {
   };
 
   const deleteRow = async (index: number) => {
+    const result = await confirmAlert(
+      "Delete Entry?",
+      "This action cannot be undone",
+    );
+
+    if (!result.isConfirmed) return;
+
     const row = rows[index];
 
+    // DELETE FROM DATABASE
     if (row.id) {
       const { error } = await supabase
         .from("doctor_entries")
@@ -198,26 +217,30 @@ export default function Dashboard() {
         .eq("id", row.id);
 
       if (error) {
-        alert("Error deleting row");
+        errorAlert("Delete Failed", error.message);
+
         return;
       }
     }
 
+    // REMOVE FROM UI
     const updatedRows = rows.filter((_, i) => i !== index);
 
     setRows(updatedRows);
+
+    successAlert("Deleted Successfully");
   };
 
   const saveSingleRow = async (row: RowData) => {
     const employeeId = localStorage.getItem("employeeId");
 
     if (!employeeId) {
-      alert("Employee not found");
+      errorAlert("Employee Not Found");
       return;
     }
 
     if (!row.date || !row.doctorName || row.product.length === 0) {
-      alert("Please fill all fields");
+      warningAlert("Incomplete Form", "Please fill all fields");
       return;
     }
 
@@ -233,11 +256,11 @@ export default function Dashboard() {
         .eq("id", row.id);
 
       if (error) {
-        alert(error.message);
+        errorAlert("Update Failed", error.message);
         return;
       }
 
-      alert("Updated");
+      successAlert("Updated Successfully");
     } else {
       const { error } = await supabase.from("doctor_entries").insert([
         {
@@ -250,11 +273,11 @@ export default function Dashboard() {
       ]);
 
       if (error) {
-        alert(error.message);
+        errorAlert("Add Failed", error.message);
         return;
       }
 
-      alert("Added");
+      successAlert("Added Successfully");
     }
 
     fetchData();
@@ -274,12 +297,12 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
+            {/* <button
               onClick={addRow}
               className="rounded-xl bg-secondary px-5 py-3 font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
             >
               + Add Row
-            </button>
+            </button> */}
 
             {!supportsContactPicker && contacts.length === 0 && (
               <button
@@ -328,7 +351,8 @@ export default function Dashboard() {
           {rows.map((row, index) => (
             <div
               key={index}
-className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"            >
+              className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
+            >
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_2fr]">
                 {/* DATE */}
                 <div>
@@ -486,20 +510,22 @@ className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shad
                   )}
 
                   {row.id && (
-                    <button
-                      onClick={() => saveSingleRow(row)}
-                      className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
-                    >
-                      Update Data
-                    </button>
-                  )}
+                    <>
+                      <button
+                        onClick={() => saveSingleRow(row)}
+                        className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        Update Data
+                      </button>
 
-                  <button
-                    onClick={() => deleteRow(index)}
-                    className="rounded-xl bg-red-500 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    Delete
-                  </button>
+                      <button
+                        onClick={() => deleteRow(index)}
+                        className="rounded-xl bg-red-500 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
