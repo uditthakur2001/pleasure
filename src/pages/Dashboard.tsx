@@ -38,10 +38,45 @@ export default function Dashboard() {
     },
   ]);
 
-  const [contacts, setContacts] = useState<any[]>([]);
+  const loadContacts = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
+    const token = session?.provider_token;
+
+    if (!token) return;
+
+    try {
+      const res = await fetch(
+        "https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers&pageSize=1000",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await res.json();
+
+      const formattedContacts = (data.connections || [])
+        .filter((contact: any) => contact.names && contact.phoneNumbers)
+        .map((contact: any) => ({
+          name: contact.names?.[0]?.displayName || "",
+
+          phone: contact.phoneNumbers?.[0]?.value || "",
+        }));
+
+      setContacts(formattedContacts);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [contacts, setContacts] = useState<any[]>([]);
   useEffect(() => {
     fetchData();
+    loadContacts();
   }, []);
 
   const fetchData = async () => {
@@ -89,54 +124,19 @@ export default function Dashboard() {
     ]);
   };
   const connectGoogle = async () => {
-    const client = window.google.accounts.oauth2.initTokenClient({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
 
-      scope: "https://www.googleapis.com/auth/contacts.readonly",
+      options: {
+        scopes: "https://www.googleapis.com/auth/contacts.readonly",
 
-      callback: async (response: any) => {
-        if (response.error) {
-          console.log(response);
-
-          alert("Google login failed");
-
-          return;
-        }
-
-        try {
-          const res = await fetch(
-            "https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers&pageSize=1000",
-            {
-              headers: {
-                Authorization: `Bearer ${response.access_token}`,
-              },
-            },
-          );
-
-          const data = await res.json();
-
-          console.log(data);
-
-          const formattedContacts = (data.connections || [])
-            .filter((contact: any) => contact.names && contact.phoneNumbers)
-            .map((contact: any) => ({
-              name: contact.names?.[0]?.displayName || "",
-
-              phone: contact.phoneNumbers?.[0]?.value || "",
-            }));
-
-          setContacts(formattedContacts);
-
-          alert(`${formattedContacts.length} contacts synced`);
-        } catch (err) {
-          console.log(err);
-
-          alert("Failed to fetch contacts");
-        }
+        redirectTo: window.location.origin + "/dashboard",
       },
     });
 
-    client.requestAccessToken();
+    if (error) {
+      alert(error.message);
+    }
   };
 
   const handleChange = (index: number, field: keyof RowData, value: any) => {
@@ -257,6 +257,70 @@ export default function Dashboard() {
     alert("Data saved successfully");
   };
 
+  const saveSingleRow = async (row: RowData) => {
+    const employeeId = localStorage.getItem("employeeId");
+
+    if (!employeeId) {
+      alert("Employee not found");
+      return;
+    }
+
+    if (!row.date || !row.doctorName || row.product.length === 0) {
+      alert("Please fill all fields");
+
+      return;
+    }
+
+    // UPDATE
+    if (row.id) {
+      const { error } = await supabase
+        .from("doctor_entries")
+        .update({
+          visit_date: row.date,
+
+          doctor_name: row.doctorName,
+
+          doctor_phone: row.doctorPhone,
+
+          products: row.product,
+        })
+        .eq("id", row.id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Updated");
+    }
+
+    // INSERT
+    else {
+      const { error } = await supabase.from("doctor_entries").insert([
+        {
+          employee_id: Number(employeeId),
+
+          visit_date: row.date,
+
+          doctor_name: row.doctorName,
+
+          doctor_phone: row.doctorPhone,
+
+          products: row.product,
+        },
+      ]);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Added");
+    }
+
+    fetchData();
+  };
+
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
       <div className="mx-auto max-w-7xl">
@@ -268,179 +332,150 @@ export default function Dashboard() {
           </div>
         </div>
 
-<div className="space-y-4">
-  {rows.map((row, index) => (
-    <div
-      key={index}
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm"
-    >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {/* DATE */}
-        <div>
-          <label className="mb-2 block text-sm font-medium">
-            Date
-          </label>
+        <div className="space-y-4">
+          {rows.map((row, index) => (
+            <div
+              key={index}
+              className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+            >
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                {/* DATE */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Date</label>
 
-          <input
-            type="date"
-            value={row.date}
-            min={today}
-            max={today}
-            onChange={(e) =>
-              handleChange(
-                index,
-                "date",
-                e.target.value
-              )
-            }
-            className="w-full rounded-xl border border-border px-4 py-3"
-          />
+                  <input
+                    type="date"
+                    value={row.date}
+                    min={today}
+                    max={today}
+                    onChange={(e) =>
+                      handleChange(index, "date", e.target.value)
+                    }
+                    className="w-full rounded-xl border border-border px-4 py-3"
+                  />
+                </div>
+
+                {/* DOCTOR */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium">
+                    Doctor Name
+                  </label>
+
+                  <input
+                    list={`doctor-list-${index}`}
+                    type="text"
+                    placeholder="Doctor name"
+                    value={row.doctorName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      handleChange(index, "doctorName", value);
+
+                      const matched = contacts.find((c) => c.name === value);
+
+                      if (matched) {
+                        handleChange(index, "doctorPhone", matched.phone);
+                      }
+                    }}
+                    className="w-full rounded-xl border border-border px-4 py-3"
+                  />
+
+                  <datalist id={`doctor-list-${index}`}>
+                    {contacts.map((contact, i) => (
+                      <option key={i} value={contact.name} />
+                    ))}
+                  </datalist>
+                </div>
+
+                {/* PHONE */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium">
+                    Phone
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Phone number"
+                    value={row.doctorPhone}
+                    onChange={(e) =>
+                      handleChange(index, "doctorPhone", e.target.value)
+                    }
+                    className="w-full rounded-xl border border-border px-4 py-3"
+                  />
+                </div>
+
+                {/* PRODUCTS */}
+                <div className="xl:col-span-2">
+                  <label className="mb-1 block text-sm font-medium">
+                    Products
+                  </label>
+
+                  <Select
+                    isMulti
+                    options={productOptions}
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    menuPlacement="auto"
+                    value={productOptions.filter((option) =>
+                      row.product.includes(option.value),
+                    )}
+                    onChange={(selected) =>
+                      handleChange(
+                        index,
+                        "product",
+                        selected.map((item) => item.value),
+                      )
+                    }
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: 42,
+                        borderRadius: 10,
+                      }),
+
+                      menu: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+
+                      menuList: (base) => ({
+                        ...base,
+                        maxHeight: 220,
+                      }),
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+                {!row.id && (
+                  <button
+                    onClick={() => saveSingleRow(row)}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
+                  >
+                    Add Data
+                  </button>
+                )}
+
+                {row.id && (
+                  <button
+                    onClick={() => saveSingleRow(row)}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white"
+                  >
+                    Update Data
+                  </button>
+                )}
+
+                <button
+                  onClick={() => deleteRow(index)}
+                  className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* DOCTOR */}
-        <div>
-          <label className="mb-2 block text-sm font-medium">
-            Doctor Name
-          </label>
-
-          <input
-            list={`doctor-list-${index}`}
-            type="text"
-            placeholder="Doctor name"
-            value={row.doctorName}
-            onChange={(e) => {
-              const value =
-                e.target.value;
-
-              handleChange(
-                index,
-                "doctorName",
-                value
-              );
-
-              const matched =
-                contacts.find(
-                  (c) =>
-                    c.name === value
-                );
-
-              if (matched) {
-                handleChange(
-                  index,
-                  "doctorPhone",
-                  matched.phone
-                );
-              }
-            }}
-            className="w-full rounded-xl border border-border px-4 py-3"
-          />
-
-          <datalist
-            id={`doctor-list-${index}`}
-          >
-            {contacts.map(
-              (contact, i) => (
-                <option
-                  key={i}
-                  value={
-                    contact.name
-                  }
-                />
-              )
-            )}
-          </datalist>
-        </div>
-
-        {/* PHONE */}
-        <div>
-          <label className="mb-2 block text-sm font-medium">
-            Phone
-          </label>
-
-          <input
-            type="text"
-            placeholder="Phone number"
-            value={row.doctorPhone}
-            onChange={(e) =>
-              handleChange(
-                index,
-                "doctorPhone",
-                e.target.value
-              )
-            }
-            className="w-full rounded-xl border border-border px-4 py-3"
-          />
-        </div>
-
-        {/* PRODUCTS */}
-        <div className="xl:col-span-2">
-          <label className="mb-2 block text-sm font-medium">
-            Products
-          </label>
-
-          <Select
-            isMulti
-            options={productOptions}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            menuPlacement="auto"
-            value={productOptions.filter(
-              (option) =>
-                row.product.includes(
-                  option.value
-                )
-            )}
-            onChange={(selected) =>
-              handleChange(
-                index,
-                "product",
-                selected.map(
-                  (item) =>
-                    item.value
-                )
-              )
-            }
-            styles={{
-              control: (
-                base
-              ) => ({
-                ...base,
-                minHeight: 52,
-                borderRadius: 14,
-              }),
-
-              menu: (
-                base
-              ) => ({
-                ...base,
-                zIndex: 9999,
-              }),
-
-              menuList: (
-                base
-              ) => ({
-                ...base,
-                maxHeight: 220,
-              }),
-            }}
-          />
-        </div>
-      </div>
-
-      {/* DELETE BUTTON */}
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={() =>
-            deleteRow(index)
-          }
-          className="rounded-xl bg-red-500 px-5 py-3 text-white"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
 
         <div className="mt-5 flex flex-wrap gap-3">
           <button
@@ -450,19 +485,14 @@ export default function Dashboard() {
             + Add Row
           </button>
 
-          <button
-            onClick={saveData}
-            className="rounded-lg bg-primary px-5 py-3 text-white"
-          >
-            Save Data
-          </button>
-
-          <button
-            onClick={connectGoogle}
-            className="rounded-lg border border-border px-5 py-3"
-          >
-            Connect Contacts
-          </button>
+          {contacts.length === 0 && (
+            <button
+              onClick={connectGoogle}
+              className="rounded-lg border border-border px-5 py-3"
+            >
+              Connect Contacts
+            </button>
+          )}
         </div>
       </div>
     </div>
