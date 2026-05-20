@@ -18,6 +18,21 @@ interface RowData {
   product: string[];
 }
 
+declare global {
+  interface Navigator {
+    contacts?: {
+      select: (
+        properties: string[],
+        options?: {
+          multiple?: boolean;
+        },
+      ) => Promise<any[]>;
+    };
+  }
+}
+
+const supportsContactPicker = !!navigator.contacts;
+
 const today = new Date().toISOString().split("T")[0];
 
 const productOptions = products.map((product) => ({
@@ -37,6 +52,15 @@ export default function Dashboard() {
       product: [],
     },
   ]);
+
+  const [supportsContactPicker, setSupportsContactPicker] =
+  useState(false);
+
+useEffect(() => {
+  setSupportsContactPicker(
+    !!navigator.contacts
+  );
+}, []);
 
   const loadContacts = async () => {
     const {
@@ -136,6 +160,23 @@ export default function Dashboard() {
 
     if (error) {
       alert(error.message);
+    }
+  };
+
+  const pickPhoneContact = async (index: number) => {
+    try {
+      // @ts-ignore
+      const contacts = await navigator.contacts.select(["name", "tel"], {
+        multiple: false,
+      });
+
+      if (contacts.length > 0) {
+        handleChange(index, "doctorName", contacts[0].name?.[0] || "");
+
+        handleChange(index, "doctorPhone", contacts[0].tel?.[0] || "");
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -366,11 +407,16 @@ export default function Dashboard() {
                     type="text"
                     placeholder="Doctor name"
                     value={row.doctorName}
+                    autoCapitalize="words"
                     autoComplete="off"
                     spellCheck={false}
-                    onChange={(e) =>
-                      handleChange(index, "doctorName", e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\b\w/g, (char) =>
+                        char.toUpperCase(),
+                      );
+
+                      handleChange(index, "doctorName", value);
+                    }}
                     onBlur={() => {
                       const matched = contacts.find(
                         (c) => c.name === row.doctorName,
@@ -380,8 +426,8 @@ export default function Dashboard() {
                         handleChange(index, "doctorPhone", matched.phone);
                       }
                     }}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                  />
+className="w-full rounded-xl border border-border px-4 py-3"                  />
+
 
                   <datalist id={`doctor-list-${index}`}>
                     {contacts.map((contact, i) => (
@@ -449,7 +495,15 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
-
+{supportsContactPicker && (
+  <button
+    type="button"
+    onClick={() => pickPhoneContact(index)}
+    className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
+  >
+    Pick Contact
+  </button>
+)}
               <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
                 {!row.id && (
                   <button
@@ -488,7 +542,8 @@ export default function Dashboard() {
             + Add Row
           </button>
 
-          {contacts.length === 0 && (
+         {!supportsContactPicker &&
+  contacts.length === 0 && (
             <button
               onClick={connectGoogle}
               className="rounded-lg border border-border px-5 py-3"
