@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 
 import Select from "react-select";
 
-import { gapi } from "gapi-script";
-
 import { supabase } from "@/lib/supabase";
 
 import { products } from "@/data/products";
@@ -20,19 +18,17 @@ interface RowData {
   product: string[];
 }
 
-const productOptions = products.map(
-  (product) => ({
-    value: product.name,
-    label: product.name,
-  })
-);
+const today = new Date().toISOString().split("T")[0];
+
+const productOptions = products.map((product) => ({
+  value: product.name,
+  label: product.name,
+}));
 
 export default function Dashboard() {
-  const [rows, setRows] = useState<
-    RowData[]
-  >([
+  const [rows, setRows] = useState<RowData[]>([
     {
-      date: "",
+      date: today,
 
       doctorName: "",
 
@@ -42,76 +38,45 @@ export default function Dashboard() {
     },
   ]);
 
-  const [contacts, setContacts] =
-    useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
-
-    const initClient = () => {
-      gapi.load(
-        "client:auth2",
-        async () => {
-          await gapi.client.init({
-            clientId:
-              import.meta.env
-                .VITE_GOOGLE_CLIENT_ID,
-
-            scope:
-              "https://www.googleapis.com/auth/contacts.readonly",
-          });
-        }
-      );
-    };
-
-    initClient();
   }, []);
 
   const fetchData = async () => {
-    const employeeId =
-      localStorage.getItem(
-        "employeeId"
-      );
+    const employeeId = localStorage.getItem("employeeId");
 
     if (!employeeId) return;
 
-    const { data, error } =
-      await supabase
-        .from("doctor_entries")
-        .select("*")
-        .eq(
-          "employee_id",
-          Number(employeeId)
-        )
-        .order("id", {
-          ascending: false,
-        });
+    const { data, error } = await supabase
+      .from("doctor_entries")
+      .select("*")
+      .eq("employee_id", Number(employeeId))
+      .order("id", {
+        ascending: false,
+      });
 
     if (error) {
       console.log(error);
       return;
     }
 
-    const formattedRows =
-      data.map((item) => ({
-        id: item.id,
+    const formattedRows = data.map((item) => ({
+      id: item.id,
 
-        date:
-          item.visit_date || "",
+      date: item.visit_date || "",
 
-        doctorName:
-          item.doctor_name || "",
+      doctorName: item.doctor_name || "",
 
-        doctorPhone:
-          item.doctor_phone || "",
+      doctorPhone: item.doctor_phone || "",
 
-        product:
-          item.products || [],
-      }));
+      product: item.products || [],
+    }));
 
     setRows([
       {
-        date: "",
+        date: today,
 
         doctorName: "",
 
@@ -123,57 +88,58 @@ export default function Dashboard() {
       ...formattedRows,
     ]);
   };
+  const connectGoogle = async () => {
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
 
-  const connectGoogle =
-    async () => {
-      const authInstance =
-        gapi.auth2.getAuthInstance();
+      scope: "https://www.googleapis.com/auth/contacts.readonly",
 
-      await authInstance.signIn();
+      callback: async (response: any) => {
+        if (response.error) {
+          console.log(response);
 
-      const response =
-        await gapi.client.request({
-          path:
-            "https://people.googleapis.com/v1/people/me/connections",
+          alert("Google login failed");
 
-          params: {
-            personFields:
-              "names,phoneNumbers",
-          },
-        });
+          return;
+        }
 
-      const connections =
-        response.result
-          .connections || [];
+        try {
+          const res = await fetch(
+            "https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers&pageSize=1000",
+            {
+              headers: {
+                Authorization: `Bearer ${response.access_token}`,
+              },
+            },
+          );
 
-      const formattedContacts =
-        connections.map(
-          (c: any) => ({
-            name:
-              c.names?.[0]
-                ?.displayName ||
-              "",
+          const data = await res.json();
 
-            phone:
-              c.phoneNumbers?.[0]
-                ?.value || "",
-          })
-        );
+          console.log(data);
 
-      setContacts(
-        formattedContacts
-      );
+          const formattedContacts = (data.connections || [])
+            .filter((contact: any) => contact.names && contact.phoneNumbers)
+            .map((contact: any) => ({
+              name: contact.names?.[0]?.displayName || "",
 
-      alert(
-        "Google Contacts Connected"
-      );
-    };
+              phone: contact.phoneNumbers?.[0]?.value || "",
+            }));
 
-  const handleChange = (
-    index: number,
-    field: keyof RowData,
-    value: any
-  ) => {
+          setContacts(formattedContacts);
+
+          alert(`${formattedContacts.length} contacts synced`);
+        } catch (err) {
+          console.log(err);
+
+          alert("Failed to fetch contacts");
+        }
+      },
+    });
+
+    client.requestAccessToken();
+  };
+
+  const handleChange = (index: number, field: keyof RowData, value: any) => {
     const updatedRows = [...rows];
 
     updatedRows[index] = {
@@ -188,7 +154,7 @@ export default function Dashboard() {
   const addRow = () => {
     setRows([
       {
-        date: "",
+        date: today,
 
         doctorName: "",
 
@@ -201,81 +167,54 @@ export default function Dashboard() {
     ]);
   };
 
-  const deleteRow = async (
-    index: number
-  ) => {
+  const deleteRow = async (index: number) => {
     const row = rows[index];
 
     if (row.id) {
-      const { error } =
-        await supabase
-          .from("doctor_entries")
-          .delete()
-          .eq("id", row.id);
+      const { error } = await supabase
+        .from("doctor_entries")
+        .delete()
+        .eq("id", row.id);
 
       if (error) {
-        alert(
-          "Error deleting row"
-        );
+        alert("Error deleting row");
 
         return;
       }
     }
 
-    const updatedRows =
-      rows.filter(
-        (_, i) => i !== index
-      );
+    const updatedRows = rows.filter((_, i) => i !== index);
 
     setRows(updatedRows);
   };
 
   const saveData = async () => {
-    const employeeId =
-      localStorage.getItem(
-        "employeeId"
-      );
+    const employeeId = localStorage.getItem("employeeId");
 
     if (!employeeId) {
-      alert(
-        "Employee not found"
-      );
+      alert("Employee not found");
 
       return;
     }
 
     const newRows = rows.filter(
-      (row) =>
-        !row.id &&
-        row.date &&
-        row.doctorName &&
-        row.product.length > 0
+      (row) => !row.id && row.date && row.doctorName && row.product.length > 0,
     );
 
     if (newRows.length > 0) {
-      const { error } =
-        await supabase
-          .from("doctor_entries")
-          .insert(
-            newRows.map((row) => ({
-              employee_id:
-                Number(
-                  employeeId
-                ),
+      const { error } = await supabase.from("doctor_entries").insert(
+        newRows.map((row) => ({
+          employee_id: Number(employeeId),
 
-              visit_date:
-                row.date,
+          visit_date: row.date,
 
-              doctor_name:
-                row.doctorName,
+          doctor_name: row.doctorName,
 
-              doctor_phone:
-                row.doctorPhone,
+          doctor_phone: row.doctorPhone,
 
-              products:
-                row.product,
-            }))
-          );
+          products: row.product,
+        })),
+      );
 
       if (error) {
         console.log(error);
@@ -286,33 +225,23 @@ export default function Dashboard() {
       }
     }
 
-    const existingRows =
-      rows.filter(
-        (row) =>
-          row.id &&
-          row.date &&
-          row.doctorName &&
-          row.product.length > 0
-      );
+    const existingRows = rows.filter(
+      (row) => row.id && row.date && row.doctorName && row.product.length > 0,
+    );
 
     for (const row of existingRows) {
-      const { error } =
-        await supabase
-          .from("doctor_entries")
-          .update({
-            visit_date:
-              row.date,
+      const { error } = await supabase
+        .from("doctor_entries")
+        .update({
+          visit_date: row.date,
 
-            doctor_name:
-              row.doctorName,
+          doctor_name: row.doctorName,
 
-            doctor_phone:
-              row.doctorPhone,
+          doctor_phone: row.doctorPhone,
 
-            products:
-              row.product,
-          })
-          .eq("id", row.id);
+          products: row.product,
+        })
+        .eq("id", row.id);
 
       if (error) {
         console.log(error);
@@ -325,9 +254,7 @@ export default function Dashboard() {
 
     await fetchData();
 
-    alert(
-      "Data saved successfully"
-    );
+    alert("Data saved successfully");
   };
 
   return (
@@ -335,17 +262,187 @@ export default function Dashboard() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">
-              Dashboard
-            </h1>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
 
-            <p className="text-muted-foreground">
-              Doctor Product Database
-            </p>
+            <p className="text-muted-foreground">Doctor Product Database</p>
           </div>
         </div>
 
-        <div className="mb-5 flex flex-wrap gap-3">
+<div className="space-y-4">
+  {rows.map((row, index) => (
+    <div
+      key={index}
+      className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+    >
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {/* DATE */}
+        <div>
+          <label className="mb-2 block text-sm font-medium">
+            Date
+          </label>
+
+          <input
+            type="date"
+            value={row.date}
+            min={today}
+            max={today}
+            onChange={(e) =>
+              handleChange(
+                index,
+                "date",
+                e.target.value
+              )
+            }
+            className="w-full rounded-xl border border-border px-4 py-3"
+          />
+        </div>
+
+        {/* DOCTOR */}
+        <div>
+          <label className="mb-2 block text-sm font-medium">
+            Doctor Name
+          </label>
+
+          <input
+            list={`doctor-list-${index}`}
+            type="text"
+            placeholder="Doctor name"
+            value={row.doctorName}
+            onChange={(e) => {
+              const value =
+                e.target.value;
+
+              handleChange(
+                index,
+                "doctorName",
+                value
+              );
+
+              const matched =
+                contacts.find(
+                  (c) =>
+                    c.name === value
+                );
+
+              if (matched) {
+                handleChange(
+                  index,
+                  "doctorPhone",
+                  matched.phone
+                );
+              }
+            }}
+            className="w-full rounded-xl border border-border px-4 py-3"
+          />
+
+          <datalist
+            id={`doctor-list-${index}`}
+          >
+            {contacts.map(
+              (contact, i) => (
+                <option
+                  key={i}
+                  value={
+                    contact.name
+                  }
+                />
+              )
+            )}
+          </datalist>
+        </div>
+
+        {/* PHONE */}
+        <div>
+          <label className="mb-2 block text-sm font-medium">
+            Phone
+          </label>
+
+          <input
+            type="text"
+            placeholder="Phone number"
+            value={row.doctorPhone}
+            onChange={(e) =>
+              handleChange(
+                index,
+                "doctorPhone",
+                e.target.value
+              )
+            }
+            className="w-full rounded-xl border border-border px-4 py-3"
+          />
+        </div>
+
+        {/* PRODUCTS */}
+        <div className="xl:col-span-2">
+          <label className="mb-2 block text-sm font-medium">
+            Products
+          </label>
+
+          <Select
+            isMulti
+            options={productOptions}
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
+            menuPlacement="auto"
+            value={productOptions.filter(
+              (option) =>
+                row.product.includes(
+                  option.value
+                )
+            )}
+            onChange={(selected) =>
+              handleChange(
+                index,
+                "product",
+                selected.map(
+                  (item) =>
+                    item.value
+                )
+              )
+            }
+            styles={{
+              control: (
+                base
+              ) => ({
+                ...base,
+                minHeight: 52,
+                borderRadius: 14,
+              }),
+
+              menu: (
+                base
+              ) => ({
+                ...base,
+                zIndex: 9999,
+              }),
+
+              menuList: (
+                base
+              ) => ({
+                ...base,
+                maxHeight: 220,
+              }),
+            }}
+          />
+        </div>
+      </div>
+
+      {/* DELETE BUTTON */}
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() =>
+            deleteRow(index)
+          }
+          className="rounded-xl bg-red-500 px-5 py-3 text-white"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
+        <div className="mt-5 flex flex-wrap gap-3">
           <button
             onClick={addRow}
             className="rounded-lg bg-secondary px-5 py-3 font-medium"
@@ -361,202 +458,11 @@ export default function Dashboard() {
           </button>
 
           <button
-            onClick={
-              connectGoogle
-            }
+            onClick={connectGoogle}
             className="rounded-lg border border-border px-5 py-3"
           >
             Connect Contacts
           </button>
-        </div>
-
-        <div className="overflow-x-auto rounded-2xl border border-border">
-          <table className="w-full min-w-[1100px] border-collapse">
-            <thead>
-              <tr className="bg-secondary">
-                <th className="p-4 text-left">
-                  Date
-                </th>
-
-                <th className="p-4 text-left">
-                  Doctor
-                </th>
-
-                <th className="p-4 text-left">
-                  Phone
-                </th>
-
-                <th className="p-4 text-left">
-                  Products
-                </th>
-
-                <th className="p-4 text-left">
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {rows.map(
-                (row, index) => (
-                  <tr
-                    key={index}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="p-4">
-                      <input
-                        type="date"
-                        value={row.date}
-                        onChange={(
-                          e
-                        ) =>
-                          handleChange(
-                            index,
-                            "date",
-                            e.target
-                              .value
-                          )
-                        }
-                        className="w-full rounded-lg border border-border px-3 py-2"
-                      />
-                    </td>
-
-                    <td className="p-4">
-                      <input
-                        list={`doctor-list-${index}`}
-                        type="text"
-                        placeholder="Doctor name"
-                        value={
-                          row.doctorName
-                        }
-                        onChange={(
-                          e
-                        ) => {
-                          const value =
-                            e.target
-                              .value;
-
-                          handleChange(
-                            index,
-                            "doctorName",
-                            value
-                          );
-
-                          const matched =
-                            contacts.find(
-                              (
-                                c
-                              ) =>
-                                c.name ===
-                                value
-                            );
-
-                          if (
-                            matched
-                          ) {
-                            handleChange(
-                              index,
-                              "doctorPhone",
-                              matched.phone
-                            );
-                          }
-                        }}
-                        className="w-full rounded-lg border border-border px-3 py-2"
-                      />
-
-                      <datalist
-                        id={`doctor-list-${index}`}
-                      >
-                        {contacts.map(
-                          (
-                            contact,
-                            i
-                          ) => (
-                            <option
-                              key={
-                                i
-                              }
-                              value={
-                                contact.name
-                              }
-                            />
-                          )
-                        )}
-                      </datalist>
-                    </td>
-
-                    <td className="p-4">
-                      <input
-                        type="text"
-                        placeholder="Phone"
-                        value={
-                          row.doctorPhone
-                        }
-                        onChange={(
-                          e
-                        ) =>
-                          handleChange(
-                            index,
-                            "doctorPhone",
-                            e.target
-                              .value
-                          )
-                        }
-                        className="w-full rounded-lg border border-border px-3 py-2"
-                      />
-                    </td>
-
-                    <td className="min-w-[350px] p-4">
-                      <Select
-                        isMulti
-                        closeMenuOnSelect={
-                          false
-                        }
-                        options={
-                          productOptions
-                        }
-                        value={productOptions.filter(
-                          (
-                            option
-                          ) =>
-                            row.product.includes(
-                              option.value
-                            )
-                        )}
-                        onChange={(
-                          selected
-                        ) =>
-                          handleChange(
-                            index,
-                            "product",
-                            selected.map(
-                              (
-                                item
-                              ) =>
-                                item.value
-                            )
-                          )
-                        }
-                      />
-                    </td>
-
-                    <td className="p-4">
-                      <button
-                        onClick={() =>
-                          deleteRow(
-                            index
-                          )
-                        }
-                        className="rounded-lg bg-red-500 px-4 py-2 text-white"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
