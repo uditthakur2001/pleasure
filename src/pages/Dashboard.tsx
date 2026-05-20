@@ -53,14 +53,11 @@ export default function Dashboard() {
     },
   ]);
 
-  const [supportsContactPicker, setSupportsContactPicker] =
-  useState(false);
+  const [supportsContactPicker, setSupportsContactPicker] = useState(false);
 
-useEffect(() => {
-  setSupportsContactPicker(
-    !!navigator.contacts
-  );
-}, []);
+  useEffect(() => {
+    setSupportsContactPicker(!!navigator.contacts);
+  }, []);
 
   const loadContacts = async () => {
     const {
@@ -365,11 +362,29 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
 
             <p className="text-muted-foreground">Doctor Product Database</p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={addRow}
+              className="rounded-lg bg-secondary px-5 py-3 font-medium"
+            >
+              + Add Row
+            </button>
+
+            {!supportsContactPicker && contacts.length === 0 && (
+              <button
+                onClick={connectGoogle}
+                className="rounded-lg border border-border px-5 py-3"
+              >
+                Connect Contacts
+              </button>
+            )}
           </div>
         </div>
 
@@ -426,8 +441,8 @@ useEffect(() => {
                         handleChange(index, "doctorPhone", matched.phone);
                       }
                     }}
-className="w-full rounded-xl border border-border px-4 py-3"                  />
-
+                    className="w-full rounded-xl border border-border px-4 py-3"
+                  />
 
                   <datalist id={`doctor-list-${index}`}>
                     {contacts.map((contact, i) => (
@@ -495,15 +510,15 @@ className="w-full rounded-xl border border-border px-4 py-3"                  />
                   />
                 </div>
               </div>
-{supportsContactPicker && (
-  <button
-    type="button"
-    onClick={() => pickPhoneContact(index)}
-    className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
-  >
-    Pick Contact
-  </button>
-)}
+              {supportsContactPicker && (
+                <button
+                  type="button"
+                  onClick={() => pickPhoneContact(index)}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
+                >
+                  Pick Contact
+                </button>
+              )}
               <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
                 {!row.id && (
                   <button
@@ -532,25 +547,6 @@ className="w-full rounded-xl border border-border px-4 py-3"                  />
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button
-            onClick={addRow}
-            className="rounded-lg bg-secondary px-5 py-3 font-medium"
-          >
-            + Add Row
-          </button>
-
-         {!supportsContactPicker &&
-  contacts.length === 0 && (
-            <button
-              onClick={connectGoogle}
-              className="rounded-lg border border-border px-5 py-3"
-            >
-              Connect Contacts
-            </button>
-          )}
         </div>
       </div>
     </div>
