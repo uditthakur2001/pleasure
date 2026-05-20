@@ -50,7 +50,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl">
-        <h1 className="mb-2 text-3xl font-bold">Worker Login</h1>
+        <h1 className="mb-2 text-3xl font-bold">Employee Login</h1>
 
         <p className="mb-6 text-muted-foreground">Enter your credentials</p>
 
