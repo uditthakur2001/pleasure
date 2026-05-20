@@ -342,62 +342,62 @@ export default function AdminDashboard() {
     }, [entries]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
       <div className="mx-auto max-w-7xl">
         {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold tracking-tight">
             Admin Dashboard
           </h1>
 
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Employees &
             Analytics
           </p>
         </div>
 
         {/* ANALYTICS */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <p className="text-sm text-muted-foreground">
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <p className="text-xs text-muted-foreground">
               Total Employees
             </p>
 
-            <h2 className="mt-2 text-4xl font-bold">
+            <h2 className="mt-1 text-3xl font-bold">
               {
                 employees.length
               }
             </h2>
           </div>
 
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <p className="text-xs text-muted-foreground">
               Total Entries
             </p>
 
-            <h2 className="mt-2 text-4xl font-bold">
+            <h2 className="mt-1 text-3xl font-bold">
               {entries.length}
             </h2>
           </div>
 
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <p className="text-xs text-muted-foreground">
               Products Added
             </p>
 
-            <h2 className="mt-2 text-4xl font-bold">
+            <h2 className="mt-1 text-3xl font-bold">
               {
                 totalProducts
               }
             </h2>
           </div>
 
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <p className="text-xs text-muted-foreground">
               Today's Entries
             </p>
 
-            <h2 className="mt-2 text-4xl font-bold">
+            <h2 className="mt-1 text-3xl font-bold">
               {
                 todayEntries
               }
@@ -406,14 +406,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* CHARTS */}
-        <div className="mb-10 grid gap-5 xl:grid-cols-2">
+        <div className="mb-6 grid gap-4 xl:grid-cols-2">
           {/* BAR CHART */}
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <h2 className="mb-4 text-xl font-semibold">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <h2 className="mb-3 text-lg font-semibold">
               Top Products
             </h2>
 
-            <div className="h-[240px]">
+            <div className="h-[180px]">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -436,7 +436,7 @@ export default function AdminDashboard() {
                     axisLine={
                       false
                     }
-                    fontSize={12}
+                    fontSize={11}
                   />
 
                   <YAxis
@@ -446,18 +446,18 @@ export default function AdminDashboard() {
                     axisLine={
                       false
                     }
-                    fontSize={12}
+                    fontSize={11}
                   />
 
                   <Tooltip
                     contentStyle={{
-                      borderRadius: 16,
+                      borderRadius: 14,
                       border:
                         "none",
                       backdropFilter:
                         "blur(12px)",
                       background:
-                        "rgba(255,255,255,0.85)",
+                        "rgba(255,255,255,0.9)",
                       boxShadow:
                         "0 10px 30px rgba(0,0,0,0.08)",
                     }}
@@ -478,13 +478,13 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* PIE CHART */}
-          <div className="rounded-3xl border border-white/20 bg-white/60 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-            <h2 className="mb-4 text-xl font-semibold">
+          {/* PIE */}
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <h2 className="mb-3 text-lg font-semibold">
               Product Distribution
             </h2>
 
-            <div className="h-[240px]">
+            <div className="h-[180px]">
               <ResponsiveContainer
                 width="100%"
                 height="100%"
@@ -497,12 +497,11 @@ export default function AdminDashboard() {
                     dataKey="value"
                     nameKey="name"
                     outerRadius={
-                      85
+                      65
                     }
                     innerRadius={
-                      45
+                      35
                     }
-                    label
                   >
                     {productAnalytics.map(
                       (
@@ -526,13 +525,13 @@ export default function AdminDashboard() {
 
                   <Tooltip
                     contentStyle={{
-                      borderRadius: 16,
+                      borderRadius: 14,
                       border:
                         "none",
                       backdropFilter:
                         "blur(12px)",
                       background:
-                        "rgba(255,255,255,0.85)",
+                        "rgba(255,255,255,0.9)",
                       boxShadow:
                         "0 10px 30px rgba(0,0,0,0.08)",
                     }}
@@ -544,12 +543,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* DAILY ANALYTICS */}
-        <div className="mb-10 rounded-3xl border border-white/20 bg-white/60 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-          <h2 className="mb-4 text-xl font-semibold">
+        <div className="mb-6 rounded-2xl border border-white/20 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+          <h2 className="mb-3 text-lg font-semibold">
             Daily Visit Analytics
           </h2>
 
-          <div className="h-[260px]">
+          <div className="h-[200px]">
             <ResponsiveContainer
               width="100%"
               height="100%"
@@ -568,24 +567,24 @@ export default function AdminDashboard() {
                   dataKey="date"
                   tickLine={false}
                   axisLine={false}
-                  fontSize={12}
+                  fontSize={11}
                 />
 
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  fontSize={12}
+                  fontSize={11}
                 />
 
                 <Tooltip
                   contentStyle={{
-                    borderRadius: 16,
+                    borderRadius: 14,
                     border:
                       "none",
                     backdropFilter:
                       "blur(12px)",
                     background:
-                      "rgba(255,255,255,0.85)",
+                      "rgba(255,255,255,0.9)",
                     boxShadow:
                       "0 10px 30px rgba(0,0,0,0.08)",
                   }}
@@ -607,21 +606,20 @@ export default function AdminDashboard() {
         </div>
 
         {/* DOCTOR PERFORMANCE */}
-        <div className="mb-10 rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-          <h2 className="mb-5 text-2xl font-semibold">
-            Doctor Visit
-            Performance
+        <div className="mb-6 rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+          <h2 className="mb-3 text-xl font-semibold">
+            Doctor Performance
           </h2>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full min-w-[500px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Doctor
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Visits
                   </th>
                 </tr>
@@ -637,13 +635,13 @@ export default function AdminDashboard() {
                       key={index}
                       className="border-b border-border"
                     >
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {
                           doctor.name
                         }
                       </td>
 
-                      <td className="p-3 font-semibold">
+                      <td className="p-2.5 text-sm font-semibold">
                         {
                           doctor.visits
                         }
@@ -657,12 +655,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* EMPLOYEES */}
-        <div className="mb-10 rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-          <h2 className="mb-4 text-2xl font-semibold">
+        <div className="mb-6 rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+          <h2 className="mb-3 text-xl font-semibold">
             Employees
           </h2>
 
-          <div className="mb-4">
+          <div className="mb-3">
             <input
               type="text"
               placeholder="Search employees..."
@@ -675,31 +673,31 @@ export default function AdminDashboard() {
                     .value,
                 )
               }
-              className="w-full rounded-xl border border-border bg-white/70 px-4 py-3 backdrop-blur-md"
+              className="w-full rounded-xl border border-border bg-white/70 px-3 py-2.5 text-sm backdrop-blur-md"
             />
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-[650px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Username
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Name
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Phone
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Email
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Role
                   </th>
                 </tr>
@@ -712,30 +710,30 @@ export default function AdminDashboard() {
                       key={emp.id}
                       className="border-b border-border"
                     >
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {
                           emp.username
                         }
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {emp.full_name ||
                           "-"}
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {emp.phone ||
                           "-"}
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {emp.email ||
                           "-"}
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         <span
-                          className={`rounded-full px-3 py-1 text-sm ${
+                          className={`rounded-full px-2.5 py-1 text-xs ${
                             emp.role ===
                             "admin"
                               ? "bg-red-100 text-red-700"
@@ -756,12 +754,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* DAILY UPDATES */}
-        <div className="rounded-3xl border border-white/20 bg-white/60 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-          <h2 className="mb-4 text-2xl font-semibold">
+        <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+          <h2 className="mb-3 text-xl font-semibold">
             Daily Updates
           </h2>
 
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               placeholder="Search updates..."
@@ -772,7 +770,7 @@ export default function AdminDashboard() {
                     .value,
                 )
               }
-              className="w-full rounded-xl border border-border bg-white/70 px-4 py-3 backdrop-blur-md"
+              className="w-full rounded-xl border border-border bg-white/70 px-3 py-2.5 text-sm backdrop-blur-md"
             />
 
             <select
@@ -783,7 +781,7 @@ export default function AdminDashboard() {
                     .value,
                 )
               }
-              className="rounded-xl border border-border bg-white/70 px-4 py-3 backdrop-blur-md"
+              className="rounded-xl border border-border bg-white/70 px-3 py-2.5 text-sm backdrop-blur-md"
             >
               <option value="latest">
                 Latest First
@@ -796,22 +794,22 @@ export default function AdminDashboard() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px]">
+            <table className="w-full min-w-[850px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Date
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Doctor
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Products
                   </th>
 
-                  <th className="p-3 text-left">
+                  <th className="p-2.5 text-left text-sm">
                     Created
                   </th>
                 </tr>
@@ -824,19 +822,19 @@ export default function AdminDashboard() {
                       key={entry.id}
                       className="border-b border-border align-top"
                     >
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {
                           entry.visit_date
                         }
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {
                           entry.doctor_name
                         }
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         <div className="flex flex-wrap gap-2">
                           {entry.products?.map(
                             (
@@ -847,7 +845,7 @@ export default function AdminDashboard() {
                                 key={
                                   index
                                 }
-                                className="rounded-full bg-secondary px-3 py-1 text-sm"
+                                className="rounded-full bg-secondary px-2.5 py-1 text-xs"
                               >
                                 {
                                   product
@@ -858,7 +856,7 @@ export default function AdminDashboard() {
                         </div>
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-2.5 text-sm">
                         {new Date(
                           entry.created_at,
                         ).toLocaleString()}
