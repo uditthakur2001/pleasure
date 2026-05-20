@@ -18,35 +18,27 @@ export default function Login() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.from("employee").select("*");
-
-    console.log("DATA:", data);
-    console.log("ERROR:", error);
-
-    const matchedUser = data?.find(
-      (user) =>
-        user.username?.trim() === username.trim() &&
-        user.password?.trim() === password.trim(),
-    );
-
+    const { data: matchedUser, error } = await supabase
+      .from("employee")
+      .select("id, username, role")
+      .eq("username", username.trim())
+      .eq("password", password.trim())
+      .single();
     setLoading(false);
 
-    if (!matchedUser) {
+    if (error || !matchedUser) {
+      setLoading(false);
+
       alert("Invalid username or password");
+
       return;
     }
 
     localStorage.setItem("isLoggedIn", "true");
 
-localStorage.setItem(
-  "workerName",
-  matchedUser.username
-);
+    localStorage.setItem("workerName", matchedUser.username);
 
-localStorage.setItem(
-  "employeeId",
-  matchedUser.id
-);
+    localStorage.setItem("employeeId", matchedUser.id);
     localStorage.setItem("role", matchedUser.role);
 
     if (matchedUser.role === "admin") {
