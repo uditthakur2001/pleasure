@@ -366,18 +366,21 @@ export default function Dashboard() {
                     type="text"
                     placeholder="Doctor name"
                     value={row.doctorName}
-                    onChange={(e) => {
-                      const value = e.target.value;
-
-                      handleChange(index, "doctorName", value);
-
-                      const matched = contacts.find((c) => c.name === value);
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(e) =>
+                      handleChange(index, "doctorName", e.target.value)
+                    }
+                    onBlur={() => {
+                      const matched = contacts.find(
+                        (c) => c.name === row.doctorName,
+                      );
 
                       if (matched) {
                         handleChange(index, "doctorPhone", matched.phone);
                       }
                     }}
-                    className="w-full rounded-xl border border-border px-4 py-3"
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                   />
 
                   <datalist id={`doctor-list-${index}`}>
