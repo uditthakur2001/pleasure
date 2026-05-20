@@ -8,13 +8,9 @@ import { products } from "@/data/products";
 
 interface RowData {
   id?: number;
-
   date: string;
-
   doctorName: string;
-
   doctorPhone: string;
-
   product: string[];
 }
 
@@ -31,8 +27,6 @@ declare global {
   }
 }
 
-const supportsContactPicker = !!navigator.contacts;
-
 const today = new Date().toISOString().split("T")[0];
 
 const productOptions = products.map((product) => ({
@@ -44,19 +38,27 @@ export default function Dashboard() {
   const [rows, setRows] = useState<RowData[]>([
     {
       date: today,
-
       doctorName: "",
-
       doctorPhone: "",
-
       product: [],
     },
   ]);
 
+  const [contacts, setContacts] = useState<any[]>([]);
+
   const [supportsContactPicker, setSupportsContactPicker] = useState(false);
 
   useEffect(() => {
-    setSupportsContactPicker(!!navigator.contacts);
+    setSupportsContactPicker(
+      typeof navigator !== "undefined" &&
+        !!navigator.contacts &&
+        typeof navigator.contacts.select === "function",
+    );
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    loadContacts();
   }, []);
 
   const loadContacts = async () => {
@@ -84,7 +86,6 @@ export default function Dashboard() {
         .filter((contact: any) => contact.names && contact.phoneNumbers)
         .map((contact: any) => ({
           name: contact.names?.[0]?.displayName || "",
-
           phone: contact.phoneNumbers?.[0]?.value || "",
         }));
 
@@ -93,12 +94,6 @@ export default function Dashboard() {
       console.log(err);
     }
   };
-
-  const [contacts, setContacts] = useState<any[]>([]);
-  useEffect(() => {
-    fetchData();
-    loadContacts();
-  }, []);
 
   const fetchData = async () => {
     const employeeId = localStorage.getItem("employeeId");
@@ -120,30 +115,23 @@ export default function Dashboard() {
 
     const formattedRows = data.map((item) => ({
       id: item.id,
-
       date: item.visit_date || "",
-
       doctorName: item.doctor_name || "",
-
       doctorPhone: item.doctor_phone || "",
-
       product: item.products || [],
     }));
 
     setRows([
       {
         date: today,
-
         doctorName: "",
-
         doctorPhone: "",
-
         product: [],
       },
-
       ...formattedRows,
     ]);
   };
+
   const connectGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -182,7 +170,6 @@ export default function Dashboard() {
 
     updatedRows[index] = {
       ...updatedRows[index],
-
       [field]: value,
     };
 
@@ -193,14 +180,10 @@ export default function Dashboard() {
     setRows([
       {
         date: today,
-
         doctorName: "",
-
         doctorPhone: "",
-
         product: [],
       },
-
       ...rows,
     ]);
   };
@@ -216,7 +199,6 @@ export default function Dashboard() {
 
       if (error) {
         alert("Error deleting row");
-
         return;
       }
     }
@@ -224,75 +206,6 @@ export default function Dashboard() {
     const updatedRows = rows.filter((_, i) => i !== index);
 
     setRows(updatedRows);
-  };
-
-  const saveData = async () => {
-    const employeeId = localStorage.getItem("employeeId");
-
-    if (!employeeId) {
-      alert("Employee not found");
-
-      return;
-    }
-
-    const newRows = rows.filter(
-      (row) => !row.id && row.date && row.doctorName && row.product.length > 0,
-    );
-
-    if (newRows.length > 0) {
-      const { error } = await supabase.from("doctor_entries").insert(
-        newRows.map((row) => ({
-          employee_id: Number(employeeId),
-
-          visit_date: row.date,
-
-          doctor_name: row.doctorName,
-
-          doctor_phone: row.doctorPhone,
-
-          products: row.product,
-        })),
-      );
-
-      if (error) {
-        console.log(error);
-
-        alert(error.message);
-
-        return;
-      }
-    }
-
-    const existingRows = rows.filter(
-      (row) => row.id && row.date && row.doctorName && row.product.length > 0,
-    );
-
-    for (const row of existingRows) {
-      const { error } = await supabase
-        .from("doctor_entries")
-        .update({
-          visit_date: row.date,
-
-          doctor_name: row.doctorName,
-
-          doctor_phone: row.doctorPhone,
-
-          products: row.product,
-        })
-        .eq("id", row.id);
-
-      if (error) {
-        console.log(error);
-
-        alert(error.message);
-
-        return;
-      }
-    }
-
-    await fetchData();
-
-    alert("Data saved successfully");
   };
 
   const saveSingleRow = async (row: RowData) => {
@@ -305,21 +218,16 @@ export default function Dashboard() {
 
     if (!row.date || !row.doctorName || row.product.length === 0) {
       alert("Please fill all fields");
-
       return;
     }
 
-    // UPDATE
     if (row.id) {
       const { error } = await supabase
         .from("doctor_entries")
         .update({
           visit_date: row.date,
-
           doctor_name: row.doctorName,
-
           doctor_phone: row.doctorPhone,
-
           products: row.product,
         })
         .eq("id", row.id);
@@ -330,20 +238,13 @@ export default function Dashboard() {
       }
 
       alert("Updated");
-    }
-
-    // INSERT
-    else {
+    } else {
       const { error } = await supabase.from("doctor_entries").insert([
         {
           employee_id: Number(employeeId),
-
           visit_date: row.date,
-
           doctor_name: row.doctorName,
-
           doctor_phone: row.doctorPhone,
-
           products: row.product,
         },
       ]);
@@ -362,17 +263,20 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        {/* HEADER */}
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
 
-            <p className="text-muted-foreground">Doctor Product Database</p>
+            <p className="mt-1 text-muted-foreground">
+              Doctor Product Database
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <button
               onClick={addRow}
-              className="rounded-lg bg-secondary px-5 py-3 font-medium"
+              className="rounded-xl bg-secondary px-5 py-3 font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
             >
               + Add Row
             </button>
@@ -380,7 +284,7 @@ export default function Dashboard() {
             {!supportsContactPicker && contacts.length === 0 && (
               <button
                 onClick={connectGoogle}
-                className="rounded-lg border border-border px-5 py-3"
+                className="rounded-xl border border-border bg-white px-5 py-3 transition-all duration-200 hover:shadow-md"
               >
                 Connect Contacts
               </button>
@@ -388,13 +292,44 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* STATS */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-sm text-muted-foreground">Total Entries</p>
+
+            <h2 className="mt-2 text-3xl font-bold">
+              {rows.filter((r) => r.id).length}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-sm text-muted-foreground">Products Added</p>
+
+            <h2 className="mt-2 text-3xl font-bold">
+              {rows.reduce((acc, row) => acc + row.product.length, 0)}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-sm text-muted-foreground">Contacts Synced</p>
+
+            <h2 className="mt-2 text-3xl font-bold">{contacts.length}</h2>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-sm text-muted-foreground">Today's Date</p>
+
+            <h2 className="mt-2 text-xl font-semibold">{today}</h2>
+          </div>
+        </div>
+
+        {/* ROWS */}
+        <div className="space-y-5">
           {rows.map((row, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-border bg-card p-4 shadow-sm"
-            >
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"            >
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_2fr]">
                 {/* DATE */}
                 <div>
                   <label className="mb-1 block text-sm font-medium">Date</label>
@@ -469,13 +404,15 @@ export default function Dashboard() {
                 </div>
 
                 {/* PRODUCTS */}
-                <div className="xl:col-span-2">
+                <div>
                   <label className="mb-1 block text-sm font-medium">
                     Products
                   </label>
 
                   <Select
                     isMulti
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
                     options={productOptions}
                     closeMenuOnSelect={false}
                     hideSelectedOptions={false}
@@ -493,57 +430,77 @@ export default function Dashboard() {
                     styles={{
                       control: (base) => ({
                         ...base,
-                        minHeight: 42,
-                        borderRadius: 10,
+                        minHeight: 54,
+                        borderRadius: 14,
+                        borderColor: "#e5e7eb",
+                        boxShadow: "none",
+                        paddingInline: 4,
                       }),
 
                       menu: (base) => ({
                         ...base,
                         zIndex: 9999,
+                        borderRadius: 14,
+                        overflow: "hidden",
                       }),
 
                       menuList: (base) => ({
                         ...base,
                         maxHeight: 220,
                       }),
+
+                      multiValue: (base) => ({
+                        ...base,
+                        borderRadius: 999,
+                        paddingInline: 4,
+                      }),
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
                     }}
                   />
                 </div>
               </div>
-              {supportsContactPicker && (
-                <button
-                  type="button"
-                  onClick={() => pickPhoneContact(index)}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
-                >
-                  Pick Contact
-                </button>
-              )}
-              <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-                {!row.id && (
+
+              {/* ACTIONS */}
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                {supportsContactPicker && (
                   <button
-                    onClick={() => saveSingleRow(row)}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm text-white"
+                    type="button"
+                    onClick={() => pickPhoneContact(index)}
+                    className="rounded-xl border border-border bg-white px-4 py-2 text-sm transition-all duration-200 hover:shadow-md"
                   >
-                    Add Data
+                    Pick Contact
                   </button>
                 )}
 
-                {row.id && (
-                  <button
-                    onClick={() => saveSingleRow(row)}
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white"
-                  >
-                    Update Data
-                  </button>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  {!row.id && (
+                    <button
+                      onClick={() => saveSingleRow(row)}
+                      className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
+                    >
+                      Add Data
+                    </button>
+                  )}
 
-                <button
-                  onClick={() => deleteRow(index)}
-                  className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white"
-                >
-                  Delete
-                </button>
+                  {row.id && (
+                    <button
+                      onClick={() => saveSingleRow(row)}
+                      className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
+                    >
+                      Update Data
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => deleteRow(index)}
+                    className="rounded-xl bg-red-500 px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
