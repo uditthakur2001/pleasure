@@ -90,6 +90,7 @@ export default function AdminDashboard() {
 
     fetchEmployees();
     fetchEntries();
+    fetchProducts();
   };
 
   const fetchEmployees = async () => {
@@ -256,6 +257,211 @@ export default function AdminDashboard() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [entries]);
 
+
+
+  //product details
+
+  const [productsData, setProductsData] =
+  useState<any[]>([]);
+
+const [editingProduct, setEditingProduct] =
+  useState<any>(null);
+
+const [showProductManager, setShowProductManager] =
+  useState(false);
+
+const [productName, setProductName] =
+  useState("");
+
+const [productTagline, setProductTagline] =
+  useState("");
+
+const [productCategory, setProductCategory] =
+  useState("Injection");
+
+const [productComposition, setProductComposition] =
+  useState("");
+
+const [productDosage, setProductDosage] =
+  useState("");
+
+const [productDescription, setProductDescription] =
+  useState("");
+
+const [productBenefits, setProductBenefits] =
+  useState("");
+
+const [productIndications, setProductIndications] =
+  useState("");
+
+const [productImages, setProductImages] =
+  useState<string[]>([]);
+
+  const fetchProducts =
+  async () => {
+    const { data, error } =
+      await supabase
+        .from("products")
+        .select("*")
+        .order("id", {
+          ascending: false,
+        });
+
+    if (!error && data) {
+      setProductsData(data);
+    }
+  };
+
+
+const uploadProductImage =
+  async (
+    file: File,
+  ) => {
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const { error } =
+      await supabase.storage
+        .from(
+          "product-images",
+        )
+        .upload(
+          fileName,
+          file,
+        );
+
+    if (error) {
+      errorAlert(
+        "Upload Failed",
+        error.message,
+      );
+
+      return null;
+    }
+
+    const { data } =
+      supabase.storage
+        .from(
+          "product-images",
+        )
+        .getPublicUrl(
+          fileName,
+        );
+
+    return data.publicUrl;
+  };
+
+
+  const saveProduct =
+  async () => {
+    if (!productName) {
+      errorAlert(
+        "Required",
+        "Product name required",
+      );
+
+      return;
+    }
+
+    const payload = {
+      slug:
+        productName
+          .toLowerCase()
+          .replace(/\s+/g, "-"),
+
+      name: productName,
+
+      tagline:
+        productTagline,
+
+      category:
+        productCategory,
+
+      composition:
+        productComposition,
+
+      dosage:
+        productDosage,
+
+      description:
+        productDescription,
+
+      benefits:
+        productBenefits
+          .split(","),
+
+      indications:
+        productIndications.split(
+          ",",
+        ),
+
+      image_urls:
+        productImages,
+    };
+
+    let response;
+
+    if (editingProduct) {
+      response =
+        await supabase
+          .from(
+            "products",
+          )
+          .update(payload)
+          .eq(
+            "id",
+            editingProduct.id,
+          );
+    } else {
+      response =
+        await supabase
+          .from(
+            "products",
+          )
+          .insert([
+            payload,
+          ]);
+    }
+
+    if (response.error) {
+      errorAlert(
+        "Error",
+        response.error.message,
+      );
+
+      return;
+    }
+
+    successAlert(
+      editingProduct
+        ? "Product Updated"
+        : "Product Added",
+    );
+
+  resetProductForm();
+  };
+
+  const resetProductForm = () => {
+  setEditingProduct(null);
+
+  setProductName("");
+
+  setProductTagline("");
+
+  setProductCategory("Injection");
+
+  setProductComposition("");
+
+  setProductDosage("");
+
+  setProductDescription("");
+
+  setProductBenefits("");
+
+  setProductIndications("");
+
+  setProductImages([]);
+};
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
       <div className="mx-auto max-w-7xl">
@@ -349,6 +555,357 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+
+
+<div className="mb-6">
+  <button
+    onClick={() =>
+      setShowProductManager(
+        !showProductManager,
+      )
+    }
+    className="rounded-xl bg-primary px-5 py-3 text-white"
+  >
+    {showProductManager
+      ? "Close Product Manager"
+      : "Open Product Manager"}
+  </button>
+</div>
+
+{showProductManager && (
+  <div className="mb-6 overflow-hidden rounded-3xl border border-white/20 bg-white/70 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
+    
+    {/* HEADER */}
+    <div className="flex items-center justify-between border-b border-border p-5">
+      <div>
+        <h2 className="text-2xl font-bold">
+          Product Manager
+        </h2>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          Add, edit and manage products dynamically
+        </p>
+      </div>
+
+      <button
+        onClick={() =>
+          setShowProductManager(false)
+        }
+        className="rounded-xl border px-4 py-2 text-sm"
+      >
+        Close
+      </button>
+    </div>
+
+    {/* FORM */}
+    <div className="grid gap-4 p-5 lg:grid-cols-2">
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={productName}
+        onChange={(e) =>
+          setProductName(
+            e.target.value,
+          )
+        }
+        className="rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <input
+        type="text"
+        placeholder="Tagline"
+        value={productTagline}
+        onChange={(e) =>
+          setProductTagline(
+            e.target.value,
+          )
+        }
+        className="rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <select
+        value={productCategory}
+        onChange={(e) =>
+          setProductCategory(
+            e.target.value,
+          )
+        }
+        className="rounded-2xl border bg-white px-4 py-3"
+      >
+        <option>
+          Injection
+        </option>
+
+        <option>Bolus</option>
+
+        <option>Powder</option>
+
+        <option>Syrup</option>
+      </select>
+
+      <input
+        type="text"
+        placeholder="Composition"
+        value={productComposition}
+        onChange={(e) =>
+          setProductComposition(
+            e.target.value,
+          )
+        }
+        className="rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <textarea
+        placeholder="Full Product Description"
+        value={productDescription}
+        onChange={(e) =>
+          setProductDescription(
+            e.target.value,
+          )
+        }
+        className="min-h-[160px] rounded-2xl border bg-white px-4 py-3 lg:col-span-2"
+      />
+
+      <textarea
+        placeholder="Indications (comma separated)"
+        value={productIndications}
+        onChange={(e) =>
+          setProductIndications(
+            e.target.value,
+          )
+        }
+        className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <textarea
+        placeholder="Benefits (comma separated)"
+        value={productBenefits}
+        onChange={(e) =>
+          setProductBenefits(
+            e.target.value,
+          )
+        }
+        className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <input
+        type="text"
+        placeholder="Dosage"
+        value={productDosage}
+        onChange={(e) =>
+          setProductDosage(
+            e.target.value,
+          )
+        }
+        className="rounded-2xl border bg-white px-4 py-3"
+      />
+
+      <div className="rounded-2xl border bg-white p-4">
+        <label className="mb-3 block text-sm font-medium">
+          Upload Product Images
+        </label>
+
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={async (e) => {
+            const files =
+              Array.from(
+                e.target.files || [],
+              );
+
+            const uploadedUrls =
+              [];
+
+            for (const file of files) {
+              const url =
+                await uploadProductImage(
+                  file,
+                );
+
+              if (url) {
+                uploadedUrls.push(
+                  url,
+                );
+              }
+            }
+
+            setProductImages(
+              uploadedUrls,
+            );
+          }}
+        />
+
+        {/* PREVIEW */}
+        <div className="mt-4 flex flex-wrap gap-3">
+          {productImages.map(
+            (img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt=""
+                className="h-20 w-20 rounded-xl object-cover shadow"
+              />
+            ),
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* ACTION */}
+    <div className="flex flex-wrap gap-3">
+  <button
+    onClick={saveProduct}
+    className="rounded-2xl bg-primary px-6 py-3 font-medium text-white"
+  >
+    {editingProduct
+      ? "Update Product"
+      : "Add Product"}
+  </button>
+
+  {editingProduct && (
+    <button
+      onClick={resetProductForm}
+      className="rounded-2xl border px-6 py-3 font-medium"
+    >
+      Cancel Edit
+    </button>
+  )}
+</div>
+
+    {/* PRODUCT LIST */}
+    <div className="border-t border-border p-5">
+      <h3 className="mb-4 text-lg font-semibold">
+        Existing Products
+      </h3>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {productsData.map(
+          (product) => (
+            <div
+              key={product.id}
+              className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+            >
+              <img
+                src={
+                  product.image_urls?.[0] ||
+                  "/placeholder.webp"
+                }
+                alt=""
+                className="h-48 w-full object-cover"
+              />
+
+              <div className="p-4">
+                <h3 className="font-semibold">
+                  {product.name}
+                </h3>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {product.category}
+                </p>
+
+                <p className="mt-2 line-clamp-2 text-sm">
+                  {
+                    product.tagline
+                  }
+                </p>
+
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingProduct(
+                        product,
+                      );
+
+                      setProductName(
+                        product.name,
+                      );
+
+                      setProductTagline(
+                        product.tagline,
+                      );
+
+                      setProductCategory(
+                        product.category,
+                      );
+
+                      setProductComposition(
+                        product.composition,
+                      );
+
+                      setProductDosage(
+                        product.dosage,
+                      );
+
+                      setProductDescription(
+                        product.description,
+                      );
+
+                      setProductBenefits(
+                        product.benefits?.join(
+                          ",",
+                        ),
+                      );
+
+                      setProductIndications(
+                        product.indications?.join(
+                          ",",
+                        ),
+                      );
+
+                      setProductImages(
+                        product.image_urls ||
+                          [],
+                      );
+                    }}
+                    className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      const result =
+                        await confirmAlert(
+                          "Delete Product?",
+                          "This cannot be undone",
+                        );
+
+                      if (
+                        !result.isConfirmed
+                      )
+                        return;
+
+                      await supabase
+                        .from(
+                          "products",
+                        )
+                        .delete()
+                        .eq(
+                          "id",
+                          product.id,
+                        );
+
+                      successAlert(
+                        "Product Deleted",
+                      );
+
+                      fetchProducts();
+                    }}
+                    className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
         {/* EMPLOYEES */}
         <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">

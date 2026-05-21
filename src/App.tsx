@@ -22,6 +22,12 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const SeedProducts = lazy(
+  () =>
+    import(
+      "./pages/SeedProducts"
+    ),
+);
 
 const queryClient = new QueryClient();
 
@@ -107,6 +113,12 @@ const App = () => (
 
               <Route path="/careers" element={<Careers />} />
             </Route>
+
+
+            <Route
+  path="/seed-products"
+  element={<SeedProducts />}
+/>
 
             {/* Login */}
             <Route path="/login" element={<Login />} />
