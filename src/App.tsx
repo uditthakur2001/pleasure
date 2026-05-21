@@ -35,6 +35,39 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function AdminRoute({ children }: { children: JSX.Element }) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  const role = localStorage.getItem("role");
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
+function EmployeeRoute({ children }: { children: JSX.Element }) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  const role = localStorage.getItem("role");
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // ADMIN REDIRECT
+  if (role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return children;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -82,9 +115,18 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <EmployeeRoute>
                   <Dashboard />
-                </ProtectedRoute>
+                </EmployeeRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
               }
             />
 
@@ -97,18 +139,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-  path="/signup"
-  element={<Signup />}
-/>
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/signup" element={<Signup />} />
+
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>

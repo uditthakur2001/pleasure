@@ -24,10 +24,33 @@ const publicLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-const privateLinks = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/profile", label: "Profile" },
-];
+const role =
+  localStorage.getItem("role");
+
+const privateLinks =
+  role === "admin"
+    ? [
+        {
+          to: "/admin",
+          label: "Dashboard",
+        },
+
+        {
+          to: "/profile",
+          label: "Profile",
+        },
+      ]
+    : [
+        {
+          to: "/dashboard",
+          label: "Dashboard",
+        },
+
+        {
+          to: "/profile",
+          label: "Profile",
+        },
+      ];
 
 export const Navbar = () => {
 const navigate = useNavigate();

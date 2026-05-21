@@ -20,8 +20,8 @@ import pcefSb from "@/assets/p-cef-sb.png";
 import pcefSbii from "@/assets/pcef-sb.ii.jpg";
 
 // CSURE
-import csure1 from "@/assets/csure.i.webp";
-import csure2 from "@/assets/csure.ii.webp";
+import csure from "@/assets/csure.png";
+import csure2 from "@/assets/csure2.png";
 
 // F-STAR PLUS
 import fstarPlus1 from "@/assets/f-star-plus.i.webp";
@@ -48,7 +48,8 @@ import permethrin2 from "@/assets/permethrin2.jpg";
 
 import enroff from "@/assets/enroff.png";
 import enroff2 from "@/assets/enroff2.png";
-// import vitahp from '@/assets/vitahp.png'
+import vitahp1 from '@/assets/vitahp1.png'
+import vitahp1000 from '@/assets/vitahp1.2.png'
 import vitahp from "@/assets/vitahp.png";
 import vitahp25 from "@/assets/vitahp2.0.png";
 import vitahp250 from "@/assets/vitahp2.1.png";
@@ -227,7 +228,7 @@ export const products: Product[] = [
     name: "VITA-HP",
     tagline: "High-Potency Vitamin Tonic",
     category: "Syrup",
-    images: [vitahp],
+    images: [vitahp1],
 
     variants: [
       {
@@ -236,7 +237,11 @@ export const products: Product[] = [
       },
       {
         size: "500 ml",
-        images: [vitahp],
+        images: [vitahp,vitahp1000],
+      },
+      {
+        size: "1 L",
+        images: [vitahp1,vitahp1000],
       },
       {
         size: "5 L",
@@ -256,7 +261,7 @@ export const products: Product[] = [
       "Improves milk yield & fertility",
       "Boosts immunity",
     ],
-    packSize: "250ml, 500ml & 5l pack",
+    packSize: "250ml, 500ml, 1l & 5l pack",
   },
   {
     slug: "liv-sure",
@@ -338,7 +343,7 @@ export const products: Product[] = [
     name: "C-SURE",
     tagline: "Ascorbic Acid Injection",
     category: "Injection",
-    images: [csure1, csure2],
+    images: [csure, csure2],
     composition: "Vitamin C (Ascorbic Acid)",
     indications: ["Stress", "Mastitis", "Recovery"],
     dosage: "5–10 ml",
@@ -407,7 +412,7 @@ export const products: Product[] = [
 
   {
     slug: "zoonil-plus",
-    name: "ZOONIL PLUS",
+    name: "ZOONIL PLUS BOLUS",
     tagline: "Advanced Dewormer",
     category: "Bolus",
     images: [zoonilPlus1, zoonilPlus2],

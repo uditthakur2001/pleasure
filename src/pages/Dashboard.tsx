@@ -239,10 +239,59 @@ export default function Dashboard() {
       return;
     }
 
-    if (!row.date || !row.doctorName || row.product.length === 0) {
-      warningAlert("Incomplete Form", "Please fill all fields");
-      return;
-    }
+    if (
+  !row.date ||
+  !row.doctorName.trim() ||
+  !row.doctorPhone.trim() ||
+  row.product.length === 0
+) {
+  warningAlert(
+    "Incomplete Form",
+    "Doctor name, phone number and products are required",
+  );
+
+  return;
+}
+
+// VALID DOCTOR NAME
+const doctorNameRegex =
+  /^[A-Za-z\s.]+$/;
+
+if (
+  !doctorNameRegex.test(
+    row.doctorName.trim(),
+  )
+) {
+  warningAlert(
+    "Invalid Doctor Name",
+    "Doctor name should contain only letters",
+  );
+
+  return;
+}
+
+// VALID PHONE NUMBER
+const cleanPhone =
+  row.doctorPhone.replace(
+    /\D/g,
+    "",
+  );
+
+// VALID INDIAN MOBILE NUMBER
+const indianPhoneRegex =
+/^(91)?[6-9]\d{9}$/;
+if (
+  !indianPhoneRegex.test(
+    cleanPhone,
+  )
+) {
+  warningAlert(
+    "Invalid Phone Number",
+    "Enter valid 10-digit Indian mobile number",
+  );
+
+  return;
+}
 
     if (row.id) {
       const { error } = await supabase
@@ -385,12 +434,20 @@ export default function Dashboard() {
                     autoComplete="off"
                     spellCheck={false}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\b\w/g, (char) =>
-                        char.toUpperCase(),
-                      );
+  // REMOVE NUMBERS & SPECIAL CHARS
+  const cleaned =
+    e.target.value
+      .replace(/[^A-Za-z\s.]/g, "")
+      .replace(/\b\w/g, (char) =>
+        char.toUpperCase(),
+      );
 
-                      handleChange(index, "doctorName", value);
-                    }}
+  handleChange(
+    index,
+    "doctorName",
+    cleaned,
+  );
+}}
                     onBlur={() => {
                       const matched = contacts.find(
                         (c) => c.name === row.doctorName,
@@ -417,14 +474,24 @@ export default function Dashboard() {
                   </label>
 
                   <input
-                    type="text"
-                    placeholder="Phone number"
-                    value={row.doctorPhone}
-                    onChange={(e) =>
-                      handleChange(index, "doctorPhone", e.target.value)
-                    }
-                    className="w-full rounded-xl border border-border px-4 py-3"
-                  />
+  type="tel"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  maxLength={15}
+  placeholder="Phone number"
+  value={row.doctorPhone}
+  onChange={(e) => {
+    const onlyNumbers =
+      e.target.value.replace(/\D/g, "");
+
+    handleChange(
+      index,
+      "doctorPhone",
+      onlyNumbers,
+    );
+  }}
+  className="w-full rounded-xl border border-border px-4 py-3"
+/>
                 </div>
 
                 {/* PRODUCTS */}

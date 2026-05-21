@@ -161,7 +161,11 @@ const ProductDetail = () => {
               <div className="w-full h-full rounded-2xl border bg-tan shadow-xl overflow-hidden">
                 <img
                   ref={zoomRef}
-                  src={product.images[selected]}
+                  src={
+                    selectedVariant
+                      ? selectedVariant.images[selected]
+                      : product.images[selected]
+                  }
                   className="w-full h-full object-contain scale-[2.5]"
                 />
               </div>
@@ -263,7 +267,10 @@ const ProductDetail = () => {
           <Lightbox
             open={openLightbox}
             close={() => setOpenLightbox(false)}
-            slides={product.images.map((img) => ({
+            slides={(selectedVariant
+              ? selectedVariant.images
+              : product.images
+            ).map((img) => ({
               src: img,
             }))}
             index={selected}
