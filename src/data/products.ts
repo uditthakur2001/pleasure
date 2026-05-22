@@ -397,7 +397,7 @@ export const products: Product[] = [
     dosage: "As directed",
     benefits: ["Strong antibacterial"],
   },
-
+ 
   {
     slug: "vetofex-iu",
     name: "VETOFEX-IU",

@@ -257,210 +257,143 @@ export default function AdminDashboard() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [entries]);
 
-
-
   //product details
 
-  const [productsData, setProductsData] =
-  useState<any[]>([]);
+  const [productsData, setProductsData] = useState<any[]>([]);
 
-const [editingProduct, setEditingProduct] =
-  useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
-const [showProductManager, setShowProductManager] =
-  useState(false);
+  const [showProductManager, setShowProductManager] = useState(false);
 
-const [productName, setProductName] =
-  useState("");
+  const [productName, setProductName] = useState("");
 
-const [productTagline, setProductTagline] =
-  useState("");
+  const [productTagline, setProductTagline] = useState("");
 
-const [productCategory, setProductCategory] =
-  useState("Injection");
+  const [productCategory, setProductCategory] = useState("Injection");
 
-const [productComposition, setProductComposition] =
-  useState("");
+  const [productComposition, setProductComposition] = useState("");
 
-const [productDosage, setProductDosage] =
-  useState("");
+  const [productDosage, setProductDosage] = useState("");
 
-const [productDescription, setProductDescription] =
-  useState("");
+  const [productDescription, setProductDescription] = useState("");
 
-const [productBenefits, setProductBenefits] =
-  useState("");
+  const [productBenefits, setProductBenefits] = useState("");
 
-const [productIndications, setProductIndications] =
-  useState("");
+  const [productIndications, setProductIndications] = useState("");
 
-const [productImages, setProductImages] =
-  useState<string[]>([]);
+  const [productImages, setProductImages] = useState<string[]>([]);
 
-  const fetchProducts =
-  async () => {
-    const { data, error } =
-      await supabase
-        .from("products")
-        .select("*")
-        .order("id", {
-          ascending: false,
-        });
+  const [productVariants, setProductVariants] = useState<any[]>([]);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("id", {
+        ascending: false,
+      });
 
     if (!error && data) {
       setProductsData(data);
     }
   };
 
-
-const uploadProductImage =
-  async (
-    file: File,
-  ) => {
+  const uploadProductImage = async (file: File) => {
     const fileName = `${Date.now()}-${file.name}`;
 
-    const { error } =
-      await supabase.storage
-        .from(
-          "product-images",
-        )
-        .upload(
-          fileName,
-          file,
-        );
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, file);
 
     if (error) {
-      errorAlert(
-        "Upload Failed",
-        error.message,
-      );
+      errorAlert("Upload Failed", error.message);
 
       return null;
     }
 
-    const { data } =
-      supabase.storage
-        .from(
-          "product-images",
-        )
-        .getPublicUrl(
-          fileName,
-        );
+    const { data } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(fileName);
 
     return data.publicUrl;
   };
 
-
-  const saveProduct =
-  async () => {
+  const saveProduct = async () => {
     if (!productName) {
-      errorAlert(
-        "Required",
-        "Product name required",
-      );
+      errorAlert("Required", "Product name required");
 
       return;
     }
 
     const payload = {
-      slug:
-        productName
-          .toLowerCase()
-          .replace(/\s+/g, "-"),
+      slug: productName.toLowerCase().replace(/\s+/g, "-"),
 
       name: productName,
 
-      tagline:
-        productTagline,
+      tagline: productTagline,
 
-      category:
-        productCategory,
+      category: productCategory,
 
-      composition:
-        productComposition,
+      composition: productComposition,
 
-      dosage:
-        productDosage,
+      dosage: productDosage,
 
-      description:
-        productDescription,
+      description: productDescription,
 
-      benefits:
-        productBenefits
-          .split(","),
+      benefits: productBenefits.split(",").map((b) => b.trim()),
 
-      indications:
-        productIndications.split(
-          ",",
-        ),
+      indications: productIndications.split(",").map((i) => i.trim()),
 
-      image_urls:
-        productImages,
+      image_urls: productImages,
+
+      variants: productVariants,
     };
 
     let response;
 
     if (editingProduct) {
-      response =
-        await supabase
-          .from(
-            "products",
-          )
-          .update(payload)
-          .eq(
-            "id",
-            editingProduct.id,
-          );
+      response = await supabase
+        .from("products")
+        .update(payload)
+        .eq("id", editingProduct.id);
     } else {
-      response =
-        await supabase
-          .from(
-            "products",
-          )
-          .insert([
-            payload,
-          ]);
+      response = await supabase.from("products").insert([payload]);
     }
 
     if (response.error) {
-      errorAlert(
-        "Error",
-        response.error.message,
-      );
+      errorAlert("Error", response.error.message);
 
       return;
     }
 
-    successAlert(
-      editingProduct
-        ? "Product Updated"
-        : "Product Added",
-    );
+    successAlert(editingProduct ? "Product Updated" : "Product Added");
 
-  resetProductForm();
+    resetProductForm();
   };
 
   const resetProductForm = () => {
-  setEditingProduct(null);
+    setEditingProduct(null);
 
-  setProductName("");
+    setProductName("");
 
-  setProductTagline("");
+    setProductTagline("");
 
-  setProductCategory("Injection");
+    setProductCategory("Injection");
 
-  setProductComposition("");
+    setProductComposition("");
 
-  setProductDosage("");
+    setProductDosage("");
 
-  setProductDescription("");
+    setProductDescription("");
 
-  setProductBenefits("");
+    setProductBenefits("");
 
-  setProductIndications("");
+    setProductIndications("");
 
-  setProductImages([]);
-};
+    setProductImages([]);
+
+    setProductVariants([]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
@@ -556,356 +489,463 @@ const uploadProductImage =
           </div>
         </div>
 
-
-<div className="mb-6">
-  <button
-    onClick={() =>
-      setShowProductManager(
-        !showProductManager,
-      )
-    }
-    className="rounded-xl bg-primary px-5 py-3 text-white"
-  >
-    {showProductManager
-      ? "Close Product Manager"
-      : "Open Product Manager"}
-  </button>
-</div>
-
-{showProductManager && (
-  <div className="mb-6 overflow-hidden rounded-3xl border border-white/20 bg-white/70 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
-    
-    {/* HEADER */}
-    <div className="flex items-center justify-between border-b border-border p-5">
-      <div>
-        <h2 className="text-2xl font-bold">
-          Product Manager
-        </h2>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Add, edit and manage products dynamically
-        </p>
-      </div>
-
-      <button
-        onClick={() =>
-          setShowProductManager(false)
-        }
-        className="rounded-xl border px-4 py-2 text-sm"
-      >
-        Close
-      </button>
-    </div>
-
-    {/* FORM */}
-    <div className="grid gap-4 p-5 lg:grid-cols-2">
-      <input
-        type="text"
-        placeholder="Product Name"
-        value={productName}
-        onChange={(e) =>
-          setProductName(
-            e.target.value,
-          )
-        }
-        className="rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <input
-        type="text"
-        placeholder="Tagline"
-        value={productTagline}
-        onChange={(e) =>
-          setProductTagline(
-            e.target.value,
-          )
-        }
-        className="rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <select
-        value={productCategory}
-        onChange={(e) =>
-          setProductCategory(
-            e.target.value,
-          )
-        }
-        className="rounded-2xl border bg-white px-4 py-3"
-      >
-        <option>
-          Injection
-        </option>
-
-        <option>Bolus</option>
-
-        <option>Powder</option>
-
-        <option>Syrup</option>
-      </select>
-
-      <input
-        type="text"
-        placeholder="Composition"
-        value={productComposition}
-        onChange={(e) =>
-          setProductComposition(
-            e.target.value,
-          )
-        }
-        className="rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <textarea
-        placeholder="Full Product Description"
-        value={productDescription}
-        onChange={(e) =>
-          setProductDescription(
-            e.target.value,
-          )
-        }
-        className="min-h-[160px] rounded-2xl border bg-white px-4 py-3 lg:col-span-2"
-      />
-
-      <textarea
-        placeholder="Indications (comma separated)"
-        value={productIndications}
-        onChange={(e) =>
-          setProductIndications(
-            e.target.value,
-          )
-        }
-        className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <textarea
-        placeholder="Benefits (comma separated)"
-        value={productBenefits}
-        onChange={(e) =>
-          setProductBenefits(
-            e.target.value,
-          )
-        }
-        className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <input
-        type="text"
-        placeholder="Dosage"
-        value={productDosage}
-        onChange={(e) =>
-          setProductDosage(
-            e.target.value,
-          )
-        }
-        className="rounded-2xl border bg-white px-4 py-3"
-      />
-
-      <div className="rounded-2xl border bg-white p-4">
-        <label className="mb-3 block text-sm font-medium">
-          Upload Product Images
-        </label>
-
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={async (e) => {
-            const files =
-              Array.from(
-                e.target.files || [],
-              );
-
-            const uploadedUrls =
-              [];
-
-            for (const file of files) {
-              const url =
-                await uploadProductImage(
-                  file,
-                );
-
-              if (url) {
-                uploadedUrls.push(
-                  url,
-                );
-              }
-            }
-
-            setProductImages(
-              uploadedUrls,
-            );
-          }}
-        />
-
-        {/* PREVIEW */}
-        <div className="mt-4 flex flex-wrap gap-3">
-          {productImages.map(
-            (img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt=""
-                className="h-20 w-20 rounded-xl object-cover shadow"
-              />
-            ),
-          )}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowProductManager(!showProductManager)}
+            className="rounded-xl bg-primary px-5 py-3 text-white"
+          >
+            {showProductManager
+              ? "Close Product Manager"
+              : "Open Product Manager"}
+          </button>
         </div>
-      </div>
-    </div>
 
-    {/* ACTION */}
-    <div className="flex flex-wrap gap-3">
-  <button
-    onClick={saveProduct}
-    className="rounded-2xl bg-primary px-6 py-3 font-medium text-white"
-  >
-    {editingProduct
-      ? "Update Product"
-      : "Add Product"}
-  </button>
-
-  {editingProduct && (
-    <button
-      onClick={resetProductForm}
-      className="rounded-2xl border px-6 py-3 font-medium"
-    >
-      Cancel Edit
-    </button>
-  )}
-</div>
-
-    {/* PRODUCT LIST */}
-    <div className="border-t border-border p-5">
-      <h3 className="mb-4 text-lg font-semibold">
-        Existing Products
-      </h3>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {productsData.map(
-          (product) => (
-            <div
-              key={product.id}
-              className="overflow-hidden rounded-2xl border bg-white shadow-sm"
-            >
-              <img
-                src={
-                  product.image_urls?.[0] ||
-                  "/placeholder.webp"
-                }
-                alt=""
-                className="h-48 w-full object-cover"
-              />
-
-              <div className="p-4">
-                <h3 className="font-semibold">
-                  {product.name}
-                </h3>
+        {showProductManager && (
+          <div className="mb-6 overflow-hidden rounded-3xl border border-white/20 bg-white/70 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
+            {/* HEADER */}
+            <div className="flex items-center justify-between border-b border-border p-5">
+              <div>
+                <h2 className="text-2xl font-bold">Product Manager</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {product.category}
+                  Add, edit and manage products dynamically
                 </p>
+              </div>
 
-                <p className="mt-2 line-clamp-2 text-sm">
-                  {
-                    product.tagline
-                  }
-                </p>
+              <button
+                onClick={() => setShowProductManager(false)}
+                className="rounded-xl border px-4 py-2 text-sm"
+              >
+                Close
+              </button>
+            </div>
 
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingProduct(
-                        product,
-                      );
+            {/* FORM */}
+            <div className="grid gap-4 p-5 lg:grid-cols-2">
+              <input
+                type="text"
+                placeholder="Product Name"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3"
+              />
 
-                      setProductName(
-                        product.name,
-                      );
+              <input
+                type="text"
+                placeholder="Tagline"
+                value={productTagline}
+                onChange={(e) => setProductTagline(e.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3"
+              />
 
-                      setProductTagline(
-                        product.tagline,
-                      );
+              <select
+                value={productCategory}
+                onChange={(e) => setProductCategory(e.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3"
+              >
+                <option>Injection</option>
 
-                      setProductCategory(
-                        product.category,
-                      );
+                <option>Bolus</option>
 
-                      setProductComposition(
-                        product.composition,
-                      );
+                <option>Powder</option>
 
-                      setProductDosage(
-                        product.dosage,
-                      );
+                <option>Syrup</option>
+              </select>
 
-                      setProductDescription(
-                        product.description,
-                      );
+              <input
+                type="text"
+                placeholder="Composition"
+                value={productComposition}
+                onChange={(e) => setProductComposition(e.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3"
+              />
 
-                      setProductBenefits(
-                        product.benefits?.join(
-                          ",",
-                        ),
-                      );
+              <textarea
+                placeholder="Full Product Description"
+                value={productDescription}
+                onChange={(e) => setProductDescription(e.target.value)}
+                className="min-h-[160px] rounded-2xl border bg-white px-4 py-3 lg:col-span-2"
+              />
 
-                      setProductIndications(
-                        product.indications?.join(
-                          ",",
-                        ),
-                      );
+              <textarea
+                placeholder="Indications (comma separated)"
+                value={productIndications}
+                onChange={(e) => setProductIndications(e.target.value)}
+                className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
+              />
 
-                      setProductImages(
-                        product.image_urls ||
-                          [],
-                      );
-                    }}
-                    className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white"
-                  >
-                    Edit
-                  </button>
+              <textarea
+                placeholder="Benefits (comma separated)"
+                value={productBenefits}
+                onChange={(e) => setProductBenefits(e.target.value)}
+                className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
+              />
 
-                  <button
-                    onClick={async () => {
-                      const result =
-                        await confirmAlert(
-                          "Delete Product?",
-                          "This cannot be undone",
-                        );
+              <input
+                type="text"
+                placeholder="Dosage"
+                value={productDosage}
+                onChange={(e) => setProductDosage(e.target.value)}
+                className="rounded-2xl border bg-white px-4 py-3"
+              />
 
-                      if (
-                        !result.isConfirmed
-                      )
-                        return;
+              <div className="rounded-2xl border bg-white p-4">
+                <label className="mb-3 block text-sm font-medium">
+                  Upload Product Images
+                </label>
 
-                      await supabase
-                        .from(
-                          "products",
-                        )
-                        .delete()
-                        .eq(
-                          "id",
-                          product.id,
-                        );
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
 
-                      successAlert(
-                        "Product Deleted",
-                      );
+                    const uploadedUrls = [];
 
-                      fetchProducts();
-                    }}
-                    className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm text-white"
-                  >
-                    Delete
-                  </button>
+                    for (const file of files) {
+                      const url = await uploadProductImage(file);
+
+                      if (url) {
+                        uploadedUrls.push(url);
+                      }
+                    }
+
+                    setProductImages((prev) => [...prev, ...uploadedUrls]);
+                  }}
+                />
+
+                <div className="rounded-2xl border bg-white p-4 lg:col-span-2">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Product Variants</h3>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setProductVariants([
+                          ...productVariants,
+
+                          {
+                            size: "",
+                            images: [],
+                          },
+                        ])
+                      }
+                      className="rounded-xl bg-primary px-4 py-2 text-sm text-white"
+                    >
+                      Add Variant
+                    </button>
+                  </div>
+
+                  <div className="space-y-5">
+                    {productVariants.map((variant, variantIndex) => (
+                      <div
+                        key={variantIndex}
+                        className="rounded-2xl border p-4"
+                      >
+                        <div className="mb-4 flex gap-3">
+                          <input
+                            type="text"
+                            placeholder="Variant Size"
+                            value={variant.size}
+                            onChange={(e) => {
+                              const updated = [...productVariants];
+
+                              updated[variantIndex].size = e.target.value;
+
+                              setProductVariants(updated);
+                            }}
+                            className="w-full rounded-xl border px-4 py-3"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = productVariants.filter(
+                                (_: any, i: number) => i !== variantIndex,
+                              );
+
+                              setProductVariants(updated);
+                            }}
+                            className="rounded-xl bg-red-500 px-4 text-white"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const files = Array.from(e.target.files || []);
+
+                            const uploaded = [];
+
+                            for (const file of files) {
+                              const url = await uploadProductImage(file);
+
+                              if (url) {
+                                uploaded.push(url);
+                              }
+                            }
+
+                            const updated = [...productVariants];
+
+                            updated[variantIndex].images = [
+                              ...(updated[variantIndex].images || []),
+
+                              ...uploaded,
+                            ];
+
+                            setProductVariants(updated);
+                          }}
+                        />
+
+                        <div className="mt-4 flex flex-wrap gap-3">
+  {variant.images?.map(
+    (
+      img: string,
+      i: number,
+    ) => (
+      <div
+        key={i}
+        className="relative"
+      >
+        <img
+          src={img}
+          alt=""
+          className="h-20 w-20 rounded-xl border object-cover"
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            const updated =
+              [
+                ...productVariants,
+              ];
+
+            updated[
+              variantIndex
+            ].images =
+              updated[
+                variantIndex
+              ].images.filter(
+                (
+                  _: string,
+                  imgIndex: number,
+                ) =>
+                  imgIndex !==
+                  i,
+              );
+
+            setProductVariants(
+              updated,
+            );
+          }}
+          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+        >
+          ✕
+        </button>
+      </div>
+    ),
+  )}
+</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* PREVIEW */}
+                <div className="mt-4 flex flex-wrap gap-3">
+  {productImages.map(
+    (
+      img: string,
+      index: number,
+    ) => (
+      <div
+        key={index}
+        className="relative"
+      >
+        <img
+          src={img}
+          alt=""
+          className="h-20 w-20 rounded-xl border object-cover"
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            setProductImages(
+              (
+                prev,
+              ) =>
+                prev.filter(
+                  (
+                    _,
+                    i,
+                  ) =>
+                    i !==
+                    index,
+                ),
+            );
+          }}
+          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+        >
+          ✕
+        </button>
+      </div>
+    ),
+  )}
+</div>
               </div>
             </div>
+
+            {/* ACTION */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={saveProduct}
+                className="rounded-2xl bg-primary px-6 py-3 font-medium text-white"
+              >
+                {editingProduct ? "Update Product" : "Add Product"}
+              </button>
+
+              {editingProduct && (
+                <button
+                  onClick={resetProductForm}
+                  className="rounded-2xl border px-6 py-3 font-medium"
+                >
+                  Cancel Edit
+                </button>
+              )}
+            </div>
+
+            {/* PRODUCT LIST */}
+            <div className="border-t border-border p-5">
+              <h3 className="mb-4 text-lg font-semibold">Existing Products</h3>
+
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {productsData.map((product) => (
+                  <div
+                    key={product.id}
+                    className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+                  >
+                    <div className="relative overflow-hidden bg-[#f8f5ef]">
+  <img
+    src={
+      product.image_urls?.[0] ||
+      "/placeholder.webp"
+    }
+    alt=""
+    className="h-56 w-full object-contain p-4 transition duration-300 hover:scale-105"
+  />
+
+  {/* THUMBNAILS */}
+  {product.image_urls
+    ?.length > 1 && (
+    <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-white/90 px-3 py-2 shadow-lg backdrop-blur">
+      {product.image_urls
+        .slice(0, 4)
+        .map(
+          (
+            img: string,
+            i: number,
+          ) => (
+            <img
+              key={i}
+              src={img}
+              alt=""
+              className="h-10 w-10 rounded-lg border bg-white object-cover"
+            />
           ),
         )}
-      </div>
+
+      {product.image_urls
+        .length >
+        4 && (
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-xs font-semibold">
+          +
+          {product
+            .image_urls
+            .length - 4}
+        </div>
+      )}
     </div>
-  </div>
-)}
+  )}
+</div>
+                    <div className="p-4">
+                      <h3 className="font-semibold">{product.name}</h3>
+
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {product.category}
+                      </p>
+
+                      <p className="mt-2 line-clamp-2 text-sm">
+                        {product.tagline}
+                      </p>
+
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingProduct(product);
+
+                            setProductName(product.name);
+
+                            setProductTagline(product.tagline);
+
+                            setProductCategory(product.category);
+
+                            setProductComposition(product.composition);
+
+                            setProductDosage(product.dosage);
+
+                            setProductDescription(product.description);
+
+                            setProductBenefits(product.benefits?.join(","));
+
+                            setProductIndications(
+                              product.indications?.join(","),
+                            );
+
+                            setProductImages(product.image_urls || []);
+                            setProductVariants(product.variants || []);
+                          }}
+                          className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            const result = await confirmAlert(
+                              "Delete Product?",
+                              "This cannot be undone",
+                            );
+
+                            if (!result.isConfirmed) return;
+
+                            await supabase
+                              .from("products")
+                              .delete()
+                              .eq("id", product.id);
+
+                            successAlert("Product Deleted");
+
+                            fetchProducts();
+                          }}
+                          className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm text-white"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* EMPLOYEES */}
         <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
