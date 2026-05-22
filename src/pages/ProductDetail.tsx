@@ -90,6 +90,10 @@ const ProductDetail = () => {
     loadProduct();
   }, [slug]);
 
+useEffect(() => {
+  setSelected(0);
+}, [selectedVariant]);
+  
   const loadProduct =
     async () => {
       setLoading(true);
@@ -107,11 +111,20 @@ const ProductDetail = () => {
 
       setProduct(data);
 
-      setSelectedVariant(
-        data.variants?.[0] ||
-          null,
-      );
 
+const firstVariantWithImages =
+  data.variants?.find(
+    (
+      v: any,
+    ) =>
+      v.images?.length >
+      0,
+  );
+
+setSelectedVariant(
+  firstVariantWithImages ||
+    null,
+);
       const allProducts =
         await fetchProducts();
 
@@ -206,10 +219,11 @@ const ProductDetail = () => {
     );
   }
 const currentImages =
-  selectedVariant?.images
-    ?.length
+  selectedVariant
+    ?.images?.length >
+  0
     ? selectedVariant.images
-    : product.images ||
+    : product?.images ||
       [];
 
   return (
@@ -283,30 +297,30 @@ const currentImages =
 
             {/* THUMBNAILS */}
             <div className="mt-4 flex flex-wrap gap-3">
-  {currentImages?.map(
-    (
-      img: string,
-      i: number,
-    ) => (
-      <button
-        key={i}
-        onClick={() =>
-          setSelected(i)
-        }
-        className={`overflow-hidden rounded-xl border-2 transition ${
-          selected === i
-            ? "border-primary"
-            : "border-border"
-        }`}
-      >
-        <img
-          src={img}
-          alt=""
-          className="h-20 w-20 object-cover"
-        />
-      </button>
-    ),
-  )}
+ {currentImages?.map(
+  (
+    img: string,
+    i: number,
+  ) => (
+    <button
+      key={i}
+      onClick={() =>
+        setSelected(i)
+      }
+      className={`overflow-hidden rounded-xl border-2 transition ${
+        selected === i
+          ? "border-primary"
+          : "border-border"
+      }`}
+    >
+      <img
+        src={img}
+        alt=""
+        className="h-20 w-20 object-cover"
+      />
+    </button>
+  ),
+)}
 </div>
 
             {/* VARIANTS */}
@@ -323,14 +337,16 @@ const currentImages =
                         variant.size
                       }
                       onClick={() => {
-                        setSelectedVariant(
-                          variant,
-                        );
+  console.log(
+    variant,
+  );
 
-                        setSelected(
-                          0,
-                        );
-                      }}
+setSelectedVariant({
+  ...variant,
+});
+
+  setSelected(0);
+}}
                       className={cn(
                         "rounded-full border px-4 py-2 text-sm font-medium transition-smooth",
 

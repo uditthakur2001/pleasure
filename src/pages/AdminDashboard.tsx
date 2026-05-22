@@ -522,72 +522,128 @@ export default function AdminDashboard() {
 
             {/* FORM */}
             <div className="grid gap-4 p-5 lg:grid-cols-2">
-              <input
-                type="text"
-                placeholder="Product Name"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                className="rounded-2xl border bg-white px-4 py-3"
-              />
+              {/* PRODUCT NAME */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Product Name
+                </h3>
 
-              <input
-                type="text"
-                placeholder="Tagline"
-                value={productTagline}
-                onChange={(e) => setProductTagline(e.target.value)}
-                className="rounded-2xl border bg-white px-4 py-3"
-              />
+                <input
+                  type="text"
+                  placeholder="Enter product name"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  className="w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
 
-              <select
-                value={productCategory}
-                onChange={(e) => setProductCategory(e.target.value)}
-                className="rounded-2xl border bg-white px-4 py-3"
-              >
-                <option>Injection</option>
+              {/* TAGLINE */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Tagline
+                </h3>
 
-                <option>Bolus</option>
+                <input
+                  type="text"
+                  placeholder="Enter tagline"
+                  value={productTagline}
+                  onChange={(e) => setProductTagline(e.target.value)}
+                  className="w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
 
-                <option>Powder</option>
+              {/* CATEGORY */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Category
+                </h3>
 
-                <option>Syrup</option>
-              </select>
+                <select
+                  value={productCategory}
+                  onChange={(e) => setProductCategory(e.target.value)}
+                  className="w-full rounded-2xl border bg-white px-4 py-3"
+                >
+                  <option>Injection</option>
 
-              <input
-                type="text"
-                placeholder="Composition"
-                value={productComposition}
-                onChange={(e) => setProductComposition(e.target.value)}
-                className="rounded-2xl border bg-white px-4 py-3"
-              />
+                  <option>Bolus</option>
 
-              <textarea
-                placeholder="Full Product Description"
-                value={productDescription}
-                onChange={(e) => setProductDescription(e.target.value)}
-                className="min-h-[160px] rounded-2xl border bg-white px-4 py-3 lg:col-span-2"
-              />
+                  <option>Powder</option>
 
-              <textarea
-                placeholder="Indications (comma separated)"
-                value={productIndications}
-                onChange={(e) => setProductIndications(e.target.value)}
-                className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
-              />
+                  <option>Syrup</option>
+                </select>
+              </div>
 
-              <textarea
-                placeholder="Benefits (comma separated)"
-                value={productBenefits}
-                onChange={(e) => setProductBenefits(e.target.value)}
-                className="min-h-[130px] rounded-2xl border bg-white px-4 py-3"
-              />
+              {/* COMPOSITION */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Composition
+                </h3>
 
-              <input
-                type="text"
-                placeholder="Dosage"
-                value={productDosage}
-                onChange={(e) => setProductDosage(e.target.value)}
-                className="rounded-2xl border bg-white px-4 py-3"
-              />
+                <input
+                  type="text"
+                  placeholder="Enter composition"
+                  value={productComposition}
+                  onChange={(e) => setProductComposition(e.target.value)}
+                  className="w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
+
+              {/* DESCRIPTION */}
+              <div className="lg:col-span-2">
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Product Description
+                </h3>
+
+                <textarea
+                  placeholder="Enter full product description"
+                  value={productDescription}
+                  onChange={(e) => setProductDescription(e.target.value)}
+                  className="min-h-[160px] w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
+
+              {/* INDICATIONS */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Indications
+                </h3>
+
+                <textarea
+                  placeholder="Comma separated indications"
+                  value={productIndications}
+                  onChange={(e) => setProductIndications(e.target.value)}
+                  className="min-h-[130px] w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
+
+              {/* BENEFITS */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Benefits
+                </h3>
+
+                <textarea
+                  placeholder="Comma separated benefits"
+                  value={productBenefits}
+                  onChange={(e) => setProductBenefits(e.target.value)}
+                  className="min-h-[130px] w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
+
+              {/* DOSAGE */}
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                  Dosage
+                </h3>
+
+                <input
+                  type="text"
+                  placeholder="Enter dosage"
+                  value={productDosage}
+                  onChange={(e) => setProductDosage(e.target.value)}
+                  className="w-full rounded-2xl border bg-white px-4 py-3"
+                />
+              </div>
 
               <div className="rounded-2xl border bg-white p-4">
                 <label className="mb-3 block text-sm font-medium">
@@ -703,55 +759,35 @@ export default function AdminDashboard() {
                         />
 
                         <div className="mt-4 flex flex-wrap gap-3">
-  {variant.images?.map(
-    (
-      img: string,
-      i: number,
-    ) => (
-      <div
-        key={i}
-        className="relative"
-      >
-        <img
-          src={img}
-          alt=""
-          className="h-20 w-20 rounded-xl border object-cover"
-        />
+                          {variant.images?.map((img: string, i: number) => (
+                            <div key={i} className="relative">
+                              <img
+                                src={img}
+                                alt=""
+                                className="h-20 w-20 rounded-xl border object-cover"
+                              />
 
-        <button
-          type="button"
-          onClick={() => {
-            const updated =
-              [
-                ...productVariants,
-              ];
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...productVariants];
 
-            updated[
-              variantIndex
-            ].images =
-              updated[
-                variantIndex
-              ].images.filter(
-                (
-                  _: string,
-                  imgIndex: number,
-                ) =>
-                  imgIndex !==
-                  i,
-              );
+                                  updated[variantIndex].images = updated[
+                                    variantIndex
+                                  ].images.filter(
+                                    (_: string, imgIndex: number) =>
+                                      imgIndex !== i,
+                                  );
 
-            setProductVariants(
-              updated,
-            );
-          }}
-          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
-        >
-          ✕
-        </button>
-      </div>
-    ),
-  )}
-</div>
+                                  setProductVariants(updated);
+                                }}
+                                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -759,46 +795,28 @@ export default function AdminDashboard() {
 
                 {/* PREVIEW */}
                 <div className="mt-4 flex flex-wrap gap-3">
-  {productImages.map(
-    (
-      img: string,
-      index: number,
-    ) => (
-      <div
-        key={index}
-        className="relative"
-      >
-        <img
-          src={img}
-          alt=""
-          className="h-20 w-20 rounded-xl border object-cover"
-        />
+                  {productImages.map((img: string, index: number) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={img}
+                        alt=""
+                        className="h-20 w-20 rounded-xl border object-cover"
+                      />
 
-        <button
-          type="button"
-          onClick={() => {
-            setProductImages(
-              (
-                prev,
-              ) =>
-                prev.filter(
-                  (
-                    _,
-                    i,
-                  ) =>
-                    i !==
-                    index,
-                ),
-            );
-          }}
-          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
-        >
-          ✕
-        </button>
-      </div>
-    ),
-  )}
-</div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProductImages((prev) =>
+                            prev.filter((_, i) => i !== index),
+                          );
+                        }}
+                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -832,48 +850,34 @@ export default function AdminDashboard() {
                     className="overflow-hidden rounded-2xl border bg-white shadow-sm"
                   >
                     <div className="relative overflow-hidden bg-[#f8f5ef]">
-  <img
-    src={
-      product.image_urls?.[0] ||
-      "/placeholder.webp"
-    }
-    alt=""
-    className="h-56 w-full object-contain p-4 transition duration-300 hover:scale-105"
-  />
+                      <img
+                        src={product.image_urls?.[0] || "/placeholder.webp"}
+                        alt=""
+                        className="h-56 w-full object-contain p-4 transition duration-300 hover:scale-105"
+                      />
 
-  {/* THUMBNAILS */}
-  {product.image_urls
-    ?.length > 1 && (
-    <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-white/90 px-3 py-2 shadow-lg backdrop-blur">
-      {product.image_urls
-        .slice(0, 4)
-        .map(
-          (
-            img: string,
-            i: number,
-          ) => (
-            <img
-              key={i}
-              src={img}
-              alt=""
-              className="h-10 w-10 rounded-lg border bg-white object-cover"
-            />
-          ),
-        )}
+                      {/* THUMBNAILS */}
+                      {product.image_urls?.length > 1 && (
+                        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-white/90 px-3 py-2 shadow-lg backdrop-blur">
+                          {product.image_urls
+                            .slice(0, 4)
+                            .map((img: string, i: number) => (
+                              <img
+                                key={i}
+                                src={img}
+                                alt=""
+                                className="h-10 w-10 rounded-lg border bg-white object-cover"
+                              />
+                            ))}
 
-      {product.image_urls
-        .length >
-        4 && (
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-xs font-semibold">
-          +
-          {product
-            .image_urls
-            .length - 4}
-        </div>
-      )}
-    </div>
-  )}
-</div>
+                          {product.image_urls.length > 4 && (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-xs font-semibold">
+                              +{product.image_urls.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <div className="p-4">
                       <h3 className="font-semibold">{product.name}</h3>
 
