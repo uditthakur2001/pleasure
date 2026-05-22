@@ -18,8 +18,12 @@ export const fetchProducts = async () => {
 
     category: product.category,
 
-    images: product.image_urls || [],
-
+images:
+  Array.isArray(
+    product.image_urls,
+  )
+    ? product.image_urls
+    : [],
     composition: product.composition,
 
     indications: product.indications || [],
@@ -58,8 +62,12 @@ export const getProductBySlug = async (slug: string) => {
 
     category: data.category,
 
-    images: data.image_urls || [],
-
+images:
+  Array.isArray(
+    data.image_urls,
+  )
+    ? data.image_urls
+    : [],
     composition: data.composition,
 
     indications: data.indications || [],
