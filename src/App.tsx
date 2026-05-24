@@ -18,10 +18,16 @@ const Certifications = lazy(() => import("./pages/Certifications"));
 const Careers = lazy(() => import("./pages/Careers"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
+// const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminLogin = lazy(
+  () =>
+    import(
+      "./pages/AdminLogin"
+    ),
+);
 const SeedProducts = lazy(
   () =>
     import(
@@ -31,47 +37,68 @@ const SeedProducts = lazy(
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+function ProtectedRoute({
+  children,
+}: {
+  children: JSX.Element;
+}) {
+  const isLoggedIn =
+    localStorage.getItem(
+      "isLoggedIn",
+    );
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
+  const adminLoggedIn =
+    localStorage.getItem(
+      "adminLoggedIn",
+    );
+
+  if (
+    !isLoggedIn &&
+    !adminLoggedIn
+  ) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
   }
 
   return children;
 }
 
-function AdminRoute({ children }: { children: JSX.Element }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+function AdminRoute({
+  children,
+}: {
+  children: JSX.Element;
+}) {
+  const adminLoggedIn =
+    localStorage.getItem(
+      "adminLoggedIn",
+    );
 
-  const role = localStorage.getItem("role");
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (role !== "admin") {
-    return <Navigate to="/dashboard" replace />;
+  if (!adminLoggedIn) {
+    return (
+      <Navigate
+        to="/admin-login"
+        replace
+      />
+    );
   }
 
   return children;
 }
 
-function EmployeeRoute({ children }: { children: JSX.Element }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-  const role = localStorage.getItem("role");
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // ADMIN REDIRECT
-  if (role === "admin") {
-    return <Navigate to="/admin" replace />;
-  }
-
-  return children;
+function EmployeeRoute({
+  children,
+}: {
+  children: JSX.Element;
+}) {
+  return (
+    <ProtectedRoute>
+      {children}
+    </ProtectedRoute>
+  );
 }
 
 const App = () => (
@@ -132,7 +159,10 @@ const App = () => (
                 </EmployeeRoute>
               }
             />
-
+<Route
+  path="/admin-login"
+  element={<AdminLogin />}
+/>
             <Route
               path="/admin"
               element={
@@ -151,7 +181,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route path="/signup" element={<Signup />} />
+            {/* <Route path="/signup" element={<Signup />} /> */}
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

@@ -1,17 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  NavLink,
-  Link,
-  useNavigate,
-  useLocation
-} from "react-router-dom";
-
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { Menu, X } from "lucide-react";
 
-import {
-  successAlert,
-  confirmAlert,
-} from "@/lib/alert";
+import { successAlert, confirmAlert } from "@/lib/alert";
 
 import { Logo } from "@/components/site/Logo";
 import { Button } from "@/components/ui/button";
@@ -24,44 +16,45 @@ const publicLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-const role =
-  localStorage.getItem("role");
+const adminLoggedIn = localStorage.getItem("adminLoggedIn");
 
-const privateLinks =
-  role === "admin"
-    ? [
-        {
-          to: "/admin",
-          label: "Dashboard",
-        },
+const employeeLoggedIn = localStorage.getItem("isLoggedIn");
 
-        {
-          to: "/profile",
-          label: "Profile",
-        },
-      ]
-    : [
-        {
-          to: "/dashboard",
-          label: "Dashboard",
-        },
+const privateLinks = adminLoggedIn
+  ? [
+      {
+        to: "/admin",
+        label: "Dashboard",
+      },
 
-        {
-          to: "/profile",
-          label: "Profile",
-        },
-      ];
+      {
+        to: "/profile",
+        label: "Profile",
+      },
+    ]
+  : [
+      {
+        to: "/dashboard",
+        label: "Dashboard",
+      },
+
+      {
+        to: "/profile",
+        label: "Profile",
+      },
+    ];
 
 export const Navbar = () => {
-const navigate = useNavigate();
-const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [open, setOpen] = useState(false);
 
   const [scrolled, setScrolled] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("isLoggedIn")
+    !!localStorage.getItem("isLoggedIn") ||
+      !!localStorage.getItem("adminLoggedIn"),
   );
 
   useEffect(() => {
@@ -79,55 +72,44 @@ const location = useLocation();
   }, []);
 
   useEffect(() => {
-  setIsLoggedIn(
-    !!localStorage.getItem("isLoggedIn")
-  );
-}, [location]);
+    setIsLoggedIn(
+      !!localStorage.getItem("isLoggedIn") ||
+        !!localStorage.getItem("adminLoggedIn"),
+    );
+  }, [location]);
 
-const logout = async () => {
-  const result =
-    await confirmAlert(
+  const logout = async () => {
+    const result = await confirmAlert(
       "Logout?",
       "You will be logged out of your account",
     );
 
-  if (
-    !result.isConfirmed
-  )
-    return;
+    if (!result.isConfirmed) return;
 
-  localStorage.removeItem(
-    "isLoggedIn",
-  );
+    // SUPABASE LOGOUT
+    await supabase.auth.signOut();
 
-  localStorage.removeItem(
-    "workerName",
-  );
+    // CLEAR STORAGE
+    localStorage.removeItem("isLoggedIn");
 
-  localStorage.removeItem(
-    "employeeId",
-  );
+    localStorage.removeItem("employeeName");
 
-  localStorage.removeItem(
-    "role",
-  );
+    localStorage.removeItem("employeeEmail");
 
-  window.dispatchEvent(
-    new Event("storage"),
-  );
+    localStorage.removeItem("employeeId");
 
-  successAlert(
-    "Logged Out Successfully",
-  );
+    localStorage.removeItem("adminLoggedIn");
 
-  setTimeout(() => {
-    navigate("/");
-  }, 1000);
-};
+    // UPDATE APP STATE
+    window.dispatchEvent(new Event("storage"));
 
-  const links = isLoggedIn
-    ? privateLinks
-    : publicLinks;
+    successAlert("Logged Out Successfully");
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 1000);
+  };
+  const links = isLoggedIn ? privateLinks : publicLinks;
 
   return (
     <header
@@ -135,7 +117,7 @@ const logout = async () => {
         "sticky top-0 z-50 w-full transition-all duration-300",
         scrolled
           ? "border-b border-border/60 bg-background/90 backdrop-blur-md"
-          : "bg-transparent"
+          : "bg-transparent",
       )}
     >
       <div className="container-prose flex h-20 items-center justify-between gap-6">
@@ -153,7 +135,7 @@ const logout = async () => {
                   "rounded-md px-3 py-2 text-sm font-medium transition",
                   isActive
                     ? "text-primary"
-                    : "text-foreground/70 hover:text-primary"
+                    : "text-foreground/70 hover:text-primary",
                 )
               }
             >
@@ -166,34 +148,17 @@ const logout = async () => {
         <div className="hidden lg:flex items-center gap-3">
           {!isLoggedIn ? (
             <>
-              <Button
-                asChild
-                variant="hero"
-                size="sm"
-              >
-                <Link to="/distributor">
-                  Become Distributor
-                </Link>
+              <Button asChild variant="hero" size="sm">
+                <Link to="/distributor">Become Distributor</Link>
               </Button>
 
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-              >
-                <Link to="/login">
-                  Login
-                </Link>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/login">Login</Link>
               </Button>
             </>
           ) : (
             <>
-             
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={logout}
-              >
+              <Button variant="destructive" size="sm" onClick={logout}>
                 Logout
               </Button>
             </>
@@ -206,11 +171,7 @@ const logout = async () => {
           onClick={() => setOpen(!open)}
           className="grid h-10 w-10 place-items-center rounded-md border border-border lg:hidden"
         >
-          {open ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
@@ -229,7 +190,7 @@ const logout = async () => {
                     "rounded-md px-3 py-3 text-base font-medium",
                     isActive
                       ? "bg-secondary text-primary"
-                      : "text-foreground/80"
+                      : "text-foreground/80",
                   )
                 }
               >
@@ -238,28 +199,22 @@ const logout = async () => {
             ))}
 
             {!isLoggedIn ? (
-  <div className="mt-2 flex flex-col gap-3">
-    <Button asChild variant="hero">
-      <Link
-        to="/distributor"
-        onClick={() => setOpen(false)}
-      >
-        Become Distributor
-      </Link>
-    </Button>
+              <div className="mt-2 flex flex-col gap-3">
+                <Button asChild variant="hero">
+                  <Link to="/distributor" onClick={() => setOpen(false)}>
+                    Become Distributor
+                  </Link>
+                </Button>
 
-    <Button asChild variant="outline">
-      <Link
-        to="/login"
-        onClick={() => setOpen(false)}
-      >
-        Login
-      </Link>
-    </Button>
-  </div>
-) : (
-  <div className="mt-4 flex flex-col gap-4 px-2">
-    {/* <Link
+                <Button asChild variant="outline">
+                  <Link to="/login" onClick={() => setOpen(false)}>
+                    Login
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-col gap-4 px-2">
+                {/* <Link
       to="/dashboard"
       onClick={() => setOpen(false)}
       className="text-base font-medium text-foreground/80 transition hover:text-primary"
@@ -275,17 +230,17 @@ const logout = async () => {
       Profile
     </Link> */}
 
-    <Button
-      variant="destructive"
-      onClick={() => {
-        logout();
-        setOpen(false);
-      }}
-    >
-      Logout
-    </Button>
-  </div>
-)}
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                >
+                  Logout
+                </Button>
+              </div>
+            )}
           </nav>
         </div>
       )}

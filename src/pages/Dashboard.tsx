@@ -64,9 +64,109 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-    loadContacts();
+    initializeDashboard();
   }, []);
+
+  const initializeDashboard = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = "/";
+      return;
+    }
+
+    localStorage.setItem("isLoggedIn", "true");
+
+    localStorage.setItem("employeeName", user.user_metadata?.full_name || "");
+
+    localStorage.setItem("employeeEmail", user.email || "");
+
+    localStorage.setItem("employeeId", user.id);
+
+    await fetchData(user.id);
+
+    await loadContacts();
+  };
+
+  const createCalendarEvent = async (
+    doctorName: string,
+    doctorPhone: string,
+    products: string[],
+    startDate: string,
+  ) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.provider_token;
+
+      if (!accessToken) {
+        console.log("No Google token");
+
+        return;
+      }
+
+      // START DATE
+      let reminderDate = new Date(startDate);
+
+      let addedDays = 0;
+
+      // FIND 13TH WORKING DAY
+      while (addedDays < 13) {
+        reminderDate.setDate(reminderDate.getDate() + 1);
+
+        // SKIP SUNDAY
+        if (reminderDate.getDay() !== 0) {
+          addedDays++;
+        }
+      }
+
+      const finalDate = reminderDate.toISOString().split("T")[0];
+
+      // CREATE GOOGLE CALENDAR EVENT
+      await fetch(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        {
+          method: "POST",
+
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            summary: `Doctor Follow-up - ${doctorName}`,
+
+            description: `
+Doctor Name: ${doctorName}
+
+Doctor Phone: ${doctorPhone}
+
+Products:
+${products.join(", ")}
+
+Employee:
+${localStorage.getItem("employeeName")}
+            `,
+
+            start: {
+              date: finalDate,
+            },
+
+            end: {
+              date: finalDate,
+            },
+          }),
+        },
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const loadContacts = async () => {
     const {
@@ -102,15 +202,15 @@ export default function Dashboard() {
     }
   };
 
-  const fetchData = async () => {
-    const employeeId = localStorage.getItem("employeeId");
+  const fetchData = async (employeeId?: string) => {
+    const userId = employeeId || localStorage.getItem("employeeId");
 
-    if (!employeeId) return;
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from("doctor_entries")
       .select("*")
-      .eq("employee_id", Number(employeeId))
+      .eq("employee_id", userId)
       .order("id", {
         ascending: false,
       });
@@ -144,7 +244,8 @@ export default function Dashboard() {
       provider: "google",
 
       options: {
-        scopes: "https://www.googleapis.com/auth/contacts.readonly",
+        scopes:
+          "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
 
         redirectTo: window.location.origin + "/dashboard",
       },
@@ -295,7 +396,7 @@ export default function Dashboard() {
     } else {
       const { error } = await supabase.from("doctor_entries").insert([
         {
-          employee_id: Number(employeeId),
+          employee_id: employeeId,
           visit_date: row.date,
           doctor_name: row.doctorName,
           doctor_phone: row.doctorPhone,
@@ -307,6 +408,13 @@ export default function Dashboard() {
         errorAlert("Add Failed", error.message);
         return;
       }
+
+      await createCalendarEvent(
+        row.doctorName,
+        row.doctorPhone,
+        row.product,
+        row.date,
+      );
 
       successAlert("Added Successfully");
     }

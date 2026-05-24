@@ -1,190 +1,99 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/lib/supabase";
 
-import {
-  successAlert,
-  errorAlert,
-} from "@/lib/alert";
+import { errorAlert } from "@/lib/alert";
 
 export default function Login() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const [username, setUsername] =
-    useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [password, setPassword] =
-    useState("");
+  // CHECK ALREADY LOGGED IN
+  useEffect(() => {
+    checkSession();
+  }, []);
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>,
-  ) => {
-    e.preventDefault();
-
-    setLoading(true);
-
+  const checkSession = async () => {
     const {
-      data: matchedUser,
-      error,
-    } = await supabase
-      .from("employee")
-      .select(
-        "id, username, role",
-      )
-      .eq(
-        "username",
-        username
-          .trim()
-          .toLowerCase(),
-      )
-      .eq(
-        "password",
-        password.trim(),
-      )
-      .single();
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    setLoading(false);
+    if (session) {
+      localStorage.setItem("isLoggedIn", "true");
 
-    if (
-      error ||
-      !matchedUser
-    ) {
-      errorAlert(
-        "Login Failed",
-        "Invalid username or password",
+      localStorage.setItem(
+        "employeeName",
+        session.user.user_metadata?.full_name || "",
       );
 
-      return;
+      localStorage.setItem("employeeEmail", session.user.email || "");
+
+      localStorage.setItem("employeeId", session.user.id);
+
+      // SAVE GOOGLE USER
+      await supabase.from("employee").upsert([
+        {
+          google_id: session.user.id,
+
+          full_name: session.user.user_metadata?.full_name || "",
+
+          email: session.user.email || "",
+
+          username: session.user.email?.split("@")[0] || "",
+
+          role: "employee",
+        },
+      ]);
+
+      navigate("/dashboard");
     }
+  };
 
-    localStorage.setItem(
-      "isLoggedIn",
-      "true",
-    );
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
 
-    localStorage.setItem(
-      "workerName",
-      matchedUser.username,
-    );
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
 
-    localStorage.setItem(
-      "employeeId",
-      String(
-        matchedUser.id,
-      ),
-    );
+        options: {
+redirectTo:
+  window.location.origin +
+  "/login",
+          scopes:
+            "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
+        },
+      });
 
-    localStorage.setItem(
-      "role",
-      matchedUser.role,
-    );
-
-    
-    successAlert(
-      "Login Successful",
-    );
-
-    setTimeout(() => {
-      if (
-        matchedUser.role ===
-        "admin"
-      ) {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
+      if (error) {
+        errorAlert("Google Login Failed", error.message);
       }
-    }, 1000);
+    } catch (err: any) {
+      errorAlert("Login Failed", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl">
-        <h1 className="mb-2 text-3xl font-bold">
-          Employee Login
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold">Employee Login</h1>
 
         <p className="mb-6 text-muted-foreground">
-          Enter your credentials
+          Continue using your Google account
         </p>
 
-        <form
-          onSubmit={
-            handleLogin
-          }
-          className="space-y-5"
+        <button
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-3 rounded-xl bg-primary px-4 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {/* USERNAME */}
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Username
-            </label>
-
-            <input
-              type="text"
-              placeholder="Enter username"
-              value={username}
-              onChange={(e) =>
-                setUsername(
-                  e.target.value.toLowerCase(),
-                )
-              }
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary"
-              required
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Password
-            </label>
-
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value,
-                )
-              }
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary"
-              required
-            />
-          </div>
-
-          {/* LOGIN BUTTON */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary px-4 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-          >
-            {loading
-              ? "Logging in..."
-              : "Login"}
-          </button>
-
-          {/* SIGNUP */}
-          <div className="mt-5 text-center">
-            <button
-              type="button"
-              onClick={() =>
-                navigate(
-                  "/signup",
-                )
-              }
-              className="text-sm text-primary hover:underline"
-            >
-              Create new account
-            </button>
-          </div>
-        </form>
+          {loading ? "Connecting..." : "Continue with Google"}
+        </button>
       </div>
     </div>
   );

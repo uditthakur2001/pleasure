@@ -21,6 +21,7 @@ import { successAlert, errorAlert, confirmAlert } from "@/lib/alert";
 
 interface Employee {
   id: number;
+  google_id?: string;
   username: string;
   full_name: string;
   phone: string;
@@ -70,26 +71,18 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAdmin = async () => {
-    const workerName = localStorage.getItem("workerName");
+    const adminLoggedIn = localStorage.getItem("adminLoggedIn");
 
-    if (!workerName) {
-      navigate("/login");
-      return;
-    }
+    if (!adminLoggedIn) {
+      navigate("/admin-login");
 
-    const { data } = await supabase
-      .from("employee")
-      .select("*")
-      .eq("username", workerName)
-      .single();
-
-    if (!data || data.role !== "admin") {
-      navigate("/");
       return;
     }
 
     fetchEmployees();
+
     fetchEntries();
+
     fetchProducts();
   };
 
@@ -122,12 +115,12 @@ export default function AdminDashboard() {
     // FETCH EMPLOYEES
     const { data: employeesData } = await supabase
       .from("employee")
-      .select("id, username, full_name");
+      .select("id, google_id, username, full_name");
 
     // MAP EMPLOYEE DATA
     const formatted = data.map((item: any) => {
       const employee = employeesData?.find(
-        (emp) => emp.id === item.employee_id,
+        (emp) => emp.google_id === item.employee_id,
       );
 
       return {
