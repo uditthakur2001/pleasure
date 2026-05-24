@@ -60,9 +60,7 @@ export default function Login() {
         provider: "google",
 
         options: {
-redirectTo:
-  window.location.origin +
-  "/login",
+          redirectTo: window.location.origin + "/login",
           scopes:
             "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
         },

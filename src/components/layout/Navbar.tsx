@@ -16,33 +16,16 @@ const publicLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-const adminLoggedIn = localStorage.getItem("adminLoggedIn");
+const dashboardLink = {
+  to: localStorage.getItem(
+    "adminLoggedIn",
+  )
+    ? "/admin"
+    : "/dashboard",
 
-const employeeLoggedIn = localStorage.getItem("isLoggedIn");
+  label: "Dashboard",
+};
 
-const privateLinks = adminLoggedIn
-  ? [
-      {
-        to: "/admin",
-        label: "Dashboard",
-      },
-
-      {
-        to: "/profile",
-        label: "Profile",
-      },
-    ]
-  : [
-      {
-        to: "/dashboard",
-        label: "Dashboard",
-      },
-
-      {
-        to: "/profile",
-        label: "Profile",
-      },
-    ];
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -109,8 +92,13 @@ export const Navbar = () => {
       navigate("/login");
     }, 1000);
   };
-  const links = isLoggedIn ? privateLinks : publicLinks;
-
+const links = isLoggedIn
+  ? [
+      ...publicLinks,
+      dashboardLink,
+    ]
+  : publicLinks;
+  
   return (
     <header
       className={cn(
