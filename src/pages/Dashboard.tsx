@@ -98,9 +98,7 @@ export default function Dashboard() {
 
       setContacts(formattedContacts);
     } catch (err) {
-      errorAlert(
-  "Failed To Load Contacts",
-);
+      errorAlert("Failed To Load Contacts");
     }
   };
 
@@ -170,9 +168,7 @@ export default function Dashboard() {
         handleChange(index, "doctorPhone", contacts[0].tel?.[0] || "");
       }
     } catch (err) {
-      errorAlert(
-  "Contact Access Failed",
-);
+      errorAlert("Contact Access Failed");
     }
   };
 
@@ -240,58 +236,44 @@ export default function Dashboard() {
     }
 
     if (
-  !row.date ||
-  !row.doctorName.trim() ||
-  !row.doctorPhone.trim() ||
-  row.product.length === 0
-) {
-  warningAlert(
-    "Incomplete Form",
-    "Doctor name, phone number and products are required",
-  );
+      !row.date ||
+      !row.doctorName.trim() ||
+      !row.doctorPhone.trim() ||
+      row.product.length === 0
+    ) {
+      warningAlert(
+        "Incomplete Form",
+        "Doctor name, phone number and products are required",
+      );
 
-  return;
-}
+      return;
+    }
 
-// VALID DOCTOR NAME
-const doctorNameRegex =
-  /^[A-Za-z\s.]+$/;
+    // VALID DOCTOR NAME
+    const doctorNameRegex = /^[A-Za-z\s.]+$/;
 
-if (
-  !doctorNameRegex.test(
-    row.doctorName.trim(),
-  )
-) {
-  warningAlert(
-    "Invalid Doctor Name",
-    "Doctor name should contain only letters",
-  );
+    if (!doctorNameRegex.test(row.doctorName.trim())) {
+      warningAlert(
+        "Invalid Doctor Name",
+        "Doctor name should contain only letters",
+      );
 
-  return;
-}
+      return;
+    }
 
-// VALID PHONE NUMBER
-const cleanPhone =
-  row.doctorPhone.replace(
-    /\D/g,
-    "",
-  );
+    // VALID PHONE NUMBER
+    const cleanPhone = row.doctorPhone.replace(/\D/g, "");
 
-// VALID INDIAN MOBILE NUMBER
-const indianPhoneRegex =
-/^(91)?[6-9]\d{9}$/;
-if (
-  !indianPhoneRegex.test(
-    cleanPhone,
-  )
-) {
-  warningAlert(
-    "Invalid Phone Number",
-    "Enter valid 10-digit Indian mobile number",
-  );
+    // VALID INDIAN MOBILE NUMBER
+    const indianPhoneRegex = /^(91)?[6-9]\d{9}$/;
+    if (!indianPhoneRegex.test(cleanPhone)) {
+      warningAlert(
+        "Invalid Phone Number",
+        "Enter valid 10-digit Indian mobile number",
+      );
 
-  return;
-}
+      return;
+    }
 
     if (row.id) {
       const { error } = await supabase
@@ -410,6 +392,7 @@ if (
                   <input
                     type="date"
                     value={row.date}
+                    disabled={!!row.id}
                     min={today}
                     max={today}
                     onChange={(e) =>
@@ -430,24 +413,18 @@ if (
                     type="text"
                     placeholder="Doctor name"
                     value={row.doctorName}
+                    disabled={!!row.id}
                     autoCapitalize="words"
                     autoComplete="off"
                     spellCheck={false}
                     onChange={(e) => {
-  // REMOVE NUMBERS & SPECIAL CHARS
-  const cleaned =
-    e.target.value
-      .replace(/[^A-Za-z\s.]/g, "")
-      .replace(/\b\w/g, (char) =>
-        char.toUpperCase(),
-      );
+                      // REMOVE NUMBERS & SPECIAL CHARS
+                      const cleaned = e.target.value
+                        .replace(/[^A-Za-z\s.]/g, "")
+                        .replace(/\b\w/g, (char) => char.toUpperCase());
 
-  handleChange(
-    index,
-    "doctorName",
-    cleaned,
-  );
-}}
+                      handleChange(index, "doctorName", cleaned);
+                    }}
                     onBlur={() => {
                       const matched = contacts.find(
                         (c) => c.name === row.doctorName,
@@ -474,24 +451,20 @@ if (
                   </label>
 
                   <input
-  type="tel"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  maxLength={15}
-  placeholder="Phone number"
-  value={row.doctorPhone}
-  onChange={(e) => {
-    const onlyNumbers =
-      e.target.value.replace(/\D/g, "");
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={15}
+                    placeholder="Phone number"
+                    value={row.doctorPhone}
+                    disabled={!!row.id}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, "");
 
-    handleChange(
-      index,
-      "doctorPhone",
-      onlyNumbers,
-    );
-  }}
-  className="w-full rounded-xl border border-border px-4 py-3"
-/>
+                      handleChange(index, "doctorPhone", onlyNumbers);
+                    }}
+                    className="w-full rounded-xl border border-border px-4 py-3"
+                  />
                 </div>
 
                 {/* PRODUCTS */}
@@ -502,6 +475,7 @@ if (
 
                   <Select
                     isMulti
+                    isDisabled={!!row.id}
                     menuPortalTarget={document.body}
                     menuPosition="fixed"
                     options={productOptions}
@@ -576,7 +550,7 @@ if (
                     </button>
                   )}
 
-                  {row.id && (
+                  {/* {row.id && (
                     <>
                       <button
                         onClick={() => saveSingleRow(row)}
@@ -592,7 +566,7 @@ if (
                         Delete
                       </button>
                     </>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
