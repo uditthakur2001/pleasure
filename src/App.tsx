@@ -22,83 +22,38 @@ const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const AdminLogin = lazy(
-  () =>
-    import(
-      "./pages/AdminLogin"
-    ),
-);
-const SeedProducts = lazy(
-  () =>
-    import(
-      "./pages/SeedProducts"
-    ),
-);
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+
+const Terms = lazy(() => import("./pages/Terms"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const SeedProducts = lazy(() => import("./pages/SeedProducts"));
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({
-  children,
-}: {
-  children: JSX.Element;
-}) {
-  const isLoggedIn =
-    localStorage.getItem(
-      "isLoggedIn",
-    );
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  const adminLoggedIn =
-    localStorage.getItem(
-      "adminLoggedIn",
-    );
+  const adminLoggedIn = localStorage.getItem("adminLoggedIn");
 
-  if (
-    !isLoggedIn &&
-    !adminLoggedIn
-  ) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+  if (!isLoggedIn && !adminLoggedIn) {
+    return <Navigate to="/login" replace />;
   }
 
   return children;
 }
 
-function AdminRoute({
-  children,
-}: {
-  children: JSX.Element;
-}) {
-  const adminLoggedIn =
-    localStorage.getItem(
-      "adminLoggedIn",
-    );
+function AdminRoute({ children }: { children: JSX.Element }) {
+  const adminLoggedIn = localStorage.getItem("adminLoggedIn");
 
   if (!adminLoggedIn) {
-    return (
-      <Navigate
-        to="/admin-login"
-        replace
-      />
-    );
+    return <Navigate to="/admin-login" replace />;
   }
 
   return children;
 }
 
-function EmployeeRoute({
-  children,
-}: {
-  children: JSX.Element;
-}) {
-  return (
-    <ProtectedRoute>
-      {children}
-    </ProtectedRoute>
-  );
+function EmployeeRoute({ children }: { children: JSX.Element }) {
+  return <ProtectedRoute>{children}</ProtectedRoute>;
 }
 
 const App = () => (
@@ -141,11 +96,7 @@ const App = () => (
               <Route path="/careers" element={<Careers />} />
             </Route>
 
-
-            <Route
-  path="/seed-products"
-  element={<SeedProducts />}
-/>
+            <Route path="/seed-products" element={<SeedProducts />} />
 
             {/* Login */}
             <Route path="/login" element={<Login />} />
@@ -159,10 +110,7 @@ const App = () => (
                 </EmployeeRoute>
               }
             />
-<Route
-  path="/admin-login"
-  element={<AdminLogin />}
-/>
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route
               path="/admin"
               element={
@@ -185,6 +133,10 @@ const App = () => (
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
+
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
