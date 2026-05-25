@@ -4,8 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteLayout } from "@/components/layout/SiteLayout";
-import { lazy, Suspense } from "react";
-
+import { useEffect, lazy, Suspense } from "react";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/layout/Navbar";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -56,92 +56,109 @@ function EmployeeRoute({ children }: { children: JSX.Element }) {
   return <ProtectedRoute>{children}</ProtectedRoute>;
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <Navbar />{" "}
-        <Suspense
-          fallback={
-            <div className="flex min-h-screen items-center justify-center">
-              Loading...
-            </div>
-          }
+const App = () => {
+  useEffect(() => {
+    trackVisitor();
+  }, []);
+
+  const trackVisitor = async () => {
+    try {
+      await supabase.from("website_visitors").insert([
+        {
+          user_agent: navigator.userAgent,
+        },
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
         >
-          {" "}
-          <Routes>
-            {/* Public Website Layout */}
-            <Route element={<SiteLayout />}>
-              <Route path="/" element={<Home />} />
+          <Navbar />{" "}
+          <Suspense
+            fallback={
+              <div className="flex min-h-screen items-center justify-center">
+                Loading...
+              </div>
+            }
+          >
+            {" "}
+            <Routes>
+              {/* Public Website Layout */}
+              <Route element={<SiteLayout />}>
+                <Route path="/" element={<Home />} />
 
-              <Route path="/about" element={<About />} />
+                <Route path="/about" element={<About />} />
 
-              <Route path="/products" element={<Products />} />
+                <Route path="/products" element={<Products />} />
 
-              <Route path="/products/:slug" element={<ProductDetail />} />
+                <Route path="/products/:slug" element={<ProductDetail />} />
 
-              <Route path="/contact" element={<Contact />} />
+                <Route path="/contact" element={<Contact />} />
 
-              <Route path="/distributor" element={<Distributor />} />
+                <Route path="/distributor" element={<Distributor />} />
 
-              <Route path="/certifications" element={<Certifications />} />
+                <Route path="/certifications" element={<Certifications />} />
 
-              <Route path="/careers" element={<Careers />} />
-            </Route>
+                <Route path="/careers" element={<Careers />} />
+              </Route>
 
-            <Route path="/seed-products" element={<SeedProducts />} />
+              <Route path="/seed-products" element={<SeedProducts />} />
 
-            {/* Login */}
-            <Route path="/login" element={<Login />} />
+              {/* Login */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Dashboard */}
-            <Route
-              path="/dashboard"
-              element={
-                <EmployeeRoute>
-                  <Dashboard />
-                </EmployeeRoute>
-              }
-            />
-            <Route path="/admin-login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
+              {/* Dashboard */}
+              <Route
+                path="/dashboard"
+                element={
+                  <EmployeeRoute>
+                    <Dashboard />
+                  </EmployeeRoute>
+                }
+              />
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
 
-            {/* Profile */}
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            {/* <Route path="/signup" element={<Signup />} /> */}
+              {/* Profile */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              {/* <Route path="/signup" element={<Signup />} /> */}
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
 
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-            <Route path="/terms" element={<Terms />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
+              <Route path="/terms" element={<Terms />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 export default App;
