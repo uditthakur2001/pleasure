@@ -20,42 +20,42 @@ const Home = () => {
     loadProducts();
   }, []);
 
-const loadProducts =
-  async () => {
-
+  const loadProducts = async () => {
     // HOMEPAGE PRODUCTS
-    const {
-      data: homeProducts,
-    } =
-      await supabase
-        .from("products")
-        .select("*")
-        .eq(
-          "show_on_home",
-          true,
-        );
+    const { data: homeProducts } = await supabase
+      .from("products")
+      .select("*")
+      .eq("show_on_home", true);
 
-    setProductsData(
-      homeProducts || [],
-    );
+    setProductsData(homeProducts || []);
 
     // TOTAL PRODUCTS COUNT
-    const { count } =
-      await supabase
-        .from("products")
-        .select("*", {
-          count: "exact",
-          head: true,
-        });
+    const { count } = await supabase.from("products").select("*", {
+      count: "exact",
+      head: true,
+    });
 
-    setAllProductsCount(
-      count || 0,
-    );
+    setAllProductsCount(count || 0);
   };
   const stats = [
     {
       icon: Award,
-      label: "18+ Years",
+      label: `${(() => {
+        const start = new Date("2006-12-25");
+
+        const today = new Date();
+
+        let years = today.getFullYear() - start.getFullYear();
+
+        const hasNotCompletedYear =
+          today < new Date(today.getFullYear(), 11, 25);
+
+        if (hasNotCompletedYear) {
+          years--;
+        }
+
+        return years;
+      })()}+ Years`,
       sub: "of trusted heritage",
     },
 
@@ -227,22 +227,18 @@ const loadProducts =
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {highlights.map((p) => (
-  <ProductCard
-    key={p.slug}
-    product={{
-      ...p,
+              <ProductCard
+                key={p.slug}
+                product={{
+                  ...p,
 
-      images:
-        typeof p.image_urls ===
-        "string"
-          ? JSON.parse(
-              p.image_urls,
-            )
-          : p.image_urls ||
-            [],
-    }}
-  />
-))}{" "}
+                  images:
+                    typeof p.image_urls === "string"
+                      ? JSON.parse(p.image_urls)
+                      : p.image_urls || [],
+                }}
+              />
+            ))}{" "}
           </div>
         </div>
       </section>

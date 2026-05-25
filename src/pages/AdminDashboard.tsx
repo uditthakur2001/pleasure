@@ -20,7 +20,7 @@ import {
 import { successAlert, errorAlert, confirmAlert } from "@/lib/alert";
 
 interface Employee {
-  id: number;
+  id: string;
   google_id?: string;
   username: string;
   full_name: string;
@@ -30,7 +30,7 @@ interface Employee {
 }
 
 interface DoctorEntry {
-  id: number;
+  id: string;
   visit_date: string;
   doctor_name: string;
   doctor_phone: string;
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
     setEntries(formatted);
   };
   // UPDATE ROLE
-  const updateEmployeeRole = async (id: number, currentRole: string) => {
+  const updateEmployeeRole = async (id: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "employee" : "admin";
 
     const result = await confirmAlert("Change Role?", `Make user ${newRole}?`);
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
   };
 
   // DELETE EMPLOYEE
-  const deleteEmployee = async (id: number) => {
+  const deleteEmployee = async (id: string) => {
     const result = await confirmAlert(
       "Delete Employee?",
       "This action cannot be undone",
@@ -340,6 +340,7 @@ export default function AdminDashboard() {
       image_urls: productImages,
 
       variants: productVariants,
+      show_on_home: false,
     };
 
     let response;
