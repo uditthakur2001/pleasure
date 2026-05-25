@@ -16,40 +16,96 @@ export default function Login() {
     checkSession();
   }, []);
 
-  const checkSession = async () => {
+const checkSession =
+  async () => {
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } =
+      await supabase.auth.getSession();
 
-    if (session) {
-      localStorage.setItem("isLoggedIn", "true");
+    if (!session) return;
 
-      localStorage.setItem(
-        "employeeName",
-        session.user.user_metadata?.full_name || "",
+    const email =
+      session.user.email;
+
+    // CHECK AUTHORIZED EMAIL
+    const {
+      data: employee,
+      error,
+    } =
+      await supabase
+        .from("employee")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+    // NOT AUTHORIZED
+    if (
+      error ||
+      !employee
+    ) {
+      await supabase.auth.signOut();
+
+      localStorage.clear();
+
+      errorAlert(
+        "Access Denied",
+        "Your Google account is not authorized",
       );
 
-      localStorage.setItem("employeeEmail", session.user.email || "");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
 
-      localStorage.setItem("employeeId", session.user.id);
-
-      // SAVE GOOGLE USER
-      await supabase.from("employee").upsert([
-        {
-          google_id: session.user.id,
-
-          full_name: session.user.user_metadata?.full_name || "",
-
-          email: session.user.email || "",
-
-          username: session.user.email?.split("@")[0] || "",
-
-          role: "employee",
-        },
-      ]);
-
-      navigate("/dashboard");
+      return;
     }
+
+    // LOGIN SUCCESS
+    localStorage.setItem(
+      "isLoggedIn",
+      "true",
+    );
+
+    localStorage.setItem(
+      "employeeName",
+      employee.full_name ||
+        "",
+    );
+
+    localStorage.setItem(
+      "employeeEmail",
+      employee.email ||
+        "",
+    );
+
+    localStorage.setItem(
+      "employeeId",
+      employee.id,
+    );
+
+    localStorage.setItem(
+      "role",
+      employee.role ||
+        "employee",
+    );
+
+    // UPDATE GOOGLE ID
+    await supabase
+      .from("employee")
+      .update({
+        google_id:
+          session.user.id,
+      })
+      .eq("email", email);
+
+    if (
+  employee.role ===
+  "admin"
+) {
+  navigate("/admin");
+} else {
+  navigate("/dashboard");
+}
   };
 
   const handleGoogleLogin = async () => {

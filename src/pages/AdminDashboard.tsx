@@ -36,6 +36,7 @@ interface DoctorEntry {
   doctor_phone: string;
   employee_name?: string;
   employee_username?: string;
+  employee_email?:string;
   products: string[];
   created_at: string;
 }
@@ -102,7 +103,14 @@ export default function AdminDashboard() {
   const fetchEntries = async () => {
     const { data, error } = await supabase
       .from("doctor_entries")
-      .select("*")
+.select(`
+  *,
+  employee:employee_id (
+    full_name,
+    username,
+    email
+  )
+`)
       .order("created_at", {
         ascending: false,
       });
@@ -113,9 +121,12 @@ export default function AdminDashboard() {
     }
 
     // FETCH EMPLOYEES
-    const { data: employeesData } = await supabase
-      .from("employee")
-      .select("id, google_id, username, full_name");
+const { data: employeesData } =
+  await supabase
+    .from("employee")
+    .select(
+      "id, google_id, username, full_name, email",
+    );
 
     // MAP EMPLOYEE DATA
     const formatted = data.map((item: any) => {
@@ -124,12 +135,20 @@ export default function AdminDashboard() {
       );
 
       return {
-        ...item,
+  ...item,
 
-        employee_name: employee?.full_name || "-",
+  employee_name:
+    employee?.full_name ||
+    "-",
 
-        employee_username: employee?.username || "-",
-      };
+  employee_username:
+    employee?.username ||
+    "-",
+
+  employee_email:
+    employee?.email ||
+    "-",
+};
     });
 
     setEntries(formatted);
@@ -178,6 +197,96 @@ export default function AdminDashboard() {
     }
 
     successAlert("Employee Deleted");
+
+    fetchEmployees();
+  };
+
+// ADD EMPLOYEE
+const addEmployee =
+  async () => {
+
+    if (
+      !employeeEmail
+    ) {
+      errorAlert(
+        "Required",
+        "Employee email required",
+      );
+
+      return;
+    }
+if (
+  !employeeEmail
+    .toLowerCase()
+    .endsWith(
+      "@gmail.com",
+    )
+) {
+  errorAlert(
+    "Invalid Email",
+    "Only Gmail accounts are allowed",
+  );
+
+  return;
+}
+    const { error } =
+      await supabase
+        .from("employee")
+        .insert([
+          {
+            username:
+              employeeUsername,
+
+            full_name:
+              employeeFullName,
+
+            phone:
+              employeePhone,
+
+            email:
+              employeeEmail,
+
+            role:
+              employeeRole,
+          },
+        ]);
+
+    if (error) {
+      errorAlert(
+        "Error",
+        error.message,
+      );
+
+      return;
+    }
+
+    successAlert(
+      "Employee Added",
+    );
+
+    setEmployeeUsername(
+      "",
+    );
+
+    setEmployeeFullName(
+      "",
+    );
+
+    setEmployeePhone(
+      "",
+    );
+
+    setEmployeeEmail(
+      "",
+    );
+
+    setEmployeeRole(
+      "employee",
+    );
+
+    setShowAddEmployee(
+      false,
+    );
 
     fetchEmployees();
   };
@@ -388,6 +497,31 @@ export default function AdminDashboard() {
 
     setProductVariants([]);
   };
+
+  // ADD EMPLOYEE STATES
+const [showAddEmployee,
+  setShowAddEmployee] =
+  useState(false);
+
+const [employeeUsername,
+  setEmployeeUsername] =
+  useState("");
+
+const [employeeFullName,
+  setEmployeeFullName] =
+  useState("");
+
+const [employeePhone,
+  setEmployeePhone] =
+  useState("");
+
+const [employeeEmail,
+  setEmployeeEmail] =
+  useState("");
+
+const [employeeRole,
+  setEmployeeRole] =
+  useState("employee");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
@@ -945,84 +1079,236 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* EMPLOYEES */}
-        <div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
-          <h2 className="mb-3 text-xl font-semibold">Employees</h2>
+       {/* EMPLOYEES */}
+<div className="rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
 
-          <div className="mb-3">
-            <input
-              type="text"
-              placeholder="Search employees..."
-              value={employeeSearch}
-              onChange={(e) => setEmployeeSearch(e.target.value)}
-              className="w-full rounded-xl border border-border bg-white/70 px-3 py-2.5 text-sm"
-            />
-          </div>
+  <div className="mb-4 flex items-center justify-between">
+    <h2 className="text-xl font-semibold">
+      Employees
+    </h2>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px]">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="p-2.5 text-left text-sm">Username</th>
+    <button
+      onClick={() =>
+        setShowAddEmployee(
+          !showAddEmployee,
+        )
+      }
+      className="rounded-xl bg-primary px-4 py-2 text-sm text-white"
+    >
+      {showAddEmployee
+        ? "Close"
+        : "Add Employee"}
+    </button>
+  </div>
 
-                  <th className="p-2.5 text-left text-sm">Name</th>
+  {showAddEmployee && (
+    <div className="mb-5 grid gap-4 rounded-2xl border bg-white p-4 md:grid-cols-2">
+      <input
+        type="text"
+        placeholder="Username"
+        value={
+          employeeUsername
+        }
+        onChange={(e) =>
+          setEmployeeUsername(
+            e.target.value,
+          )
+        }
+        className="rounded-xl border px-4 py-3"
+      />
 
-                  <th className="p-2.5 text-left text-sm">Phone</th>
+      <input
+        type="text"
+        placeholder="Full Name"
+        value={
+          employeeFullName
+        }
+        onChange={(e) =>
+          setEmployeeFullName(
+            e.target.value,
+          )
+        }
+        className="rounded-xl border px-4 py-3"
+      />
 
-                  <th className="p-2.5 text-left text-sm">Email</th>
+      <input
+        type="text"
+        placeholder="Phone"
+        value={
+          employeePhone
+        }
+        onChange={(e) =>
+          setEmployeePhone(
+            e.target.value,
+          )
+        }
+        className="rounded-xl border px-4 py-3"
+      />
 
-                  <th className="p-2.5 text-left text-sm">Role</th>
+      <input
+        type="email"
+        placeholder="Google Email"
+        value={
+          employeeEmail
+        }
+        onChange={(e) =>
+          setEmployeeEmail(
+            e.target.value,
+          )
+        }
+        className="rounded-xl border px-4 py-3"
+      />
 
-                  <th className="p-2.5 text-left text-sm">Actions</th>
-                </tr>
-              </thead>
+      <select
+        value={
+          employeeRole
+        }
+        onChange={(e) =>
+          setEmployeeRole(
+            e.target.value,
+          )
+        }
+        className="rounded-xl border px-4 py-3"
+      >
+        <option value="employee">
+          Employee
+        </option>
 
-              <tbody>
-                {filteredEmployees.map((emp) => (
-                  <tr key={emp.id} className="border-b border-border">
-                    <td className="p-2.5 text-sm">{emp.username}</td>
+        <option value="admin">
+          Admin
+        </option>
+      </select>
 
-                    <td className="p-2.5 text-sm">{emp.full_name || "-"}</td>
+      <button
+        onClick={
+          addEmployee
+        }
+        className="rounded-xl bg-primary px-4 py-3 text-white"
+      >
+        Save Employee
+      </button>
+    </div>
+  )}
 
-                    <td className="p-2.5 text-sm">{emp.phone || "-"}</td>
+  <div className="mb-3">
+    <input
+      type="text"
+      placeholder="Search employees..."
+      value={employeeSearch}
+      onChange={(e) =>
+        setEmployeeSearch(
+          e.target.value,
+        )
+      }
+      className="w-full rounded-xl border border-border bg-white/70 px-3 py-2.5 text-sm"
+    />
+  </div>
 
-                    <td className="p-2.5 text-sm">{emp.email || "-"}</td>
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-[850px]">
+      <thead>
+        <tr className="border-b border-border">
+          <th className="p-2.5 text-left text-sm">
+            Username
+          </th>
 
-                    <td className="p-2.5 text-sm">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs ${
-                          emp.role === "admin"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {emp.role}
-                      </span>
-                    </td>
+          <th className="p-2.5 text-left text-sm">
+            Name
+          </th>
 
-                    <td className="p-2.5 text-sm">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => updateEmployeeRole(emp.id, emp.role)}
-                          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
-                        >
-                          {emp.role === "admin" ? "Remove Admin" : "Make Admin"}
-                        </button>
+          <th className="p-2.5 text-left text-sm">
+            Phone
+          </th>
 
-                        <button
-                          onClick={() => deleteEmployee(emp.id)}
-                          className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <th className="p-2.5 text-left text-sm">
+            Email
+          </th>
+
+          <th className="p-2.5 text-left text-sm">
+            Role
+          </th>
+
+          <th className="p-2.5 text-left text-sm">
+            Actions
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredEmployees.map(
+          (emp) => (
+            <tr
+              key={emp.id}
+              className="border-b border-border"
+            >
+              <td className="p-2.5 text-sm">
+                {emp.username}
+              </td>
+
+              <td className="p-2.5 text-sm">
+                {emp.full_name ||
+                  "-"}
+              </td>
+
+              <td className="p-2.5 text-sm">
+                {emp.phone ||
+                  "-"}
+              </td>
+
+              <td className="p-2.5 text-sm">
+                {emp.email ||
+                  "-"}
+              </td>
+
+              <td className="p-2.5 text-sm">
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs ${
+                    emp.role ===
+                    "admin"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                  }`}
+                >
+                  {emp.role}
+                </span>
+              </td>
+
+              <td className="p-2.5 text-sm">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      updateEmployeeRole(
+                        emp.id,
+                        emp.role,
+                      )
+                    }
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+                  >
+                    {emp.role ===
+                    "admin"
+                      ? "Remove Admin"
+                      : "Make Admin"}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      deleteEmployee(
+                        emp.id,
+                      )
+                    }
+                    className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ),
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
         {/* DAILY UPDATES */}
         <div className="mt-6 rounded-2xl border border-white/20 bg-white/60 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
@@ -1089,7 +1375,7 @@ export default function AdminDashboard() {
                         </span>
 
                         <span className="text-xs text-muted-foreground">
-                          {entry.employee_username || "-"}
+                          {entry.employee_email || "-"}
                         </span>
                       </div>
                     </td>
