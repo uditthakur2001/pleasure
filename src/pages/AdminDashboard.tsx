@@ -15,6 +15,7 @@ import {
   Pie,
   Cell,
   CartesianGrid,
+  Legend,
 } from "recharts";
 
 import { successAlert, errorAlert, confirmAlert } from "@/lib/alert";
@@ -544,12 +545,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* CHARTS */}
-        <div className="mb-6 grid gap-4 xl:grid-cols-2">
-          <div className="rounded-2xl border border-white/20 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+        <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
             <h2 className="mb-3 text-lg font-semibold">Top Products</h2>
 
-            <div className="h-[180px]">
-              <ResponsiveContainer>
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productAnalytics}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
 
@@ -557,32 +558,60 @@ export default function AdminDashboard() {
                     dataKey="name"
                     tickLine={false}
                     axisLine={false}
-                    fontSize={11}
+                    fontSize={9}
+                    interval={0}
+                    angle={-20}
+                    textAnchor="end"
+                    height={60}
+                    tick={({ x, y, payload, index }) => (
+                      <text
+                        x={x}
+                        y={y}
+                        dy={10}
+                        textAnchor="end"
+                        transform={`rotate(-20, ${x}, ${y})`}
+                        fill={COLORS[index % COLORS.length]}
+                        fontSize={9}
+                      >
+                        {payload.value}
+                      </text>
+                    )}
                   />
 
-                  <YAxis tickLine={false} axisLine={false} fontSize={11} />
+                  <YAxis
+                    width={25}
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={11}
+                    tick={{
+                      fill: "#0f766e",
+                    }}
+                  />
 
                   <Tooltip />
 
-                  <Bar
-                    dataKey="value"
-                    radius={[999, 999, 0, 0]}
-                    fill="#0f766e"
-                  />
+                  <Bar dataKey="value" radius={[999, 999, 0, 0]}>
+                    {productAnalytics.map((entry, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/20 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/20 bg-white/60 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
             <h2 className="mb-3 text-lg font-semibold">Product Distribution</h2>
 
-            <div className="h-[180px]">
-              <ResponsiveContainer>
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={productAnalytics}
                     dataKey="value"
+                    nameKey="name"
+                    cx="40%"
+                    cy="50%"
                     outerRadius={65}
                     innerRadius={35}
                   >
@@ -592,6 +621,15 @@ export default function AdminDashboard() {
                   </Pie>
 
                   <Tooltip />
+
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    formatter={(value, entry: any) =>
+                      `${value} (${entry.payload.value})`
+                    }
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
