@@ -16,16 +16,13 @@ const publicLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
+const role = localStorage.getItem("role");
+
 const dashboardLink = {
-  to: localStorage.getItem(
-    "adminLoggedIn",
-  )
-    ? "/admin"
-    : "/dashboard",
+  to: role === "admin" ? "/admin" : "/dashboard",
 
   label: "Dashboard",
 };
-
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -36,8 +33,7 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("isLoggedIn") ||
-      !!localStorage.getItem("adminLoggedIn"),
+    !!localStorage.getItem("isLoggedIn"),
   );
 
   useEffect(() => {
@@ -55,10 +51,7 @@ export const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    setIsLoggedIn(
-      !!localStorage.getItem("isLoggedIn") ||
-        !!localStorage.getItem("adminLoggedIn"),
-    );
+    setIsLoggedIn(!!localStorage.getItem("isLoggedIn"));
   }, [location]);
 
   const logout = async () => {
@@ -81,8 +74,6 @@ export const Navbar = () => {
 
     localStorage.removeItem("employeeId");
 
-    localStorage.removeItem("adminLoggedIn");
-
     // UPDATE APP STATE
     window.dispatchEvent(new Event("storage"));
 
@@ -92,13 +83,8 @@ export const Navbar = () => {
       navigate("/login");
     }, 1000);
   };
-const links = isLoggedIn
-  ? [
-      ...publicLinks,
-      dashboardLink,
-    ]
-  : publicLinks;
-  
+  const links = isLoggedIn ? [...publicLinks, dashboardLink] : publicLinks;
+
   return (
     <header
       className={cn(

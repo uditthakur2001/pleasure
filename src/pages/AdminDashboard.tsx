@@ -73,10 +73,18 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAdmin = async () => {
-    const adminLoggedIn = localStorage.getItem("adminLoggedIn");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-    if (!adminLoggedIn) {
-      navigate("/admin-login");
+    const role = localStorage.getItem("role");
+
+    if (!isLoggedIn) {
+      navigate("/login");
+
+      return;
+    }
+
+    if (role !== "admin") {
+      navigate("/dashboard");
 
       return;
     }
@@ -86,6 +94,7 @@ export default function AdminDashboard() {
     fetchEntries();
 
     fetchProducts();
+
     fetchVisitors();
   };
 
@@ -105,16 +114,7 @@ export default function AdminDashboard() {
   const fetchEntries = async () => {
     const { data, error } = await supabase
       .from("doctor_entries")
-      .select(
-        `
-  *,
-  employee:employee_id (
-    full_name,
-    username,
-    email
-  )
-`,
-      )
+      .select("*")
       .order("created_at", {
         ascending: false,
       });
@@ -194,6 +194,7 @@ export default function AdminDashboard() {
     successAlert("Employee Deleted");
 
     fetchEmployees();
+    fetchEntries();
   };
 
   // ADD EMPLOYEE

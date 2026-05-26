@@ -25,28 +25,26 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
 const Terms = lazy(() => import("./pages/Terms"));
-const AdminLogin = lazy(() => import("./pages/AdminLogin"));
-const SeedProducts = lazy(() => import("./pages/SeedProducts"));
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  const adminLoggedIn = localStorage.getItem("adminLoggedIn");
-
-  if (!isLoggedIn && !adminLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
+  if (!isLoggedIn) return children;
 }
 
 function AdminRoute({ children }: { children: JSX.Element }) {
-  const adminLoggedIn = localStorage.getItem("adminLoggedIn");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  if (!adminLoggedIn) {
-    return <Navigate to="/admin-login" replace />;
+  const role = localStorage.getItem("role");
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -113,8 +111,6 @@ const App = () => {
                 <Route path="/careers" element={<Careers />} />
               </Route>
 
-              <Route path="/seed-products" element={<SeedProducts />} />
-
               {/* Login */}
               <Route path="/login" element={<Login />} />
 
@@ -127,7 +123,6 @@ const App = () => {
                   </EmployeeRoute>
                 }
               />
-              <Route path="/admin-login" element={<AdminLogin />} />
               <Route
                 path="/admin"
                 element={
