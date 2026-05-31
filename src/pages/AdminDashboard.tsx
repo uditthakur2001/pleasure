@@ -39,6 +39,8 @@ interface DoctorEntry {
   employee_username?: string;
   employee_email?: string;
   products: string[];
+  latitude?: number;
+  longitude?: number;
   created_at: string;
 }
 
@@ -1276,6 +1278,8 @@ export default function AdminDashboard() {
 
                   <th className="p-2.5 text-left text-sm">Products</th>
 
+                  <th className="p-2.5 text-left text-sm">Location</th>
+
                   <th className="p-2.5 text-left text-sm">Created</th>
                 </tr>
               </thead>
@@ -1320,6 +1324,29 @@ export default function AdminDashboard() {
                           </span>
                         ))}
                       </div>
+                    </td>
+                    <td>
+                      {entry.latitude && entry.longitude ? (
+                        <a
+                          href={`https://maps.google.com/?q=${entry.latitude},${entry.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          <button
+                            onClick={() =>
+                              window.open(
+                                `https://maps.google.com/?q=${entry.latitude},${entry.longitude}`,
+                                "_blank",
+                              )
+                            }
+                          >
+                            View Map
+                          </button>
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </td>
 
                     <td className="p-2.5 text-sm">

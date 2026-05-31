@@ -31,7 +31,8 @@ const queryClient = new QueryClient();
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  if (!isLoggedIn) return children;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+return children; // ✅
 }
 
 function AdminRoute({ children }: { children: JSX.Element }) {

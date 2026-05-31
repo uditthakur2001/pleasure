@@ -394,6 +394,30 @@ ${localStorage.getItem("employeeName")}
 
       successAlert("Updated Successfully");
     } else {
+      let latitude = null;
+      let longitude = null;
+
+      try {
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            });
+          },
+        );
+
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      } catch (err) {
+        errorAlert(
+          "Location Required",
+          "Please allow location access before saving.",
+        );
+        return;
+      }
+
       const { error } = await supabase.from("doctor_entries").insert([
         {
           employee_id: employeeId,
@@ -401,6 +425,8 @@ ${localStorage.getItem("employeeName")}
           doctor_name: row.doctorName,
           doctor_phone: row.doctorPhone,
           products: row.product,
+          latitude,
+          longitude,
         },
       ]);
 
