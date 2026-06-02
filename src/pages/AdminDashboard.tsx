@@ -5,6 +5,20 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 
 import {
+  DndContext,
+  closestCenter,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+
+import { CSS } from "@dnd-kit/utilities";
+
+import {
   BarChart,
   Bar,
   XAxis,
@@ -56,6 +70,59 @@ const COLORS = [
   "#0284c7",
   "#ca8a04",
 ];
+
+function SortableImage({
+  image,
+  index,
+  onRemove,
+}: {
+  image: string;
+  index: number;
+  onRemove: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: image,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="relative cursor-move"
+    >
+      <img
+        src={image}
+        alt=""
+        className="h-20 w-20 rounded-xl border object-cover"
+      />
+
+      <div className="absolute left-1 top-1 rounded bg-black/70 px-1 text-xs text-white">
+        {index + 1}
+      </div>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -495,6 +562,20 @@ export default function AdminDashboard() {
 
     setTodayVisitors(todayCount || 0);
   };
+
+  //drag n drop arrange
+  const handleImageDragEnd = (event: any) => {
+  const { active, over } = event;
+
+  if (!over || active.id === over.id) return;
+
+  setProductImages((items) => {
+    const oldIndex = items.indexOf(active.id);
+    const newIndex = items.indexOf(over.id);
+
+    return arrayMove(items, oldIndex, newIndex);
+  });
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
@@ -943,30 +1024,30 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* PREVIEW */}
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {productImages.map((img: string, index: number) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={img}
-                        alt=""
-                        className="h-20 w-20 rounded-xl border object-cover"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setProductImages((prev) =>
-                            prev.filter((_, i) => i !== index),
-                          );
-                        }}
-                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <DndContext
+  collisionDetection={closestCenter}
+  onDragEnd={handleImageDragEnd}
+>
+  <SortableContext
+    items={productImages}
+    strategy={rectSortingStrategy}
+  >
+    <div className="mt-4 flex flex-wrap gap-3">
+      {productImages.map((img, index) => (
+        <SortableImage
+          key={img}
+          image={img}
+          index={index}
+          onRemove={() =>
+            setProductImages((prev) =>
+              prev.filter((_, i) => i !== index)
+            )
+          }
+        />
+      ))}
+    </div>
+  </SortableContext>
+</DndContext>
               </div>
             </div>
 
