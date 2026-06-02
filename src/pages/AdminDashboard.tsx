@@ -37,7 +37,7 @@ import { successAlert, errorAlert, confirmAlert } from "@/lib/alert";
 interface Employee {
   id: string;
   google_id?: string;
-  username: string;
+  // username: string;
   full_name: string;
   phone: string;
   email: string;
@@ -50,7 +50,7 @@ interface DoctorEntry {
   doctor_name: string;
   doctor_phone: string;
   employee_name?: string;
-  employee_username?: string;
+  // employee_username?: string;
   employee_email?: string;
   products: string[];
   latitude?: number;
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
     // FETCH EMPLOYEES
     const { data: employeesData } = await supabase
       .from("employee")
-      .select("id, google_id, username, full_name, email");
+      .select("id, google_id, full_name, email");
 
     // MAP EMPLOYEE DATA
     const formatted = data.map((item: any) => {
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
 
         employee_name: employee?.full_name || "-",
 
-        employee_username: employee?.username || "-",
+        // employee_username: employee?.username || "-",
 
         employee_email: employee?.email || "-",
       };
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
     }
     const { error } = await supabase.from("employee").insert([
       {
-        username: employeeUsername,
+        // username: employeeUsername,
 
         full_name: employeeFullName,
 
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
 
     successAlert("Employee Added");
 
-    setEmployeeUsername("");
+    // setEmployeeUsername("");
 
     setEmployeeFullName("");
 
@@ -316,7 +316,7 @@ export default function AdminDashboard() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    [emp.username, emp.full_name, emp.phone, emp.email, emp.role]
+    [ emp.full_name, emp.phone, emp.email, emp.role]
       .join(" ")
       .toLowerCase()
       .includes(employeeSearch.toLowerCase()),
@@ -525,7 +525,7 @@ export default function AdminDashboard() {
   // ADD EMPLOYEE STATES
   const [showAddEmployee, setShowAddEmployee] = useState(false);
 
-  const [employeeUsername, setEmployeeUsername] = useState("");
+  // const [employeeUsername, setEmployeeUsername] = useState("");
 
   const [employeeFullName, setEmployeeFullName] = useState("");
 
@@ -574,6 +574,32 @@ export default function AdminDashboard() {
     const newIndex = items.indexOf(over.id);
 
     return arrayMove(items, oldIndex, newIndex);
+  });
+};
+
+const handleVariantImageDragEnd = (
+  variantIndex: number,
+  event: any,
+) => {
+  const { active, over } = event;
+
+  if (!over || active.id === over.id) return;
+
+  setProductVariants((prev) => {
+    const updated = [...prev];
+
+    const images = [...updated[variantIndex].images];
+
+    const oldIndex = images.indexOf(active.id);
+    const newIndex = images.indexOf(over.id);
+
+    updated[variantIndex].images = arrayMove(
+      images,
+      oldIndex,
+      newIndex,
+    );
+
+    return updated;
   });
 };
 
@@ -989,36 +1015,47 @@ export default function AdminDashboard() {
                           }}
                         />
 
-                        <div className="mt-4 flex flex-wrap gap-3">
-                          {variant.images?.map((img: string, i: number) => (
-                            <div key={i} className="relative">
-                              <img
-                                src={img}
-                                alt=""
-                                className="h-20 w-20 rounded-xl border object-cover"
-                              />
+                        <DndContext
+  collisionDetection={closestCenter}
+  onDragEnd={(event) =>
+    handleVariantImageDragEnd(
+      variantIndex,
+      event,
+    )
+  }
+>
+  <SortableContext
+    items={variant.images || []}
+    strategy={rectSortingStrategy}
+  >
+    <div className="mt-4 flex flex-wrap gap-3">
+      {variant.images?.map(
+        (img: string, i: number) => (
+          <SortableImage
+            key={img}
+            image={img}
+            index={i}
+            onRemove={() => {
+              const updated = [...productVariants];
 
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = [...productVariants];
+              updated[variantIndex].images =
+                updated[
+                  variantIndex
+                ].images.filter(
+                  (
+                    _: string,
+                    imgIndex: number,
+                  ) => imgIndex !== i,
+                );
 
-                                  updated[variantIndex].images = updated[
-                                    variantIndex
-                                  ].images.filter(
-                                    (_: string, imgIndex: number) =>
-                                      imgIndex !== i,
-                                  );
-
-                                  setProductVariants(updated);
-                                }}
-                                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))}
-                        </div>
+              setProductVariants(updated);
+            }}
+          />
+        ),
+      )}
+    </div>
+  </SortableContext>
+</DndContext>
                       </div>
                     ))}
                   </div>
@@ -1197,13 +1234,13 @@ export default function AdminDashboard() {
 
           {showAddEmployee && (
             <div className="mb-5 grid gap-4 rounded-2xl border bg-white p-4 md:grid-cols-2">
-              <input
+              {/* <input
                 type="text"
                 placeholder="Username"
                 value={employeeUsername}
                 onChange={(e) => setEmployeeUsername(e.target.value)}
                 className="rounded-xl border px-4 py-3"
-              />
+              /> */}
 
               <input
                 type="text"
@@ -1262,7 +1299,7 @@ export default function AdminDashboard() {
             <table className="w-full min-w-[850px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="p-2.5 text-left text-sm">Username</th>
+                  {/* <th className="p-2.5 text-left text-sm">Username</th> */}
 
                   <th className="p-2.5 text-left text-sm">Name</th>
 
@@ -1279,7 +1316,7 @@ export default function AdminDashboard() {
               <tbody>
                 {filteredEmployees.map((emp) => (
                   <tr key={emp.id} className="border-b border-border">
-                    <td className="p-2.5 text-sm">{emp.username}</td>
+                    {/* <td className="p-2.5 text-sm">{emp.username}</td> */}
 
                     <td className="p-2.5 text-sm">{emp.full_name || "-"}</td>
 

@@ -83,8 +83,16 @@ export const Navbar = () => {
       navigate("/login");
     }, 1000);
   };
-  const links = isLoggedIn ? [...publicLinks, dashboardLink] : publicLinks;
+const analyticsLink = {
+  to: "/analytics",
+  label: "Analytics",
+};
 
+const links = isLoggedIn
+  ? role === "admin"
+    ? [...publicLinks, dashboardLink]
+    : [...publicLinks, dashboardLink, analyticsLink]
+  : publicLinks;
   return (
     <header
       className={cn(

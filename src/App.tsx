@@ -23,6 +23,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const EmployeeAnalytics = lazy(() => import("./pages/EmployeeAnalytics"));
 
 const Terms = lazy(() => import("./pages/Terms"));
 
@@ -124,6 +125,14 @@ const App = () => {
                   </EmployeeRoute>
                 }
               />
+              <Route
+  path="/analytics"
+  element={
+    <EmployeeRoute>
+      <EmployeeAnalytics />
+    </EmployeeRoute>
+  }
+/>
               <Route
                 path="/admin"
                 element={
