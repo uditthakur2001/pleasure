@@ -138,10 +138,7 @@ export default function EmployeeAnalytics() {
 
       setEmployees(employeeData || []);
 
-
-      const employeeRecord = employeeData?.find(
-        (e) => e.google_id === user.id,
-      );
+      const employeeRecord = employeeData?.find((e) => e.google_id === user.id);
       // Load ALL sales for leaderboard
       const { data: allSalesData } = await supabase
         .from("employee_sales")
@@ -150,23 +147,23 @@ export default function EmployeeAnalytics() {
       setLeaderboardSales(allSalesData || []);
 
       if (employeeRecord) {
-  const { data: salesData } = await supabase
-    .from("employee_sales")
-    .select("*")
-    .eq("employee_id", employeeRecord.id);
-
-  setAllSales(salesData || []);
-}
-
-      // Load ONLY current employee sales for cards
-      if (currentEmployee) {
         const { data: salesData } = await supabase
           .from("employee_sales")
           .select("*")
-          .eq("employee_id", currentEmployee.id);
+          .eq("employee_id", employeeRecord.id);
 
         setAllSales(salesData || []);
       }
+
+      // Load ONLY current employee sales for cards
+      // if (currentEmployee) {
+      //   const { data: salesData } = await supabase
+      //     .from("employee_sales")
+      //     .select("*")
+      //     .eq("employee_id", currentEmployee.id);
+
+      //   setAllSales(salesData || []);
+      // }
 
       if (error) throw error;
 
@@ -179,35 +176,44 @@ export default function EmployeeAnalytics() {
   };
 
   const leaderboard = useMemo(() => {
-    const totals: Record<
-      string,
-      {
-        employee_id: string;
-        sales: number;
-        collection: number;
+    const now = new Date();
+
+    const filtered = leaderboardSales.filter((row) => {
+      const d = new Date(row.report_date);
+
+      if (statsRange === "week") {
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+        return d >= weekAgo;
       }
-    > = {};
 
-    allSales.forEach((row) => {
+      if (statsRange === "month") {
+        return (
+          d.getMonth() === now.getMonth() &&
+          d.getFullYear() === now.getFullYear()
+        );
+      }
+
+      return d.getFullYear() === now.getFullYear();
+    });
+
+    const totals: Record<string, any> = {};
+
+    filtered.forEach((row) => {
       const employeeId = String(row.employee_id);
-
-      if (!employeeId) return;
 
       if (!totals[employeeId]) {
         totals[employeeId] = {
           employee_id: employeeId,
           sales: 0,
-          collection: 0,
         };
       }
 
       totals[employeeId].sales += Number(row.sales || 0);
-      totals[employeeId].collection += Number(row.collection || 0);
     });
 
     return Object.values(totals).sort((a, b) => b.sales - a.sales);
-  }, [allSales]);
-
+  }, [leaderboardSales, statsRange]);
   const totalVisits = visits.length;
 
   const doctorsCovered = new Set(visits.map((v) => v.doctor_name)).size;
@@ -407,6 +413,10 @@ export default function EmployeeAnalytics() {
     (sum, row) => sum + Number(row.collection || 0),
     0,
   );
+
+  console.log("employees", employees);
+  console.log("leaderboardSales", leaderboardSales);
+  console.log("leaderboard", leaderboard);
 
   if (loading) {
     return (
