@@ -70,7 +70,7 @@ export default function EmployeeAnalytics() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [chartView, setChartView] = useState<"weekly" | "monthly">("monthly");
-const [allSales, setAllSales] = useState<any[]>([]);
+  const [allSales, setAllSales] = useState<any[]>([]);
 
   useEffect(() => {
     loadAnalytics();
@@ -151,49 +151,41 @@ const [allSales, setAllSales] = useState<any[]>([]);
     };
 
     const { data: salesData } = await supabase
-  .from("employee_sales")
-  .select("*");
+      .from("employee_sales")
+      .select("*");
 
-setAllSales(salesData || []);
+    setAllSales(salesData || []);
   };
 
+  const leaderboard = useMemo(() => {
+    const totals: Record<
+      string,
+      {
+        employee_id: string;
+        sales: number;
+        collection: number;
+      }
+    > = {};
 
+    allSales.forEach((row) => {
+      const employeeId = String(row.employee_id);
 
-const leaderboard = useMemo(() => {
-    
-  const totals: Record<
-    string,
-    {
-      employee_id: string;
-      sales: number;
-      collection: number;
-    }
-  > = {};
+      if (!employeeId) return;
 
-  
-  allSales.forEach((row) => {
-    const employeeId = String(row.employee_id);
+      if (!totals[employeeId]) {
+        totals[employeeId] = {
+          employee_id: employeeId,
+          sales: 0,
+          collection: 0,
+        };
+      }
 
-    if (!employeeId) return;
+      totals[employeeId].sales += Number(row.sales || 0);
+      totals[employeeId].collection += Number(row.collection || 0);
+    });
 
-    if (!totals[employeeId]) {
-      totals[employeeId] = {
-        employee_id: employeeId,
-        sales: 0,
-        collection: 0,
-      };
-    }
-
-    totals[employeeId].sales += Number(row.sales || 0);
-    totals[employeeId].collection += Number(row.collection || 0);
-  });
-
-  return Object.values(totals).sort(
-    (a, b) => b.sales - a.sales
-  );
-  
-}, [allSales]);
-  
+    return Object.values(totals).sort((a, b) => b.sales - a.sales);
+  }, [allSales]);
 
   const totalVisits = visits.length;
 
@@ -303,142 +295,127 @@ const leaderboard = useMemo(() => {
         date,
         count,
         level:
-  count >= 5
-    ? 4
-    : count >= 3
-    ? 3
-    : count >= 2
-    ? 2
-    : count >= 1
-    ? 1
-    : 0
+          count >= 5 ? 4 : count >= 3 ? 3 : count >= 2 ? 2 : count >= 1 ? 1 : 0,
       })),
     ];
   }, [visits]);
 
- const getEmployeeName = (employeeId: string) => {
-  return (
-    employees.find(
-      (e: any) => String(e.id) === String(employeeId)
-    )?.full_name || "Unknown"
-  );
-};
+  const getEmployeeName = (employeeId: string) => {
+    return (
+      employees.find((e: any) => String(e.id) === String(employeeId))
+        ?.full_name || "Unknown"
+    );
+  };
 
   const currentUserName =
     employees.find((e: any) => e.google_id === currentUser?.id)?.full_name ||
     "You";
 
- const last3Months = useMemo(() => {
-  const endDate = new Date();
+  const last3Months = useMemo(() => {
+    const endDate = new Date();
 
-  const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - 3);
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 3);
 
-  const activityMap = new Map(
-    calendarData.map((item) => [item.date, item])
-  );
+    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
 
-  const days = [];
+    const days = [];
 
-  for (
-    let d = new Date(startDate);
-    d <= endDate;
-    d.setDate(d.getDate() + 1)
-  ) {
-    const date = d.toISOString().split("T")[0];
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const date = d.toISOString().split("T")[0];
 
-    days.push(
-      activityMap.get(date) || {
-        date,
-        count: 0,
-        level: 0,
-      }
-    );
-  }
+      days.push(
+        activityMap.get(date) || {
+          date,
+          count: 0,
+          level: 0,
+        },
+      );
+    }
 
-  return days;
-}, [calendarData]);
+    return days;
+  }, [calendarData]);
   const currentYearData = useMemo(() => {
-  const year = new Date().getFullYear();
+    const year = new Date().getFullYear();
 
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date();
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date();
 
-  const activityMap = new Map(
-    calendarData.map((item) => [item.date, item])
-  );
+    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
 
-  const days = [];
+    const days = [];
 
-  for (
-    let d = new Date(startDate);
-    d <= endDate;
-    d.setDate(d.getDate() + 1)
-  ) {
-    const date = d.toISOString().split("T")[0];
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const date = d.toISOString().split("T")[0];
 
-    days.push(
-      activityMap.get(date) || {
-        date,
-        count: 0,
-        level: 0,
-      }
-    );
-  }
+      days.push(
+        activityMap.get(date) || {
+          date,
+          count: 0,
+          level: 0,
+        },
+      );
+    }
 
-  return days;
-}, [calendarData]);
+    return days;
+  }, [calendarData]);
 
   const [range, setRange] = useState("3m");
- const last30Days = useMemo(() => {
-  const endDate = new Date();
+  const last30Days = useMemo(() => {
+    const endDate = new Date();
 
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 30);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
 
-  const activityMap = new Map(
-    calendarData.map((item) => [item.date, item])
+    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
+
+    const days = [];
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const date = d.toISOString().split("T")[0];
+
+      days.push(
+        activityMap.get(date) || {
+          date,
+          count: 0,
+          level: 0,
+        },
+      );
+    }
+
+    return days;
+  }, [calendarData]);
+
+  const displayData = useMemo(() => {
+    return range === "1m"
+      ? last30Days
+      : range === "3m"
+        ? last3Months
+        : currentYearData;
+  }, [range, last30Days, last3Months, currentYearData]);
+
+  const currentEmployee = employees.find(
+    (e: any) => e.google_id === currentUser?.id,
   );
 
-  const days = [];
+  const myRank =
+    leaderboard.findIndex(
+      (item) => String(item.employee_id) === String(currentEmployee?.id),
+    ) + 1;
 
-  for (
-    let d = new Date(startDate);
-    d <= endDate;
-    d.setDate(d.getDate() + 1)
-  ) {
-    const date = d.toISOString().split("T")[0];
-
-    days.push(
-      activityMap.get(date) || {
-        date,
-        count: 0,
-        level: 0,
-      }
-    );
-  }
-
-  return days;
-}, [calendarData]);
-
-const displayData = useMemo(() => {
-  return range === "1m"
-    ? last30Days
-    : range === "3m"
-    ? last3Months
-    : currentYearData;
-}, [range, last30Days, last3Months, currentYearData]);
-
-
-const currentEmployee = employees.find(
-  (e: any) => e.google_id === currentUser?.id
-);
-
-const myRank =
-  leaderboard.findIndex(
-    (item) =>
-      String(item.employee_id) === String(currentEmployee?.id)
-  ) + 1;
+  const isMobile = window.innerWidth < 640;
 
   if (loading) {
     return (
@@ -587,39 +564,45 @@ const myRank =
         {/* Middle */}
 
         <Card title="🏆 Product Distribution">
-          <ResponsiveContainer width="100%" height={320}>
-            <PieChart>
-              <Pie
-                data={productData}
-                dataKey="count"
-                nameKey="name"
-                innerRadius={70}
-                outerRadius={120}
-                paddingAngle={4}
-                labelLine={false}
-                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-              >
-                {productData.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+          <div className="h-[250px] sm:h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={productData}
+                  dataKey="count"
+                  nameKey="name"
+                  innerRadius={isMobile ? 35 : 70}
+                  outerRadius={isMobile ? 70 : 120}
+                  paddingAngle={4}
+                  labelLine={false}
+                  label={
+                    isMobile
+                      ? false
+                      : ({ percent }) => `${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {productData.map((_, index) => (
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
 
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  borderRadius: "16px",
-                  border: "none",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    borderRadius: "16px",
+                    border: "none",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2">
             {productData.slice(0, 5).map((item, index) => (
               <div
                 key={item.name}
-                className="flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1"
+                className="flex items-center gap-2 rounded-full bg-gray-50 px-2 py-1 text-xs sm:px-3 sm:py-1 sm:text-sm"
               >
                 <div
                   className="h-3 w-3 rounded-full"
@@ -627,7 +610,10 @@ const myRank =
                     background: COLORS[index % COLORS.length],
                   }}
                 />
-                <span className="text-sm">{item.name}</span>
+
+                <span className="truncate max-w-[100px] sm:max-w-none">
+                  {item.name}
+                </span>
               </div>
             ))}
           </div>
@@ -714,121 +700,119 @@ const myRank =
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Card title="Top Doctors">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-3 text-left">Doctor</th>
+            <div className="overflow-x-auto">
+              <table className="min-w-[300px] w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-3 text-left">Doctor</th>
 
-                  <th className="py-3 text-right">Visits</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {topDoctors.map((doctor) => (
-                  <tr key={doctor.doctor} className="border-b">
-                    <td className="py-3">{doctor.doctor}</td>
-
-                    <td className="py-3 text-right">{doctor.visits}</td>
+                    <th className="py-3 text-right">Visits</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {topDoctors.map((doctor) => (
+                    <tr key={doctor.doctor} className="border-b">
+                      <td className="py-3">{doctor.doctor}</td>
+
+                      <td className="py-3 text-right">{doctor.visits}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
 
           <Card title="">
-  <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-    <div>
-      <h2 className="text-xl font-bold text-gray-900">
-        🔥 Activity Overview
-      </h2>
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  🔥 Activity Overview
+                </h2>
 
-      <p className="mt-1 text-sm text-gray-500">
-        Track your daily doctor visit activity and consistency
-      </p>
-    </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Track your daily doctor visit activity and consistency
+                </p>
+              </div>
 
-    <div className="flex items-center gap-3">
-      <div className="flex rounded-2xl bg-gray-100 p-1">
-        {[
-          { key: "1m", label: "1 Month" },
-          { key: "3m", label: "3 Months" },
-          { key: "1y", label: "1 Year" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setRange(item.key)}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-              range === item.key
-                ? "bg-white text-green-600 shadow-md"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex rounded-2xl bg-gray-100 p-1">
+                  {[
+                    { key: "1m", label: "1 Month" },
+                    { key: "3m", label: "3 Months" },
+                    { key: "1y", label: "1 Year" },
+                  ].map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => setRange(item.key)}
+                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                        range === item.key
+                          ? "bg-white text-green-600 shadow-md"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-  <div className="mb-6 grid gap-4 md:grid-cols-3">
-    <div className="rounded-2xl bg-green-50 p-4">
-      <p className="text-xs text-gray-500">
-        Total Visits
-      </p>
+            <div className="mb-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl bg-green-50 p-4">
+                <p className="text-xs text-gray-500">Total Visits</p>
 
-      <p className="mt-1 text-3xl font-bold text-green-700">
-        {totalVisits}
-      </p>
-    </div>
+                <p className="mt-1 text-3xl font-bold text-green-700">
+                  {totalVisits}
+                </p>
+              </div>
 
-    <div className="rounded-2xl bg-blue-50 p-4">
-      <p className="text-xs text-gray-500">
-        Doctors Covered
-      </p>
+              <div className="rounded-2xl bg-blue-50 p-4">
+                <p className="text-xs text-gray-500">Doctors Covered</p>
 
-      <p className="mt-1 text-3xl font-bold text-blue-700">
-        {doctorsCovered}
-      </p>
-    </div>
+                <p className="mt-1 text-3xl font-bold text-blue-700">
+                  {doctorsCovered}
+                </p>
+              </div>
 
-    <div className="rounded-2xl bg-orange-50 p-4">
-      <p className="text-xs text-gray-500">
-        Products Promoted
-      </p>
+              <div className="rounded-2xl bg-orange-50 p-4">
+                <p className="text-xs text-gray-500">Products Promoted</p>
 
-      <p className="mt-1 text-3xl font-bold text-orange-700">
-        {productsPromoted}
-      </p>
-    </div>
-  </div>
+                <p className="mt-1 text-3xl font-bold text-orange-700">
+                  {productsPromoted}
+                </p>
+              </div>
+            </div>
 
-  <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white p-4">
-    <ActivityCalendar
-      data={displayData}
-      blockSize={16}
-      blockMargin={4}
-      fontSize={14}
-      showWeekdayLabels
-      theme={{
-        light: [
-          "#fafaf9",
-          "#dcfce7",
-          "#86efac",
-          "#22c55e",
-          "#166534",
-        ],
-        dark: [
-          "#1e293b",
-          "#14532d",
-          "#16a34a",
-          "#22c55e",
-          "#15803d",
-        ],
-      }}
-    />
-  </div>
+            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white p-4">
+              <div className="w-max sm:w-full">
+                <ActivityCalendar
+                  data={displayData}
+                  blockSize={isMobile ? 8 : 16}
+                  blockMargin={isMobile ? 2 : 4}
+                  fontSize={12}
+                  showWeekdayLabels
+                  theme={{
+                    light: [
+                      "#fafaf9",
+                      "#dcfce7",
+                      "#86efac",
+                      "#22c55e",
+                      "#166534",
+                    ],
+                    dark: [
+                      "#1e293b",
+                      "#14532d",
+                      "#16a34a",
+                      "#22c55e",
+                      "#15803d",
+                    ],
+                  }}
+                />
+              </div>
+            </div>
 
-  {/* <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            {/* <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-600">
     <span>Activity Level:</span>
 
     <div className="flex items-center gap-2">
@@ -856,7 +840,7 @@ const myRank =
       Very High
     </div>
   </div> */}
-</Card>
+          </Card>
         </div>
       </div>
     </div>
