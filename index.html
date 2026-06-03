@@ -38,18 +38,27 @@
     />
 
     <meta property="og:type" content="website" />
-
+    <meta property="og:title" content="Pleasure Pharmaceuticals Pvt. Ltd." />
+    <meta
+      property="og:description"
+      content="Trusted veterinary pharmaceutical company in Delhi since 2006."
+    />
+    <meta property="og:url" content="https://pleasurepharmaceuticals.in/" />
+    
     <meta
       property="og:image"
-      content="https://pleasurepharmaceuticals.in/hero.webp"
+      content="https://pleasurepharmaceuticals.in/image.png"
     />
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-
+    <meta name="twitter:title" content="Pleasure Pharmaceuticals Pvt. Ltd." />
+    <meta
+      name="twitter:description"
+      content="Trusted veterinary pharmaceutical company in Delhi since 2006."
+    />
     <meta
       name="twitter:image"
-      content="https://pleasurepharmaceuticals.in/hero.webp"
+      content="https://pleasurepharmaceuticals.in/image.png"
     />
 
     <!-- Fonts -->
@@ -69,18 +78,15 @@
   <body>
     <div id="root"></div>
 
-<script>
-const loadGoogleAuth = () => {
-  const script = document.createElement("script");
-  script.src = "https://accounts.google.com/gsi/client";
-  script.async = true;
-  document.body.appendChild(script);
-};
-</script>
+    <script>
+      const loadGoogleAuth = () => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        document.body.appendChild(script);
+      };
+    </script>
 
-<script
-  type="module"
-  src="/src/main.tsx"
-></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
