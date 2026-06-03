@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://pleasurepharmaceuticals.vercel.app/sitemap.xml
+Sitemap: https://pleasurepharmaceuticals.in/sitemap.xml
