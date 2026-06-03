@@ -6,9 +6,6 @@ export default function PrivacyPolicy() {
           Privacy Policy
         </h1>
 
-        <p className="mb-8 text-muted-foreground">
-          Last Updated: May 2026
-        </p>
 
         <div className="space-y-8 text-sm leading-7 text-foreground/80">
           <section>
@@ -130,7 +127,7 @@ export default function PrivacyPolicy() {
             <p>
               Pleasure Pharmaceuticals Pvt. Ltd.
               <br />
-              Email: privacy@pleasurepharma.in
+              Email: pleasurepharmaceuticals@gmail.com
             </p>
           </section>
 
