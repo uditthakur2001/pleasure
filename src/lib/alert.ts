@@ -1,15 +1,10 @@
-// import Swal from "sweetalert2";
-const getSwal = async () => {
-  const module = await import("sweetalert2");
-  return module.default;
-};
+import Swal from "sweetalert2";
 
-export const successAlert = async (
+
+export const successAlert = (
   title: string,
   text?: string,
 ) => {
-  const Swal = await getSwal();
-
   return Swal.fire({
     icon: "success",
     title,
@@ -22,12 +17,10 @@ export const successAlert = async (
   });
 };
 
-export const errorAlert = async (
+export const errorAlert = (
   title: string,
   text?: string,
 ) => {
-  const Swal = await getSwal();
-
   return Swal.fire({
     icon: "error",
     title,
@@ -38,12 +31,10 @@ export const errorAlert = async (
   });
 };
 
-export const warningAlert = async (
+export const warningAlert = (
   title: string,
   text?: string,
 ) => {
-  const Swal = await getSwal();
-
   return Swal.fire({
     icon: "warning",
     title,
@@ -54,12 +45,10 @@ export const warningAlert = async (
   });
 };
 
-export const confirmAlert = async (
+export const confirmAlert = (
   title: string,
   text?: string,
 ) => {
-  const Swal = await getSwal();
-
   return Swal.fire({
     icon: "question",
     title,
