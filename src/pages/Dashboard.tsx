@@ -490,6 +490,13 @@ ${localStorage.getItem("employeeName")}
         return;
       }
 
+      if (!sales && !collections) {
+  warningAlert(
+    "Enter Value",
+    "Please enter Sales or Collection amount"
+  );
+  return;
+}
       const { error } = await supabase.from("employee_sales").insert([
         {
           employee_id: employee.id,
@@ -508,6 +515,10 @@ ${localStorage.getItem("employeeName")}
     } catch (err) {
       console.log(err);
     }
+    setSales("");
+setCollections("");
+
+await fetchDailySales(selectedDate);
   };
 
   const [dailySales, setDailySales] = useState(0);
@@ -804,53 +815,50 @@ ${localStorage.getItem("employeeName")}
             </div>
           </div>
           {/* RIGHT SIDE */}
-          <div className="lg:col-span-3 flex flex-col h-full">
-            {/* SALES */}
-            <div className="rounded-2xl border bg-white p-3 shadow-sm flex-1">
-              <label className="block text-sm font-medium mb-1">Sales</label>
+<div className="lg:col-span-3">
+  <div className="rounded-3xl border bg-white p-4 shadow-sm">
+    {/* <h3 className="mb-4 text-lg font-semibold">
+      Sales & Collection
+    </h3> */}
 
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={sales}
-                  onChange={(e) => setSales(e.target.value)}
-                  placeholder="Enter Sales Amount"
-                  className="flex-1 rounded-xl border px-2 py-3"
-                />
+    <div className="space-y-4">
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Sales
+        </label>
 
-                <button
-                  onClick={saveSalesCollection}
-                  className="rounded-xl bg-green-600 px-4 text-white"
-                >
-                  ✓
-                </button>
-              </div>
-            </div>
+        <input
+          type="number"
+          value={sales}
+          onChange={(e) => setSales(e.target.value)}
+          placeholder="Enter Sales Amount"
+          className="w-full rounded-xl border px-3 py-3"
+        />
+      </div>
 
-            {/* COLLECTION */}
-            <div className="rounded-2xl border bg-white p-3 shadow-sm flex-1 mt-4">
-              <label className="block text-sm font-medium mb-1">
-                Collection
-              </label>
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Collection
+        </label>
 
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={collections}
-                  onChange={(e) => setCollections(e.target.value)}
-                  placeholder="Enter Collection Amount"
-                  className="flex-1 rounded-xl border px-2 py-3"
-                />
+        <input
+          type="number"
+          value={collections}
+          onChange={(e) => setCollections(e.target.value)}
+          placeholder="Enter Collection Amount"
+          className="w-full rounded-xl border px-3 py-3"
+        />
+      </div>
 
-                <button
-                  onClick={saveSalesCollection}
-                  className="rounded-xl bg-blue-600 px-4 text-white"
-                >
-                  ✓
-                </button>
-              </div>
-            </div>
-          </div>
+      <button
+        onClick={saveSalesCollection}
+        className="w-full rounded-xl bg-green-600 py-3 font-medium text-white transition hover:bg-green-700"
+      >
+        Save ✓
+      </button>
+    </div>
+  </div>
+</div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 mt-4">

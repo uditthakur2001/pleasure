@@ -70,6 +70,7 @@ export default function EmployeeAnalytics() {
   const [statsRange, setStatsRange] = useState<"week" | "month" | "year">(
     "month",
   );
+  const [leaderboardSales, setLeaderboardSales] = useState<any[]>([]);
 
   useEffect(() => {
     loadAnalytics();
@@ -131,6 +132,42 @@ export default function EmployeeAnalytics() {
         .eq("employee_id", user.id)
         .order("created_at", { ascending: false });
 
+      const { data: employeeData } = await supabase
+        .from("employee")
+        .select("id, google_id, full_name");
+
+      setEmployees(employeeData || []);
+
+
+      const employeeRecord = employeeData?.find(
+        (e) => e.google_id === user.id,
+      );
+      // Load ALL sales for leaderboard
+      const { data: allSalesData } = await supabase
+        .from("employee_sales")
+        .select("*");
+
+      setLeaderboardSales(allSalesData || []);
+
+      if (employeeRecord) {
+  const { data: salesData } = await supabase
+    .from("employee_sales")
+    .select("*")
+    .eq("employee_id", employeeRecord.id);
+
+  setAllSales(salesData || []);
+}
+
+      // Load ONLY current employee sales for cards
+      if (currentEmployee) {
+        const { data: salesData } = await supabase
+          .from("employee_sales")
+          .select("*")
+          .eq("employee_id", currentEmployee.id);
+
+        setAllSales(salesData || []);
+      }
+
       if (error) throw error;
 
       setVisits(data || []);
@@ -139,21 +176,6 @@ export default function EmployeeAnalytics() {
     } finally {
       setLoading(false);
     }
-
-    const { data: employeeData } = await supabase
-      .from("employee")
-      .select("id, google_id, full_name");
-
-    setEmployees(employeeData || []);
-    const getEmployeeName = (employeeId: string) => {
-      return employees.find((e) => e.id === employeeId)?.full_name || "Unknown";
-    };
-
-    const { data: salesData } = await supabase
-      .from("employee_sales")
-      .select("*");
-
-    setAllSales(salesData || []);
   };
 
   const leaderboard = useMemo(() => {
@@ -566,7 +588,6 @@ export default function EmployeeAnalytics() {
             ))}
           </div>
         </Card>
-
 
         {/* Bottom */}
 
