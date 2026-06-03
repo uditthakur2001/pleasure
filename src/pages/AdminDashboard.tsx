@@ -4,10 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { supabase } from "@/lib/supabase";
 
-import {
-  DndContext,
-  closestCenter,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter } from "@dnd-kit/core";
 
 import {
   SortableContext,
@@ -60,7 +57,6 @@ interface DoctorEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
-const productFormRef = useRef<HTMLDivElement>(null);
 
 const COLORS = [
   "#0f766e",
@@ -82,15 +78,10 @@ function SortableImage({
   index: number;
   onRemove: () => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: image,
-  });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: image,
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -98,34 +89,30 @@ function SortableImage({
   };
 
   return (
-    <div
-  ref={setNodeRef}
-  style={style}
-  className="relative"
->
+    <div ref={setNodeRef} style={style} className="relative">
       <img
-  src={image}
-  alt=""
-  {...attributes}
-  {...listeners}
-  className="h-20 w-20 rounded-xl border object-cover cursor-move"
-/>
+        src={image}
+        alt=""
+        {...attributes}
+        {...listeners}
+        className="h-20 w-20 rounded-xl border object-cover cursor-move"
+      />
 
       <div className="absolute left-1 top-1 rounded bg-black/70 px-1 text-xs text-white">
         {index + 1}
       </div>
 
       <button
-  type="button"
-  onPointerDown={(e) => e.stopPropagation()}
-  onClick={(e) => {
-    e.stopPropagation();
-    onRemove();
-  }}
-  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow z-50"
->
-  ✕
-</button> 
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow z-50"
+      >
+        ✕
+      </button>
     </div>
   );
 }
@@ -322,7 +309,7 @@ export default function AdminDashboard() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    [ emp.full_name, emp.phone, emp.email, emp.role]
+    [emp.full_name, emp.phone, emp.email, emp.role]
       .join(" ")
       .toLowerCase()
       .includes(employeeSearch.toLowerCase()),
@@ -429,6 +416,16 @@ export default function AdminDashboard() {
       setProductsData(data);
     }
   };
+  const [productSearch, setProductSearch] = useState("");
+const productFormRef = useRef<HTMLDivElement>(null);
+
+
+  const filteredProducts = productsData.filter((product) =>
+    [product.name, product.category, product.tagline, product.composition]
+      .join(" ")
+      .toLowerCase()
+      .includes(productSearch.toLowerCase()),
+  );
 
   const uploadProductImage = async (file: File) => {
     const fileName = `${Date.now()}-${file.name}`;
@@ -573,45 +570,36 @@ export default function AdminDashboard() {
 
   //drag n drop arrange
   const handleImageDragEnd = (event: any) => {
-  const { active, over } = event;
+    const { active, over } = event;
 
-  if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) return;
 
-  setProductImages((items) => {
-    const oldIndex = items.indexOf(active.id);
-    const newIndex = items.indexOf(over.id);
+    setProductImages((items) => {
+      const oldIndex = items.indexOf(active.id);
+      const newIndex = items.indexOf(over.id);
 
-    return arrayMove(items, oldIndex, newIndex);
-  });
-};
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  };
 
-const handleVariantImageDragEnd = (
-  variantIndex: number,
-  event: any,
-) => {
-  const { active, over } = event;
+  const handleVariantImageDragEnd = (variantIndex: number, event: any) => {
+    const { active, over } = event;
 
-  if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) return;
 
-  setProductVariants((prev) => {
-    const updated = [...prev];
+    setProductVariants((prev) => {
+      const updated = [...prev];
 
-    const images = [...updated[variantIndex].images];
+      const images = [...updated[variantIndex].images];
 
-    const oldIndex = images.indexOf(active.id);
-    const newIndex = images.indexOf(over.id);
+      const oldIndex = images.indexOf(active.id);
+      const newIndex = images.indexOf(over.id);
 
-    updated[variantIndex].images = arrayMove(
-      images,
-      oldIndex,
-      newIndex,
-    );
+      updated[variantIndex].images = arrayMove(images, oldIndex, newIndex);
 
-    return updated;
-  });
-};
-
-
+      return updated;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
@@ -788,7 +776,10 @@ const handleVariantImageDragEnd = (
             </div>
 
             {/* FORM */}
-            <div className="grid gap-4 p-5 lg:grid-cols-2">
+            <div
+  ref={productFormRef}
+  className="grid gap-4 p-5 lg:grid-cols-2"
+>
               {/* PRODUCT NAME */}
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-gray-700">
@@ -1026,75 +1017,67 @@ const handleVariantImageDragEnd = (
                         />
 
                         <DndContext
-  collisionDetection={closestCenter}
-  onDragEnd={(event) =>
-    handleVariantImageDragEnd(
-      variantIndex,
-      event,
-    )
-  }
->
-  <SortableContext
-    items={variant.images || []}
-    strategy={rectSortingStrategy}
-  >
-    <div className="mt-4 flex flex-wrap gap-3">
-      {variant.images?.map(
-        (img: string, i: number) => (
-          <SortableImage
-            key={img}
-            image={img}
-            index={i}
-            onRemove={() => {
-              const updated = [...productVariants];
+                          collisionDetection={closestCenter}
+                          onDragEnd={(event) =>
+                            handleVariantImageDragEnd(variantIndex, event)
+                          }
+                        >
+                          <SortableContext
+                            items={variant.images || []}
+                            strategy={rectSortingStrategy}
+                          >
+                            <div className="mt-4 flex flex-wrap gap-3">
+                              {variant.images?.map((img: string, i: number) => (
+                                <SortableImage
+                                  key={img}
+                                  image={img}
+                                  index={i}
+                                  onRemove={() => {
+                                    const updated = [...productVariants];
 
-              updated[variantIndex].images =
-                updated[
-                  variantIndex
-                ].images.filter(
-                  (
-                    _: string,
-                    imgIndex: number,
-                  ) => imgIndex !== i,
-                );
+                                    updated[variantIndex].images = updated[
+                                      variantIndex
+                                    ].images.filter(
+                                      (_: string, imgIndex: number) =>
+                                        imgIndex !== i,
+                                    );
 
-              setProductVariants(updated);
-            }}
-          />
-        ),
-      )}
-    </div>
-  </SortableContext>
-</DndContext>
+                                    setProductVariants(updated);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <DndContext
-  collisionDetection={closestCenter}
-  onDragEnd={handleImageDragEnd}
->
-  <SortableContext
-    items={productImages}
-    strategy={rectSortingStrategy}
-  >
-    <div className="mt-4 flex flex-wrap gap-3">
-      {productImages.map((img, index) => (
-        <SortableImage
-          key={img}
-          image={img}
-          index={index}
-          onRemove={() =>
-            setProductImages((prev) =>
-              prev.filter((_, i) => i !== index)
-            )
-          }
-        />
-      ))}
-    </div>
-  </SortableContext>
-</DndContext>
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleImageDragEnd}
+                >
+                  <SortableContext
+                    items={productImages}
+                    strategy={rectSortingStrategy}
+                  >
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      {productImages.map((img, index) => (
+                        <SortableImage
+                          key={img}
+                          image={img}
+                          index={index}
+                          onRemove={() =>
+                            setProductImages((prev) =>
+                              prev.filter((_, i) => i !== index),
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               </div>
             </div>
 
@@ -1121,8 +1104,17 @@ const handleVariantImageDragEnd = (
             <div className="border-t border-border p-5">
               <h3 className="mb-4 text-lg font-semibold">Existing Products</h3>
 
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {productsData.map((product) => (
+                {filteredProducts.map((product) => (
                   <div
                     key={product.id}
                     className="overflow-hidden rounded-2xl border bg-white shadow-sm"
@@ -1156,6 +1148,7 @@ const handleVariantImageDragEnd = (
                         </div>
                       )}
                     </div>
+
                     <div className="p-4">
                       <h3 className="font-semibold">{product.name}</h3>
 
@@ -1192,6 +1185,13 @@ const handleVariantImageDragEnd = (
 
                             setProductImages(product.image_urls || []);
                             setProductVariants(product.variants || []);
+
+                            setTimeout(() => {
+                              productFormRef.current?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "start",
+                              });
+                            }, 100);
                           }}
                           className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm text-white"
                         >
