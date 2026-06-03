@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -60,6 +60,8 @@ interface DoctorEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
+const productFormRef = useRef<HTMLDivElement>(null);
+
 const COLORS = [
   "#0f766e",
   "#1d4ed8",
@@ -97,29 +99,33 @@ function SortableImage({
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="relative cursor-move"
-    >
+  ref={setNodeRef}
+  style={style}
+  className="relative"
+>
       <img
-        src={image}
-        alt=""
-        className="h-20 w-20 rounded-xl border object-cover"
-      />
+  src={image}
+  alt=""
+  {...attributes}
+  {...listeners}
+  className="h-20 w-20 rounded-xl border object-cover cursor-move"
+/>
 
       <div className="absolute left-1 top-1 rounded bg-black/70 px-1 text-xs text-white">
         {index + 1}
       </div>
 
       <button
-        type="button"
-        onClick={onRemove}
-        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
-      >
-        ✕
-      </button>
+  type="button"
+  onPointerDown={(e) => e.stopPropagation()}
+  onClick={(e) => {
+    e.stopPropagation();
+    onRemove();
+  }}
+  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow z-50"
+>
+  ✕
+</button> 
     </div>
   );
 }
@@ -494,6 +500,8 @@ export default function AdminDashboard() {
     }
 
     successAlert(editingProduct ? "Product Updated" : "Product Added");
+
+    await fetchProducts();
 
     resetProductForm();
   };
