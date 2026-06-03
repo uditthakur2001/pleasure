@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 import Select from "react-select";
 
-// import { supabase } from "@/lib/supabase";
-const { supabase } = await import("@/lib/supabase");
+import { supabase } from "@/lib/supabase";
+// const { supabase } = await import("@/lib/supabase");
 
 import { products } from "@/data/products";
 import { DayPicker } from "react-day-picker";
