@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState, useRef } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-// import { supabase } from "@/lib/supabase";
-const { supabase } = await import("@/lib/supabase");
+import { supabase } from "@/lib/supabase";
+// const { supabase } = await import("@/lib/supabase");
 
 import { DndContext, closestCenter } from "@dnd-kit/core";
 
