@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
+const { supabase } = await import("@/lib/supabase");
 import { Menu, X } from "lucide-react";
 
 import { successAlert, confirmAlert } from "@/lib/alert";

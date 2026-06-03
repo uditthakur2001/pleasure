@@ -8,7 +8,9 @@ import heroImg from "@/assets/hero-farmer-cattle.webp";
 import storeImg from "@/assets/store.webp";
 import { useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
+const { supabase } = await import("@/lib/supabase");
+
 const Home = () => {
   const [productsData, setProductsData] = useState<any[]>([]);
 

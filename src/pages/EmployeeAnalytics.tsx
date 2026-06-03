@@ -13,7 +13,9 @@ import {
   AreaChart,
 } from "recharts";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabase";
+// import { supabase } from "../lib/supabase";
+const { supabase } = await import("../lib/supabase");
+
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 

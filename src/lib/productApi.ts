@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
+const { supabase } = await import("@/lib/supabase");
 
 export const fetchProducts = async () => {
   const { data, error } = await supabase.from("products").select("*");
