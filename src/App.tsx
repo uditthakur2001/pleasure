@@ -53,7 +53,19 @@ function AdminRoute({ children }: { children: JSX.Element }) {
 }
 
 function EmployeeRoute({ children }: { children: JSX.Element }) {
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const role = localStorage.getItem("role");
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // block admins only
+  if (role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return children;
 }
 
 const App = () => {

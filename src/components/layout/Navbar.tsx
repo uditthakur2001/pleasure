@@ -16,14 +16,6 @@ const publicLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-const role = localStorage.getItem("role");
-
-const dashboardLink = {
-  to: role === "admin" ? "/admin" : "/dashboard",
-
-  label: "Dashboard",
-};
-
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,6 +27,13 @@ export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("isLoggedIn"),
   );
+  const [role, setRole] = useState(
+  localStorage.getItem("role") || "",
+);
+const dashboardLink = {
+  to: role === "admin" ? "/admin" : "/dashboard",
+  label: "Dashboard",
+};
 
   useEffect(() => {
     const onScroll = () => {
@@ -50,9 +49,10 @@ export const Navbar = () => {
     };
   }, []);
 
-  useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("isLoggedIn"));
-  }, [location]);
+useEffect(() => {
+  setIsLoggedIn(!!localStorage.getItem("isLoggedIn"));
+  setRole(localStorage.getItem("role") || "");
+}, [location]);
 
   const logout = async () => {
     const result = await confirmAlert(
@@ -67,6 +67,8 @@ export const Navbar = () => {
 
     // CLEAR STORAGE
     localStorage.removeItem("isLoggedIn");
+
+    localStorage.removeItem("role");
 
     localStorage.removeItem("employeeName");
 
