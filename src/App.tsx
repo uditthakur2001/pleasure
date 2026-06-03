@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { useEffect, lazy, Suspense } from "react";
-// import { supabase } from "@/lib/supabase";
-const { supabase } = await import("@/lib/supabase");
+import { supabase } from "@/lib/supabase";
+// const { supabase } = await import("@/lib/supabase");
 import { Navbar } from "@/components/layout/Navbar";
 
 const Home = lazy(() => import("./pages/Home"));
