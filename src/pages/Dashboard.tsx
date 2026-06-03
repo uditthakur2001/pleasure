@@ -491,12 +491,9 @@ ${localStorage.getItem("employeeName")}
       }
 
       if (!sales && !collections) {
-  warningAlert(
-    "Enter Value",
-    "Please enter Sales or Collection amount"
-  );
-  return;
-}
+        warningAlert("Enter Value", "Please enter Sales or Collection amount");
+        return;
+      }
       const { error } = await supabase.from("employee_sales").insert([
         {
           employee_id: employee.id,
@@ -516,9 +513,9 @@ ${localStorage.getItem("employeeName")}
       console.log(err);
     }
     setSales("");
-setCollections("");
+    setCollections("");
 
-await fetchDailySales(selectedDate);
+    await fetchDailySales(selectedDate);
   };
 
   const [dailySales, setDailySales] = useState(0);
@@ -627,10 +624,10 @@ await fetchDailySales(selectedDate);
         </div>
 
         {/* ROWS */}
-        <div className="grid gap-6 lg:grid-cols-12 mb-6 ">
-          {/* LEFT SIDE */}
-          <div className="lg:col-span-9">
-            <div className="space-y-5">
+        {/* <div className="grid gap-6 lg:grid-cols-12 mb-6 "> */}
+        <div className="grid gap-4 mb-6">
+          <div>
+            <div>
               {rows
                 .filter((row) => !row.id)
                 .map((row, index) => (
@@ -638,27 +635,12 @@ await fetchDailySales(selectedDate);
                     key={index}
                     className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
                   >
-                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_2fr]">
-                      {/* DATE */}
-                      <div>
-                        <label className="mb-1 block text-sm font-medium">
-                          Date
-                        </label>
-
-                        <input
-                          type="date"
-                          value={row.date}
-                          disabled={!!row.id}
-                          min={today}
-                          max={today}
-                          onChange={(e) =>
-                            handleChange(index, "date", e.target.value)
-                          }
-                          className="w-full rounded-xl border border-border px-4 py-3"
-                        />
-                      </div>
-
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Doctor Visit
+                    </div>
+                    <div className="grid items-end gap-4 xl:grid-cols-[1.4fr_1.4fr_3fr_4fr]">
                       {/* DOCTOR */}
+
                       <div>
                         <label className="mb-1 block text-sm font-medium">
                           Doctor Name
@@ -726,69 +708,100 @@ await fetchDailySales(selectedDate);
                         />
                       </div>
 
-                      {/* PRODUCTS */}
                       <div>
                         <label className="mb-1 block text-sm font-medium">
                           Products
                         </label>
 
-                        <Select
-                          isMulti
-                          isDisabled={!!row.id}
-                          menuPortalTarget={document.body}
-                          menuPosition="fixed"
-                          options={productOptions}
-                          closeMenuOnSelect={false}
-                          hideSelectedOptions={false}
-                          menuPlacement="auto"
-                          value={productOptions.filter((option) =>
-                            row.product.includes(option.value),
+                        <div className="flex items-end gap-3">
+                          <div className="flex-1">
+                            <Select
+                              isMulti
+                              isDisabled={!!row.id}
+                              menuPortalTarget={document.body}
+                              menuPosition="fixed"
+                              options={productOptions}
+                              closeMenuOnSelect={false}
+                              hideSelectedOptions={false}
+                              menuPlacement="auto"
+                              value={productOptions.filter((option) =>
+                                row.product.includes(option.value),
+                              )}
+                              onChange={(selected) =>
+                                handleChange(
+                                  index,
+                                  "product",
+                                  selected.map((item) => item.value),
+                                )
+                              }
+                              styles={{
+                                control: (base) => ({
+                                  ...base,
+                                  minHeight: 54,
+                                  borderRadius: 14,
+                                }),
+                              }}
+                            />
+                          </div>
+
+                          {!row.id && (
+                            <button
+                              onClick={() => saveSingleRow(row)}
+                              className="h-[56px] whitespace-nowrap rounded-xl bg-primary px-6 text-white"
+                            >
+                              Add Data
+                            </button>
                           )}
-                          onChange={(selected) =>
-                            handleChange(
-                              index,
-                              "product",
-                              selected.map((item) => item.value),
-                            )
-                          }
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              minHeight: 54,
-                              borderRadius: 14,
-                              borderColor: "#e5e7eb",
-                              boxShadow: "none",
-                              paddingInline: 4,
-                            }),
+                        </div>
+                        {/* </div> */}
+                      </div>
+                      <div>
+                        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          Daily Reporting
+                        </div>
 
-                            menu: (base) => ({
-                              ...base,
-                              zIndex: 9999,
-                              borderRadius: 14,
-                              overflow: "hidden",
-                            }),
+                        <div className="flex items-end gap-3">
+                          <div className="flex-1">
+                            <label className="mb-1 block text-sm font-medium">
+                              Sales
+                            </label>
 
-                            menuList: (base) => ({
-                              ...base,
-                              maxHeight: 220,
-                            }),
+                            <input
+                              type="number"
+                              value={sales}
+                              onChange={(e) => setSales(e.target.value)}
+                              placeholder="Sales"
+                              className="h-[56px] w-full rounded-xl border px-4"
+                            />
+                          </div>
 
-                            multiValue: (base) => ({
-                              ...base,
-                              borderRadius: 999,
-                              paddingInline: 4,
-                            }),
-                            menuPortal: (base) => ({
-                              ...base,
-                              zIndex: 9999,
-                            }),
-                          }}
-                        />
+                          <div className="flex-1">
+                            <label className="mb-1 block text-sm font-medium">
+                              Collection
+                            </label>
+
+                            <input
+                              type="number"
+                              value={collections}
+                              onChange={(e) => setCollections(e.target.value)}
+                              placeholder="Collection"
+                              className="h-[56px] w-full rounded-xl border px-4"
+                            />
+                          </div>
+
+                          <button
+                            onClick={saveSalesCollection}
+                            className="h-[56px] w-[56px] shrink-0 rounded-xl bg-green-600 text-xl text-white"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                     </div>
 
                     {/* ACTIONS */}
-                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    {/* <div className="mt-5 flex flex-wrap items-center justify-between gap-3"> */}
+                    <div className="mt-5 flex flex-wrap gap-2">
                       {supportsContactPicker && (
                         <button
                           type="button"
@@ -798,67 +811,12 @@ await fetchDailySales(selectedDate);
                           Pick Contact
                         </button>
                       )}
-
-                      <div className="flex flex-wrap gap-2">
-                        {!row.id && (
-                          <button
-                            onClick={() => saveSingleRow(row)}
-                            className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white transition-all duration-200 hover:scale-[1.02]"
-                          >
-                            Add Data
-                          </button>
-                        )}
-                      </div>
                     </div>
                   </div>
+                  // </div>
                 ))}
             </div>
           </div>
-          {/* RIGHT SIDE */}
-<div className="lg:col-span-3">
-  <div className="rounded-3xl border bg-white p-4 shadow-sm">
-    {/* <h3 className="mb-4 text-lg font-semibold">
-      Sales & Collection
-    </h3> */}
-
-    <div className="space-y-4">
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Sales
-        </label>
-
-        <input
-          type="number"
-          value={sales}
-          onChange={(e) => setSales(e.target.value)}
-          placeholder="Enter Sales Amount"
-          className="w-full rounded-xl border px-3 py-3"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Collection
-        </label>
-
-        <input
-          type="number"
-          value={collections}
-          onChange={(e) => setCollections(e.target.value)}
-          placeholder="Enter Collection Amount"
-          className="w-full rounded-xl border px-3 py-3"
-        />
-      </div>
-
-      <button
-        onClick={saveSalesCollection}
-        className="w-full rounded-xl bg-green-600 py-3 font-medium text-white transition hover:bg-green-700"
-      >
-        Save ✓
-      </button>
-    </div>
-  </div>
-</div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 mt-4">
