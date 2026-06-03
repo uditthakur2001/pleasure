@@ -475,24 +475,22 @@ ${localStorage.getItem("employeeName")}
     return rowDate === selectedDateString;
   });
 
- const saveSalesCollection = async () => {
-  try {
-    const authId = localStorage.getItem("employeeId");
+  const saveSalesCollection = async () => {
+    try {
+      const authId = localStorage.getItem("employeeId");
 
-    const { data: employee, error: employeeError } = await supabase
-      .from("employee")
-      .select("id")
-      .eq("google_id", authId)
-      .single();
+      const { data: employee, error: employeeError } = await supabase
+        .from("employee")
+        .select("id")
+        .eq("google_id", authId)
+        .single();
 
-    if (employeeError || !employee) {
-      errorAlert("Employee Not Found");
-      return;
-    }
+      if (employeeError || !employee) {
+        errorAlert("Employee Not Found");
+        return;
+      }
 
-    const { error } = await supabase
-      .from("employee_sales")
-      .insert([
+      const { error } = await supabase.from("employee_sales").insert([
         {
           employee_id: employee.id,
           sales: Number(sales || 0),
@@ -501,73 +499,65 @@ ${localStorage.getItem("employeeName")}
         },
       ]);
 
-    if (error) {
-      errorAlert("Failed", error.message);
-      return;
+      if (error) {
+        errorAlert("Failed", error.message);
+        return;
+      }
+
+      successAlert("Saved Successfully");
+    } catch (err) {
+      console.log(err);
     }
-
-    successAlert("Saved Successfully");
-  } catch (err) {
-    console.log(err);
-  }
-};
-
+  };
 
   const [dailySales, setDailySales] = useState(0);
-const [dailyCollection, setDailyCollection] = useState(0);
+  const [dailyCollection, setDailyCollection] = useState(0);
 
+  const fetchDailySales = async (date: Date) => {
+    try {
+      const authId = localStorage.getItem("employeeId");
 
-const fetchDailySales = async (date: Date) => {
-  try {
-    const authId = localStorage.getItem("employeeId");
+      if (!authId) return;
 
-    if (!authId) return;
+      const { data: employee, error: employeeError } = await supabase
+        .from("employee")
+        .select("id")
+        .eq("google_id", authId)
+        .single();
 
-    const { data: employee, error: employeeError } = await supabase
-      .from("employee")
-      .select("id")
-      .eq("google_id", authId)
-      .single();
+      if (employeeError || !employee) {
+        console.log("Employee not found");
+        return;
+      }
 
-    if (employeeError || !employee) {
-      console.log("Employee not found");
-      return;
+      const formattedDate = formatDate(date);
+
+      const { data, error } = await supabase
+        .from("employee_sales")
+        .select("*")
+        .eq("employee_id", employee.id)
+        .eq("report_date", formattedDate);
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      const totalSales =
+        data?.reduce((sum, row) => sum + Number(row.sales || 0), 0) || 0;
+
+      const totalCollection =
+        data?.reduce((sum, row) => sum + Number(row.collection || 0), 0) || 0;
+
+      setDailySales(totalSales);
+      setDailyCollection(totalCollection);
+    } catch (err) {
+      console.log(err);
     }
-
-    const formattedDate = formatDate(date);
-
-    const { data, error } = await supabase
-      .from("employee_sales")
-      .select("*")
-      .eq("employee_id", employee.id)
-      .eq("report_date", formattedDate);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    const totalSales =
-      data?.reduce(
-        (sum, row) => sum + Number(row.sales || 0),
-        0,
-      ) || 0;
-
-    const totalCollection =
-      data?.reduce(
-        (sum, row) => sum + Number(row.collection || 0),
-        0,
-      ) || 0;
-
-    setDailySales(totalSales);
-    setDailyCollection(totalCollection);
-  } catch (err) {
-    console.log(err);
-  }
-};
-useEffect(() => {
-  fetchDailySales(selectedDate);
-}, [selectedDate]);
+  };
+  useEffect(() => {
+    fetchDailySales(selectedDate);
+  }, [selectedDate]);
 
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
@@ -583,13 +573,6 @@ useEffect(() => {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {/* <button
-              onClick={addRow}
-              className="rounded-xl bg-secondary px-5 py-3 font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
-            >
-              + Add Row
-            </button> */}
-
             {!supportsContactPicker && contacts.length === 0 && (
               <button
                 onClick={connectGoogle}
@@ -821,8 +804,8 @@ useEffect(() => {
             </div>
           </div>
           {/* RIGHT SIDE */}
-<div className="lg:col-span-3 flex flex-col h-full">
-              {/* SALES */}
+          <div className="lg:col-span-3 flex flex-col h-full">
+            {/* SALES */}
             <div className="rounded-2xl border bg-white p-3 shadow-sm flex-1">
               <label className="block text-sm font-medium mb-1">Sales</label>
 
@@ -933,37 +916,29 @@ useEffect(() => {
           <div className="lg:col-span-8">
             <div className="h-full rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
               <div className="mb-4 flex items-center justify-between">
-                
                 <h2 className="text-xl font-semibold">Doctor Visits</h2>
-                
 
                 <span className="rounded-full bg-green-50 px-3 py-1 text-sm text-green-700">
                   {filteredRows.length} Entries
                 </span>
               </div>
               <div className="mb-4 grid grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-green-50 p-4 border">
+                  <p className="text-sm text-gray-500">Today's Sales</p>
 
-  <div className="rounded-2xl bg-green-50 p-4 border">
-    <p className="text-sm text-gray-500">
-      Today's Sales
-    </p>
+                  <h3 className="mt-2 text-2xl font-bold text-green-700">
+                    ₹{dailySales.toLocaleString()}
+                  </h3>
+                </div>
 
-    <h3 className="mt-2 text-2xl font-bold text-green-700">
-      ₹{dailySales.toLocaleString()}
-    </h3>
-  </div>
+                <div className="rounded-2xl bg-blue-50 p-4 border">
+                  <p className="text-sm text-gray-500">Today's Collection</p>
 
-  <div className="rounded-2xl bg-blue-50 p-4 border">
-    <p className="text-sm text-gray-500">
-      Today's Collection
-    </p>
-
-    <h3 className="mt-2 text-2xl font-bold text-blue-700">
-      ₹{dailyCollection.toLocaleString()}
-    </h3>
-  </div>
-
-</div>
+                  <h3 className="mt-2 text-2xl font-bold text-blue-700">
+                    ₹{dailyCollection.toLocaleString()}
+                  </h3>
+                </div>
+              </div>
 
               {filteredRows.length === 0 ? (
                 <div className="py-10 text-center text-gray-500">

@@ -2,8 +2,6 @@
 
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,14 +11,11 @@ import {
   Cell,
   Area,
   AreaChart,
-  RadialBarChart,
-  RadialBar,
-  BarChart,
-  Bar,
 } from "recharts";
-import { ActivityCalendar } from "react-activity-calendar";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 
 function StatCard({
   title,
@@ -71,6 +66,10 @@ export default function EmployeeAnalytics() {
   const [loading, setLoading] = useState(true);
   const [chartView, setChartView] = useState<"weekly" | "monthly">("monthly");
   const [allSales, setAllSales] = useState<any[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [statsRange, setStatsRange] = useState<"week" | "month" | "year">(
+    "month",
+  );
 
   useEffect(() => {
     loadAnalytics();
@@ -276,28 +275,12 @@ export default function EmployeeAnalytics() {
       .slice(0, 10);
   }, [visits]);
 
-  const calendarData = useMemo(() => {
-    const counts: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      const date = new Date(visit.created_at).toISOString().split("T")[0];
-
-      counts[date] = (counts[date] || 0) + 1;
-    });
-
-    return [
-      {
-        date: "2025-01-01",
-        count: 0,
-        level: 0,
-      },
-      ...Object.entries(counts).map(([date, count]) => ({
-        date,
-        count,
-        level:
-          count >= 5 ? 4 : count >= 3 ? 3 : count >= 2 ? 2 : count >= 1 ? 1 : 0,
-      })),
-    ];
+  const visitDatesSet = useMemo(() => {
+    return new Set(
+      visits.map(
+        (visit) => new Date(visit.created_at).toISOString().split("T")[0],
+      ),
+    );
   }, [visits]);
 
   const getEmployeeName = (employeeId: string) => {
@@ -311,101 +294,6 @@ export default function EmployeeAnalytics() {
     employees.find((e: any) => e.google_id === currentUser?.id)?.full_name ||
     "You";
 
-  const last3Months = useMemo(() => {
-    const endDate = new Date();
-
-    const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - 3);
-
-    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
-
-    const days = [];
-
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const date = d.toISOString().split("T")[0];
-
-      days.push(
-        activityMap.get(date) || {
-          date,
-          count: 0,
-          level: 0,
-        },
-      );
-    }
-
-    return days;
-  }, [calendarData]);
-  const currentYearData = useMemo(() => {
-    const year = new Date().getFullYear();
-
-    const startDate = new Date(year, 0, 1);
-    const endDate = new Date();
-
-    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
-
-    const days = [];
-
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const date = d.toISOString().split("T")[0];
-
-      days.push(
-        activityMap.get(date) || {
-          date,
-          count: 0,
-          level: 0,
-        },
-      );
-    }
-
-    return days;
-  }, [calendarData]);
-
-  const [range, setRange] = useState("3m");
-  const last30Days = useMemo(() => {
-    const endDate = new Date();
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-
-    const activityMap = new Map(calendarData.map((item) => [item.date, item]));
-
-    const days = [];
-
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const date = d.toISOString().split("T")[0];
-
-      days.push(
-        activityMap.get(date) || {
-          date,
-          count: 0,
-          level: 0,
-        },
-      );
-    }
-
-    return days;
-  }, [calendarData]);
-
-  const displayData = useMemo(() => {
-    return range === "1m"
-      ? last30Days
-      : range === "3m"
-        ? last3Months
-        : currentYearData;
-  }, [range, last30Days, last3Months, currentYearData]);
-
   const currentEmployee = employees.find(
     (e: any) => e.google_id === currentUser?.id,
   );
@@ -416,6 +304,87 @@ export default function EmployeeAnalytics() {
     ) + 1;
 
   const isMobile = window.innerWidth < 640;
+
+  const monthVisits = useMemo(() => {
+    return visits.filter((visit) => {
+      const visitDate = new Date(visit.created_at);
+
+      return (
+        visitDate.getMonth() === selectedMonth.getMonth() &&
+        visitDate.getFullYear() === selectedMonth.getFullYear()
+      );
+    });
+  }, [visits, selectedMonth]);
+
+  const daysWorked = useMemo(() => {
+    return new Set(
+      monthVisits.map(
+        (visit) => new Date(visit.created_at).toISOString().split("T")[0],
+      ),
+    ).size;
+  }, [monthVisits]);
+
+  const filteredVisits = useMemo(() => {
+    const now = new Date();
+
+    return visits.filter((visit) => {
+      const d = new Date(visit.created_at);
+
+      if (statsRange === "week") {
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+
+        return d >= weekAgo;
+      }
+
+      if (statsRange === "month") {
+        return (
+          d.getMonth() === now.getMonth() &&
+          d.getFullYear() === now.getFullYear()
+        );
+      }
+
+      return d.getFullYear() === now.getFullYear();
+    });
+  }, [visits, statsRange]);
+
+  const filteredSales = useMemo(() => {
+    const now = new Date();
+
+    return allSales.filter((row) => {
+      const d = new Date(row.report_date);
+
+      if (statsRange === "week") {
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+
+        return d >= weekAgo;
+      }
+
+      if (statsRange === "month") {
+        return (
+          d.getMonth() === now.getMonth() &&
+          d.getFullYear() === now.getFullYear()
+        );
+      }
+
+      return d.getFullYear() === now.getFullYear();
+    });
+  }, [allSales, statsRange]);
+
+  const rangeVisits = filteredVisits.length;
+
+  const rangeDoctors = new Set(filteredVisits.map((v) => v.doctor_name)).size;
+
+  const totalSalesAmount = filteredSales.reduce(
+    (sum, row) => sum + Number(row.sales || 0),
+    0,
+  );
+
+  const totalCollectionAmount = filteredSales.reduce(
+    (sum, row) => sum + Number(row.collection || 0),
+    0,
+  );
 
   if (loading) {
     return (
@@ -437,10 +406,30 @@ export default function EmployeeAnalytics() {
         </div>
 
         {/* KPI */}
-
+        <div className="mb-6 flex justify-center">
+          <div className="flex rounded-full bg-gray-100 p-1 shadow-sm">
+            {[
+              { key: "week", label: "Week" },
+              { key: "month", label: "Month" },
+              { key: "year", label: "Year" },
+            ].map((item) => (
+              <button
+                key={item.key}
+                onClick={() => setStatsRange(item.key as any)}
+                className={`rounded-full px-5 py-2 text-sm font-medium transition ${
+                  statsRange === item.key
+                    ? "bg-white text-green-600 shadow"
+                    : "text-gray-500"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Leaderboard */}
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-5">
             <Card title="🏆 Top Performers">
               <div className="space-y-3">
                 {leaderboard.slice(0, 3).map((employee, index) => (
@@ -463,10 +452,6 @@ export default function EmployeeAnalytics() {
                         </div>
                       </div>
                     </div>
-
-                    {/* <div className="rounded-full bg-green-100 px-3 py-1 font-bold text-green-700">
-  #{index + 1}
-</div> */}
                   </div>
                 ))}
 
@@ -479,45 +464,28 @@ export default function EmployeeAnalytics() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-lg font-bold">#{myRank}</div>
+                      <div className="text-lg font-bold">
+                        {myRank > 0 ? `#${myRank}` : "Not Ranked"}
+                      </div>
 
                       <div className="text-sm text-gray-600">
                         {currentUserName}
                       </div>
                     </div>
-
-                    {/* <div className="rounded-full bg-white px-4 py-2 font-bold text-green-700">
-                      ₹{
-  leaderboard.find(
-    (item) =>
-      String(item.employee_id) ===
-      String(
-        employees.find(
-          (e: any) =>
-            e.google_id === currentUser?.id
-        )?.id
-      )
-  )?.sales || 0
-}
-                    </div> */}
                   </div>
                 </div>
               </div>
             </Card>
           </div>
 
-          {/* Stats */}
-          <div className="lg:col-span-6">
-            <div className="grid gap-4 md:grid-cols-1">
-              <StatCard
-                title="Total Visits"
-                value={totalVisits}
-                color="#22c55e"
-              />
+          {/* KPI Cards */}
+          <div className="lg:col-span-7">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <StatCard title="Visits" value={rangeVisits} color="#22c55e" />
 
               <StatCard
                 title="Doctors Covered"
-                value={doctorsCovered}
+                value={rangeDoctors}
                 color="#3b82f6"
               />
 
@@ -526,41 +494,21 @@ export default function EmployeeAnalytics() {
                 value={productsPromoted}
                 color="#f97316"
               />
+
+              <StatCard
+                title="Sales"
+                value={`₹${totalSalesAmount.toLocaleString()}`}
+                color="#8b5cf6"
+              />
+
+              <StatCard
+                title="Collection"
+                value={`₹${totalCollectionAmount.toLocaleString()}`}
+                color="#ec4899"
+              />
             </div>
           </div>
         </div>
-
-        {/* Visit Trend */}
-
-        {/* <Card title="Monthly Performance">
-  <div className="mb-4 flex justify-between">
-    <span>Target Progress</span>
-
-    <span>
-      {thisMonthVisits}/{monthlyTarget}
-    </span>
-  </div>
-
-  <div className="h-4 overflow-hidden rounded-full bg-gray-200">
-    <div
-      className="h-full rounded-full bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"
-      style={{
-        width: `${
-          (thisMonthVisits /
-            monthlyTarget) *
-          100
-        }%`,
-      }}
-    />
-  </div>
-
-  <div className="mt-4 text-center text-3xl font-bold">
-    {Math.round(
-      (thisMonthVisits / monthlyTarget) * 100
-    )}
-    %
-  </div>
-</Card> */}
         {/* Middle */}
 
         <Card title="🏆 Product Distribution">
@@ -619,86 +567,10 @@ export default function EmployeeAnalytics() {
           </div>
         </Card>
 
-        <Card title="">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-xl font-semibold">📈 Growth Trend</h3>
-
-            <div className="flex rounded-full bg-gray-100 p-1">
-              <button
-                onClick={() => setChartView("weekly")}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  chartView === "weekly"
-                    ? "bg-white shadow text-green-600"
-                    : "text-gray-500"
-                }`}
-              >
-                Weekly
-              </button>
-
-              <button
-                onClick={() => setChartView("monthly")}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  chartView === "monthly"
-                    ? "bg-white shadow text-green-600"
-                    : "text-gray-500"
-                }`}
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
-
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={chartView === "weekly" ? weeklyData : monthlyData}>
-              <defs>
-                <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-
-              <XAxis dataKey={chartView === "weekly" ? "day" : "month"} />
-
-              <YAxis />
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  borderRadius: "16px",
-                  border: "none",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
-                }}
-              />
-
-              <Area
-                type="monotone"
-                dataKey="visits"
-                stroke="#22c55e"
-                strokeWidth={4}
-                fill="url(#growthGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-
-          <div className="mt-4 flex items-center justify-between">
-            <span className="text-sm text-gray-500">
-              {chartView === "weekly"
-                ? "Weekly Performance"
-                : "Monthly Performance"}
-            </span>
-
-            <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
-              {chartView === "weekly" ? "This Week" : "This Month"}
-            </span>
-          </div>
-        </Card>
 
         {/* Bottom */}
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <Card title="Top Doctors">
             <div className="overflow-x-auto">
               <table className="min-w-[300px] w-full">
@@ -727,34 +599,12 @@ export default function EmployeeAnalytics() {
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">
-                  🔥 Activity Overview
+                  📅 Visit Attendance
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
                   Track your daily doctor visit activity and consistency
                 </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex rounded-2xl bg-gray-100 p-1">
-                  {[
-                    { key: "1m", label: "1 Month" },
-                    { key: "3m", label: "3 Months" },
-                    { key: "1y", label: "1 Year" },
-                  ].map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() => setRange(item.key)}
-                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                        range === item.key
-                          ? "bg-white text-green-600 shadow-md"
-                          : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
@@ -784,62 +634,50 @@ export default function EmployeeAnalytics() {
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white p-4">
-              <div className="w-max sm:w-full">
-                <ActivityCalendar
-                  data={displayData}
-                  blockSize={isMobile ? 8 : 16}
-                  blockMargin={isMobile ? 2 : 4}
-                  fontSize={12}
-                  showWeekdayLabels
-                  theme={{
-                    light: [
-                      "#fafaf9",
-                      "#dcfce7",
-                      "#86efac",
-                      "#22c55e",
-                      "#166534",
-                    ],
-                    dark: [
-                      "#1e293b",
-                      "#14532d",
-                      "#16a34a",
-                      "#22c55e",
-                      "#15803d",
-                    ],
-                  }}
-                />
-              </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-4">
+              <DayPicker
+                mode="single"
+                month={selectedMonth}
+                onMonthChange={setSelectedMonth}
+                modifiers={{
+                  visited: (date) => {
+                    const formatted = `${date.getFullYear()}-${String(
+                      date.getMonth() + 1,
+                    ).padStart(2, "0")}-${String(date.getDate()).padStart(
+                      2,
+                      "0",
+                    )}`;
+
+                    return visitDatesSet.has(formatted);
+                  },
+                }}
+                modifiersStyles={{
+                  visited: {
+                    backgroundColor: "#22c55e",
+                    color: "white",
+                    borderRadius: "999px",
+                  },
+                }}
+              />
             </div>
 
-            {/* <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-    <span>Activity Level:</span>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-green-50 p-4">
+                <p className="text-xs text-gray-500">Days Worked</p>
 
-    <div className="flex items-center gap-2">
-      <div className="h-3 w-3 rounded bg-[#fafaf9]" />
-      None
-    </div>
+                <p className="mt-1 text-3xl font-bold text-green-700">
+                  {daysWorked}
+                </p>
+              </div>
 
-    <div className="flex items-center gap-2">
-      <div className="h-3 w-3 rounded bg-[#dcfce7]" />
-      Low
-    </div>
+              <div className="rounded-2xl bg-blue-50 p-4">
+                <p className="text-xs text-gray-500">This Month Visits</p>
 
-    <div className="flex items-center gap-2">
-      <div className="h-3 w-3 rounded bg-[#86efac]" />
-      Medium
-    </div>
-
-    <div className="flex items-center gap-2">
-      <div className="h-3 w-3 rounded bg-[#22c55e]" />
-      High
-    </div>
-
-    <div className="flex items-center gap-2">
-      <div className="h-3 w-3 rounded bg-[#166534]" />
-      Very High
-    </div>
-  </div> */}
+                <p className="mt-1 text-3xl font-bold text-blue-700">
+                  {monthVisits.length}
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
       </div>
