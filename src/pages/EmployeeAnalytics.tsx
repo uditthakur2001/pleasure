@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ResponsiveContainer,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 // const { supabase } = await import("../lib/supabase");
@@ -203,14 +197,36 @@ export default function EmployeeAnalytics() {
         totals[employeeId] = {
           employee_id: employeeId,
           sales: 0,
+          collection: 0,
+          firstTime: new Date(row.created_at).getTime(),
         };
       }
 
       totals[employeeId].sales += Number(row.sales || 0);
+      totals[employeeId].collection += Number(row.collection || 0);
+
+      totals[employeeId].firstTime = Math.min(
+        totals[employeeId].firstTime,
+        new Date(row.created_at).getTime(),
+      );
     });
 
-    return Object.values(totals).sort((a, b) => b.sales - a.sales);
+    return Object.values(totals).sort((a, b) => {
+      // Rank by collection
+      if (b.collection !== a.collection) {
+        return b.collection - a.collection;
+      }
+
+      // If collection ties, rank by sales
+      if (b.sales !== a.sales) {
+        return b.sales - a.sales;
+      }
+
+      // If both tie, whoever achieved it first wins
+      return a.firstTime - b.firstTime;
+    });
   }, [leaderboardSales, statsRange]);
+
   const totalVisits = visits.length;
 
   const doctorsCovered = new Set(visits.map((v) => v.doctor_name)).size;
@@ -428,14 +444,13 @@ export default function EmployeeAnalytics() {
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
 
-        <div>
-          <h1 className="text-5xl font-bold text-green-950">Analytics</h1>
+        <div className="mb-6 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-5xl font-bold text-green-950">Analytics</h1>
 
-          <p className="mt-2 text-gray-600">Employee Performance Dashboard</p>
-        </div>
+            <p className="mt-2 text-gray-600">Employee Performance Dashboard</p>
+          </div>
 
-        {/* KPI */}
-        <div className="mb-6 flex justify-center">
           <div className="flex rounded-full bg-gray-100 p-1 shadow-sm">
             {[
               { key: "week", label: "Week" },
@@ -456,19 +471,32 @@ export default function EmployeeAnalytics() {
             ))}
           </div>
         </div>
+
+        {/* KPI */}
+
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Leaderboard */}
           <div className="lg:col-span-5">
             <Card title="🏆 Top Performers">
               <div className="space-y-3">
-                {leaderboard.slice(0, 3).map((employee, index) => (
+                {leaderboard.slice(0, 5).map((employee, index) => (
                   <div
                     key={employee.employee_id}
                     className="flex items-center justify-between rounded-xl bg-gray-50 p-4"
                   >
                     <div className="flex items-center gap-3">
                       <div className="text-2xl">
-                        {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                        <div className="text-2xl">
+                          {index === 0
+                            ? "🥇"
+                            : index === 1
+                              ? "🥈"
+                              : index === 2
+                                ? "🥉"
+                                : index === 3
+                                  ? "🏅"
+                                  : "⭐"}
+                        </div>
                       </div>
 
                       <div>

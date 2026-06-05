@@ -1,17 +1,3 @@
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
-  CartesianGrid,
-} from "recharts";
-
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -45,6 +31,11 @@ export default function AdminAnalytics() {
   const [visits, setVisits] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [employeeSales, setEmployeeSales] = useState<any[]>([]);
+  const [rankingPeriod, setRankingPeriod] = useState<
+    "daily" | "weekly" | "monthly" | "yearly"
+  >("daily");
+  const [employeeSearch, setEmployeeSearch] = useState("");
 
   useEffect(() => {
     loadAnalytics();
@@ -69,6 +60,15 @@ export default function AdminAnalytics() {
       if (employeeError) throw employeeError;
 
       setEmployees(employeeData || []);
+
+      const { data: salesData, error: salesError } = await supabase
+        .from("employee_sales")
+        .select("*");
+
+      if (salesError) throw salesError;
+
+      setEmployeeSales(salesData || []);
+
       setVisits(data || []);
     } catch (err) {
       console.error(err);
@@ -76,7 +76,6 @@ export default function AdminAnalytics() {
       setLoading(false);
     }
   };
-
   const totalVisits = visits.length;
 
   const totalEmployees = employees.length;
@@ -108,21 +107,6 @@ export default function AdminAnalytics() {
       d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
     );
   }).length;
-
-  const visitTrend = useMemo(() => {
-    const grouped: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      const day = new Date(visit.created_at).toLocaleDateString();
-
-      grouped[day] = (grouped[day] || 0) + 1;
-    });
-
-    return Object.entries(grouped).map(([day, count]) => ({
-      day,
-      visits: count,
-    }));
-  }, [visits]);
 
   const productData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -158,29 +142,117 @@ export default function AdminAnalytics() {
     }));
   }, [visits]);
 
-  const employeeLeaderboard = useMemo(() => {
-    const counts: Record<string, number> = {};
+  const filteredSales = useMemo(() => {
+    const now = new Date();
 
-    visits.forEach((visit) => {
-      counts[visit.employee_id] = (counts[visit.employee_id] || 0) + 1;
+    return employeeSales.filter((item) => {
+      const date = new Date(item.report_date);
+
+      switch (rankingPeriod) {
+        case "daily":
+          return date.toDateString() === now.toDateString();
+
+        case "weekly": {
+          const startOfWeek = new Date(now);
+          startOfWeek.setDate(now.getDate() - now.getDay());
+
+          return date >= startOfWeek;
+        }
+
+        case "monthly":
+          return (
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+          );
+
+        case "yearly":
+          return date.getFullYear() === now.getFullYear();
+
+        default:
+          return true;
+      }
     });
+  }, [employeeSales, rankingPeriod]);
 
-    return Object.entries(counts)
-      .map(([employeeId, visits]) => {
-        const employee = employees.find(
-          (e) =>
-            String(e.id) === String(employeeId) ||
-            String(e.google_id) === String(employeeId),
+  const salesRanking = useMemo(() => {
+    return employees
+      .map((emp) => {
+        const records = filteredSales.filter(
+          (s) => Number(s.employee_id) === Number(emp.id),
         );
 
+        const sales = records.reduce((sum, r) => sum + Number(r.sales || 0), 0);
+
+        const collection = records.reduce(
+          (sum, r) => sum + Number(r.collection || 0),
+          0,
+        );
+
+        const firstEntry =
+          records.length > 0
+            ? Math.min(...records.map((r) => new Date(r.created_at).getTime()))
+            : Number.MAX_SAFE_INTEGER;
+
         return {
-          employee: employee?.full_name || "Unknown",
-          visits,
+          employee: emp.full_name,
+          sales,
+          collection,
+          firstEntry,
         };
       })
-      .sort((a, b) => b.visits - a.visits)
-      .slice(0, 10);
-  }, [visits, employees]);
+      .sort((a, b) => {
+        // Higher sales first
+        if (b.sales !== a.sales) {
+          return b.sales - a.sales;
+        }
+
+        // If sales equal, whoever submitted first wins
+        return a.firstEntry - b.firstEntry;
+      });
+  }, [employees, filteredSales]);
+
+  const collectionRanking = useMemo(() => {
+    return employees
+      .map((emp) => {
+        const records = filteredSales.filter(
+          (s) => Number(s.employee_id) === Number(emp.id),
+        );
+
+        const sales = records.reduce((sum, r) => sum + Number(r.sales || 0), 0);
+
+        const collection = records.reduce(
+          (sum, r) => sum + Number(r.collection || 0),
+          0,
+        );
+
+        const firstEntry =
+          records.length > 0
+            ? Math.min(...records.map((r) => new Date(r.created_at).getTime()))
+            : Number.MAX_SAFE_INTEGER;
+
+        return {
+          employee: emp.full_name,
+          sales,
+          collection,
+          firstEntry,
+        };
+      })
+      .sort((a, b) => {
+        if (b.collection !== a.collection) {
+          return b.collection - a.collection;
+        }
+
+        return a.firstEntry - b.firstEntry;
+      });
+  }, [employees, filteredSales]);
+
+  const filteredSalesRanking = salesRanking.filter((emp) =>
+    emp.employee.toLowerCase().includes(employeeSearch.toLowerCase()),
+  );
+
+  const filteredCollectionRanking = collectionRanking.filter((emp) =>
+    emp.employee.toLowerCase().includes(employeeSearch.toLowerCase()),
+  );
 
   const topDoctors = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -198,8 +270,6 @@ export default function AdminAnalytics() {
       .slice(0, 10);
   }, [visits]);
 
-  const recentActivity = visits.slice(0, 10);
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -207,6 +277,7 @@ export default function AdminAnalytics() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-[#f7f5f2] p-6">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -220,7 +291,7 @@ export default function AdminAnalytics() {
 
         {/* KPI */}
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        {/* <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
           <StatCard title="Employees" value={totalEmployees} />
 
           <StatCard title="Active Employees" value={activeEmployees} />
@@ -232,87 +303,137 @@ export default function AdminAnalytics() {
           <StatCard title="Products Promoted" value={productsPromoted} />
 
           <StatCard title="This Month" value={thisMonthVisits} />
+        </div> */}
+
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-3">
+            {[
+              ["daily", "Daily"],
+              ["weekly", "Weekly"],
+              ["monthly", "Monthly"],
+              ["yearly", "Yearly"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setRankingPeriod(value as any)}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  rankingPeriod === value
+                    ? "bg-green-700 text-white"
+                    : "border bg-white"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={employeeSearch}
+              onChange={(e) => setEmployeeSearch(e.target.value)}
+              className="w-72 rounded-xl border bg-white px-4 py-2 pl-10 outline-none focus:border-green-600"
+            />
+
+            <svg
+              className="absolute left-3 top-3 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
         </div>
 
-        {/* Visit Trend */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card title={`🏆 Sales Ranking (${rankingPeriod})`}>
+            <div className="space-y-3">
+              {filteredSalesRanking.map((emp, index) => {
+                const actualRank =
+                  salesRanking.findIndex((e) => e.employee === emp.employee) +
+                  1;
 
-        <Card title="Visit Trend">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={visitTrend}>
-              <CartesianGrid strokeDasharray="3 3" />
+                return (
+                  <div
+                    key={emp.employee}
+                    className="flex items-center justify-between rounded-2xl border p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-lg font-bold text-green-800">
+                        {actualRank}
+                      </div>
 
-              <XAxis dataKey="day" />
+                      <div>
+                        <p className="font-semibold">{emp.employee}</p>
 
-              <YAxis />
+                        <p className="text-sm text-gray-500">
+                          {actualRank === 1 && "🥇 Top Performer"}
+                          {actualRank === 2 && "🥈 Runner Up"}
+                          {actualRank === 3 && "🥉 Third Place"}
+                        </p>
+                      </div>
+                    </div>
 
-              <Tooltip />
+                    <div className="text-xl font-bold text-green-700">
+                      ₹{emp.sales.toLocaleString()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
 
-              <Line type="monotone" dataKey="visits" />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
+          <Card title={`💰 Collection Ranking (${rankingPeriod})`}>
+            <div className="space-y-3">
+              {filteredCollectionRanking.map((emp, index) => {
+                const actualRank =
+                  collectionRanking.findIndex(
+                    (e) => e.employee === emp.employee,
+                  ) + 1;
 
-        <Card title="Top Employees By Visits">
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={employeeLeaderboard}>
-              <CartesianGrid strokeDasharray="3 3" />
+                return (
+                  <div
+                    key={emp.employee}
+                    className="flex items-center justify-between rounded-2xl border p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-800">
+                        {actualRank}
+                      </div>
 
-              <XAxis
-                dataKey="employee"
-                angle={-20}
-                textAnchor="end"
-                height={80}
-              />
+                      <div>
+                        <p className="font-semibold">{emp.employee}</p>
 
-              <YAxis />
+                        <p className="text-sm text-gray-500">
+                          {actualRank === 1 && "🥇 Highest Collection"}
+                          {actualRank === 2 && "🥈 Runner Up"}
+                          {actualRank === 3 && "🥉 Third Place"}
+                        </p>
+                      </div>
+                    </div>
 
-              <Tooltip />
-
-              <Bar dataKey="visits" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+                    <div className="text-xl font-bold text-blue-700">
+                      ₹{emp.collection.toLocaleString()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
 
         {/* Middle */}
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card title="Product Popularity">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={productData}>
-                <CartesianGrid strokeDasharray="3 3" />
-
-                <XAxis dataKey="name" />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Bar dataKey="count" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-
-          <Card title="Monthly Progress">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-
-                <XAxis dataKey="month" />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Area type="monotone" dataKey="visits" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-
-        {/* Bottom */}
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card title="Top Doctors">
+        {/* <div className="grid gap-6 lg:grid-cols-2">
+          
+<Card title="Top Doctors">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
@@ -333,54 +454,7 @@ export default function AdminAnalytics() {
               </tbody>
             </table>
           </Card>
-
-          <Card title="Recent Activity">
-            <div className="space-y-3">
-              {recentActivity.map((visit) => (
-                <div key={visit.id} className="rounded-lg border p-4">
-                  <div className="font-semibold">
-                    {employees.find(
-                      (e) =>
-                        String(e.id) === String(visit.employee_id) ||
-                        String(e.google_id) === String(visit.employee_id),
-                    )?.full_name || "Unknown Employee"}
-                  </div>
-
-                  <div className="text-sm">Doctor: {visit.doctor_name}</div>
-
-                  <div className="text-sm text-gray-500">
-                    {new Date(visit.created_at).toLocaleDateString()}
-                  </div>
-
-                  <div className="mt-1 text-green-800">
-                    {(visit.products || []).join(", ")}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card title="Employee Ranking">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-3 text-left">Employee</th>
-                  <th className="py-3 text-right">Visits</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {employeeLeaderboard.map((emp) => (
-                  <tr key={emp.employee} className="border-b">
-                    <td className="py-3">{emp.employee}</td>
-
-                    <td className="py-3 text-right">{emp.visits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );

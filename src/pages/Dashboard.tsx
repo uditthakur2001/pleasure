@@ -341,9 +341,23 @@ ${localStorage.getItem("employeeName")}
     if (saving) return;
     setSaving(true);
 
+    const currentHour = new Date().getHours();
+
+    // Block from 9 PM (21) to 6 AM (6)
+    if (currentHour >= 21 || currentHour < 6) {
+      setSaving(false);
+
+      warningAlert(
+        "Entry Not Allowed",
+        "Doctor visits can only be added between 6:00 AM and 9:00 PM.",
+      );
+
+      return;
+    }
+
     Swal.fire({
-  title: "Saving Doctor Visit",
-  html: `
+      title: "Saving Doctor Visit",
+      html: `
     <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
       
       <div style="
@@ -379,35 +393,32 @@ ${localStorage.getItem("employeeName")}
       }
     </style>
   `,
-  timer: 5000,
-  timerProgressBar: false, // removes bottom line
-  showConfirmButton: false,
-  allowOutsideClick: false,
-  allowEscapeKey: false,
+      timer: 5000,
+      timerProgressBar: false, // removes bottom line
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
 
-  didOpen: () => {
-    const countdown =
-      Swal.getHtmlContainer()?.querySelector("#countdown");
+      didOpen: () => {
+        const countdown = Swal.getHtmlContainer()?.querySelector("#countdown");
 
-    const interval = setInterval(() => {
-      const timeLeft = Swal.getTimerLeft();
+        const interval = setInterval(() => {
+          const timeLeft = Swal.getTimerLeft();
 
-      if (countdown && timeLeft !== undefined) {
-        countdown.textContent = Math.ceil(
-          timeLeft / 1000,
-        ).toString();
-      }
-    }, 100);
+          if (countdown && timeLeft !== undefined) {
+            countdown.textContent = Math.ceil(timeLeft / 1000).toString();
+          }
+        }, 100);
 
-    Swal.getPopup()?.addEventListener("close", () => {
-      clearInterval(interval);
+        Swal.getPopup()?.addEventListener("close", () => {
+          clearInterval(interval);
+        });
+      },
+
+      customClass: {
+        popup: "rounded-3xl shadow-2xl",
+      },
     });
-  },
-
-  customClass: {
-    popup: "rounded-3xl shadow-2xl",
-  },
-});
 
     const employeeId = localStorage.getItem("employeeId");
 

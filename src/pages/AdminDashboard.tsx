@@ -58,7 +58,6 @@ interface DoctorEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
-
 const COLORS = [
   "#0f766e",
   "#1d4ed8",
@@ -237,31 +236,29 @@ export default function AdminDashboard() {
     fetchEmployees();
   };
 
-//delete doctor entries
-const deleteDoctorEntry = async (id: string) => {
-  const result = await confirmAlert(
-    "Delete Doctor Entry?",
-    "This action cannot be undone",
-  );
+  //delete doctor entries
+  const deleteDoctorEntry = async (id: string) => {
+    const result = await confirmAlert(
+      "Delete Doctor Entry?",
+      "This action cannot be undone",
+    );
 
-  if (!result.isConfirmed) return;
+    if (!result.isConfirmed) return;
 
-  const { error } = await supabase
-    .from("doctor_entries")
-    .delete()
-    .eq("id", id);
+    const { error } = await supabase
+      .from("doctor_entries")
+      .delete()
+      .eq("id", id);
 
-  if (error) {
-    errorAlert("Delete Failed", error.message);
-    return;
-  }
+    if (error) {
+      errorAlert("Delete Failed", error.message);
+      return;
+    }
 
-  successAlert("Doctor Entry Deleted");
+    successAlert("Doctor Entry Deleted");
 
-  fetchEntries();
-};
-
-
+    fetchEntries();
+  };
 
   // DELETE EMPLOYEE
   const deleteEmployee = async (id: string) => {
@@ -444,8 +441,7 @@ const deleteDoctorEntry = async (id: string) => {
     }
   };
   const [productSearch, setProductSearch] = useState("");
-const productFormRef = useRef<HTMLDivElement>(null);
-
+  const productFormRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = productsData.filter((product) =>
     [product.name, product.category, product.tagline, product.composition]
@@ -803,10 +799,7 @@ const productFormRef = useRef<HTMLDivElement>(null);
             </div>
 
             {/* FORM */}
-            <div
-  ref={productFormRef}
-  className="grid gap-4 p-5 lg:grid-cols-2"
->
+            <div ref={productFormRef} className="grid gap-4 p-5 lg:grid-cols-2">
               {/* PRODUCT NAME */}
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-gray-700">
@@ -1436,7 +1429,7 @@ const productFormRef = useRef<HTMLDivElement>(null);
                   <th className="p-2.5 text-left text-sm">Location</th>
 
                   <th className="p-2.5 text-left text-sm">Created</th>
-<th className="p-2.5 text-left text-sm">Actions</th>
+                  <th className="p-2.5 text-left text-sm">Actions</th>
                 </tr>
               </thead>
 
@@ -1506,17 +1499,17 @@ const productFormRef = useRef<HTMLDivElement>(null);
                     </td>
 
                     <td className="p-2.5 text-sm">
-  {new Date(entry.created_at).toLocaleString()}
-</td>
+                      {new Date(entry.created_at).toLocaleString()}
+                    </td>
 
-<td className="p-2.5 text-sm">
-  <button
-    onClick={() => deleteDoctorEntry(entry.id)}
-    className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
-  >
-    Delete
-  </button>
-</td>
+                    <td className="p-2.5 text-sm">
+                      <button
+                        onClick={() => deleteDoctorEntry(entry.id)}
+                        className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
