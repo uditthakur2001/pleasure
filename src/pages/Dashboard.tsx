@@ -249,21 +249,24 @@ ${localStorage.getItem("employeeName")}
   };
 
   const connectGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      scopes:
+        "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
 
-      options: {
-        scopes:
-          "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
+      redirectTo: window.location.origin + "/dashboard",
 
-        redirectTo: window.location.origin + "/dashboard",
+      queryParams: {
+        prompt: "consent",
       },
-    });
+    },
+  });
 
-    if (error) {
-      errorAlert("Connection Failed", error.message);
-    }
-  };
+  if (error) {
+    errorAlert("Connection Failed", error.message);
+  }
+};
 
   const pickPhoneContact = async (index: number) => {
     try {

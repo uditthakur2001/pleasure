@@ -76,28 +76,31 @@ export default function Login() {
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/login",
+        scopes:
+          "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
 
-        options: {
-          redirectTo: window.location.origin + "/login",
-          scopes:
-            "openid email profile https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar",
+        queryParams: {
+          prompt: "consent select_account",
         },
-      });
+      },
+    });
 
-      if (error) {
-        errorAlert("Google Login Failed", error.message);
-      }
-    } catch (err: any) {
-      errorAlert("Login Failed", err.message);
-    } finally {
-      setLoading(false);
+    if (error) {
+      errorAlert("Google Login Failed", error.message);
     }
-  };
+  } catch (err) {
+    errorAlert("Login Failed", err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
