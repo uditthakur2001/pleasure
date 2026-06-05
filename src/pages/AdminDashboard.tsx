@@ -237,6 +237,32 @@ export default function AdminDashboard() {
     fetchEmployees();
   };
 
+//delete doctor entries
+const deleteDoctorEntry = async (id: string) => {
+  const result = await confirmAlert(
+    "Delete Doctor Entry?",
+    "This action cannot be undone",
+  );
+
+  if (!result.isConfirmed) return;
+
+  const { error } = await supabase
+    .from("doctor_entries")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    errorAlert("Delete Failed", error.message);
+    return;
+  }
+
+  successAlert("Doctor Entry Deleted");
+
+  fetchEntries();
+};
+
+
+
   // DELETE EMPLOYEE
   const deleteEmployee = async (id: string) => {
     const result = await confirmAlert(
@@ -1410,6 +1436,7 @@ const productFormRef = useRef<HTMLDivElement>(null);
                   <th className="p-2.5 text-left text-sm">Location</th>
 
                   <th className="p-2.5 text-left text-sm">Created</th>
+<th className="p-2.5 text-left text-sm">Actions</th>
                 </tr>
               </thead>
 
@@ -1479,8 +1506,17 @@ const productFormRef = useRef<HTMLDivElement>(null);
                     </td>
 
                     <td className="p-2.5 text-sm">
-                      {new Date(entry.created_at).toLocaleString()}
-                    </td>
+  {new Date(entry.created_at).toLocaleString()}
+</td>
+
+<td className="p-2.5 text-sm">
+  <button
+    onClick={() => deleteDoctorEntry(entry.id)}
+    className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+  >
+    Delete
+  </button>
+</td>
                   </tr>
                 ))}
               </tbody>
