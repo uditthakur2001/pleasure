@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
 import { Menu, X } from "lucide-react";
 
 import { successAlert, confirmAlert } from "@/lib/alert";
@@ -91,9 +90,14 @@ const analyticsLink = {
   label: "Analytics",
 };
 
+const adminAnalyticsLink = {
+  to: "/adminAnalytics",
+  label: "Analytics",
+};
+
 const links = isLoggedIn
   ? role === "admin"
-    ? [...publicLinks, dashboardLink]
+    ? [...publicLinks, dashboardLink, adminAnalyticsLink]
     : [...publicLinks, dashboardLink, analyticsLink]
   : publicLinks;
   return (
@@ -199,22 +203,6 @@ const links = isLoggedIn
               </div>
             ) : (
               <div className="mt-4 flex flex-col gap-4 px-2">
-                {/* <Link
-      to="/dashboard"
-      onClick={() => setOpen(false)}
-      className="text-base font-medium text-foreground/80 transition hover:text-primary"
-    >
-      Dashboard
-    </Link>
-
-    <Link
-      to="/profile"
-      onClick={() => setOpen(false)}
-      className="text-base font-medium text-foreground/80 transition hover:text-primary"
-    >
-      Profile
-    </Link> */}
-
                 <Button
                   variant="destructive"
                   onClick={() => {

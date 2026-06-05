@@ -4,6 +4,7 @@ import Select from "react-select";
 
 import { supabase } from "@/lib/supabase";
 // const { supabase } = await import("@/lib/supabase");
+import Swal from "sweetalert2";
 
 import { products } from "@/data/products";
 import { DayPicker } from "react-day-picker";
@@ -55,7 +56,7 @@ export default function Dashboard() {
   ]);
 
   const [contacts, setContacts] = useState<any[]>([]);
-
+  const [saving, setSaving] = useState(false);
   const [supportsContactPicker, setSupportsContactPicker] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -337,6 +338,77 @@ ${localStorage.getItem("employeeName")}
   };
 
   const saveSingleRow = async (row: RowData) => {
+    if (saving) return;
+    setSaving(true);
+
+    Swal.fire({
+  title: "Saving Doctor Visit",
+  html: `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+      
+      <div style="
+        width:70px;
+        height:70px;
+        border:4px solid #e5e7eb;
+        border-top:4px solid #22c55e;
+        border-radius:50%;
+        animation:spin 1s linear infinite;
+      "></div>
+
+      <div style="
+        font-size:15px;
+        color:#6b7280;
+      ">
+        Please wait...
+      </div>
+
+      <div style="
+        font-size:32px;
+        font-weight:700;
+        color:#16a34a;
+      ">
+        <span id="countdown">5</span>s
+      </div>
+
+    </div>
+
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  `,
+  timer: 5000,
+  timerProgressBar: false, // removes bottom line
+  showConfirmButton: false,
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+
+  didOpen: () => {
+    const countdown =
+      Swal.getHtmlContainer()?.querySelector("#countdown");
+
+    const interval = setInterval(() => {
+      const timeLeft = Swal.getTimerLeft();
+
+      if (countdown && timeLeft !== undefined) {
+        countdown.textContent = Math.ceil(
+          timeLeft / 1000,
+        ).toString();
+      }
+    }, 100);
+
+    Swal.getPopup()?.addEventListener("close", () => {
+      clearInterval(interval);
+    });
+  },
+
+  customClass: {
+    popup: "rounded-3xl shadow-2xl",
+  },
+});
+
     const employeeId = localStorage.getItem("employeeId");
 
     if (!employeeId) {
@@ -409,9 +481,9 @@ ${localStorage.getItem("employeeName")}
         const position = await new Promise<GeolocationPosition>(
           (resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
+              enableHighAccuracy: false,
+              timeout: 5000,
+              maximumAge: 60000,
             });
           },
         );
@@ -452,7 +524,7 @@ ${localStorage.getItem("employeeName")}
 
       successAlert("Added Successfully");
     }
-
+    setSaving(false);
     fetchData();
   };
 

@@ -25,6 +25,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const EmployeeAnalytics = lazy(() => import("./pages/EmployeeAnalytics"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 
 const Terms = lazy(() => import("./pages/Terms"));
 
@@ -34,7 +35,7 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   if (!isLoggedIn) return <Navigate to="/login" replace />;
-return children; // ✅
+  return children; // ✅
 }
 
 function AdminRoute({ children }: { children: JSX.Element }) {
@@ -139,18 +140,26 @@ const App = () => {
                 }
               />
               <Route
-  path="/analytics"
-  element={
-    <EmployeeRoute>
-      <EmployeeAnalytics />
-    </EmployeeRoute>
-  }
-/>
+                path="/analytics"
+                element={
+                  <EmployeeRoute>
+                    <EmployeeAnalytics />
+                  </EmployeeRoute>
+                }
+              />
               <Route
                 path="/admin"
                 element={
                   <AdminRoute>
                     <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/adminAnalytics"
+                element={
+                  <AdminRoute>
+                    <AdminAnalytics />
                   </AdminRoute>
                 }
               />
