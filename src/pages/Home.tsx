@@ -27,7 +27,8 @@ const Home = () => {
     const { data: homeProducts } = await supabase
       .from("products")
       .select("*")
-      .eq("show_on_home", true);
+      .eq("show_on_home", true)
+      .order("home_order", { ascending: true });
 
     setProductsData(homeProducts || []);
 

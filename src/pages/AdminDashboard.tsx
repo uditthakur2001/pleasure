@@ -460,6 +460,42 @@ export default function AdminDashboard() {
 
   const [productVariants, setProductVariants] = useState<any[]>([]);
 
+  const moveHomepageProduct = async (
+    productId: number,
+    direction: "up" | "down",
+  ) => {
+    const homepageProducts = [...productsData]
+      .filter((p) => p.show_on_home)
+      .sort((a, b) => (a.home_order || 0) - (b.home_order || 0));
+
+    const index = homepageProducts.findIndex((p) => p.id === productId);
+
+    if (index === -1) return;
+
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+
+    if (swapIndex < 0 || swapIndex >= homepageProducts.length) return;
+
+    const current = homepageProducts[index];
+    const target = homepageProducts[swapIndex];
+
+    await supabase
+      .from("products")
+      .update({
+        home_order: target.home_order,
+      })
+      .eq("id", current.id);
+
+    await supabase
+      .from("products")
+      .update({
+        home_order: current.home_order,
+      })
+      .eq("id", target.id);
+
+    fetchProducts();
+  };
+
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from("products")
@@ -533,6 +569,9 @@ export default function AdminDashboard() {
 
       variants: productVariants,
       show_on_home: showOnHome,
+      home_order: showOnHome
+        ? productsData.filter((p) => p.show_on_home).length + 1
+        : 0,
     };
 
     let response;
@@ -1165,6 +1204,40 @@ export default function AdminDashboard() {
             </div>
 
             {/* PRODUCT LIST */}
+            <div className="mb-6 rounded-2xl border bg-green-50 p-4">
+              <h3 className="mb-4 text-lg font-semibold">Homepage Products</h3>
+
+              {productsData
+                .filter((p) => p.show_on_home)
+                .sort((a, b) => (a.home_order || 0) - (b.home_order || 0))
+                .map((product, index) => (
+                  <div
+                    key={product.id}
+                    className="mb-2 flex items-center justify-between rounded-xl border bg-white p-3"
+                  >
+                    <div>
+                      <span className="font-semibold">#{index + 1}</span>{" "}
+                      {product.name}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => moveHomepageProduct(product.id, "up")}
+                        className="rounded-lg bg-blue-600 px-3 py-1 text-white"
+                      >
+                        ↑
+                      </button>
+
+                      <button
+                        onClick={() => moveHomepageProduct(product.id, "down")}
+                        className="rounded-lg bg-blue-600 px-3 py-1 text-white"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
             <div className="border-t border-border p-5">
               <h3 className="mb-4 text-lg font-semibold">Existing Products</h3>
 
