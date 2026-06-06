@@ -129,6 +129,7 @@ export default function AdminDashboard() {
   const [entrySearch, setEntrySearch] = useState("");
 
   const [sortOrder, setSortOrder] = useState("latest");
+  const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdmin();
@@ -282,6 +283,35 @@ export default function AdminDashboard() {
     fetchEmployees();
     fetchEntries();
   };
+
+const updateEmployee = async () => {
+  if (!editingEmployeeId) return;
+
+  const { error } = await supabase
+    .from("employee")
+    .update({
+      full_name: employeeFullName,
+      phone: employeePhone,
+      email: employeeEmail,
+      role: employeeRole,
+    })
+    .eq("id", editingEmployeeId);
+
+  if (error) {
+    errorAlert("Update Failed", error.message);
+    return;
+  }
+
+  successAlert("Employee Updated");
+
+  setEditingEmployeeId(null);
+  setEmployeeFullName("");
+  setEmployeePhone("");
+  setEmployeeEmail("");
+  setEmployeeRole("employee");
+
+  fetchEmployees();
+};
 
   // ADD EMPLOYEE
   const addEmployee = async () => {
@@ -1307,11 +1337,11 @@ export default function AdminDashboard() {
               </select>
 
               <button
-                onClick={addEmployee}
-                className="rounded-xl bg-primary px-4 py-3 text-white"
-              >
-                Save Employee
-              </button>
+  onClick={editingEmployeeId ? updateEmployee : addEmployee}
+  className="rounded-xl bg-primary px-4 py-3 text-white"
+>
+  {editingEmployeeId ? "Update Employee" : "Save Employee"}
+</button>
             </div>
           )}
 
@@ -1374,7 +1404,26 @@ export default function AdminDashboard() {
                         >
                           {emp.role === "admin" ? "Remove Admin" : "Make Admin"}
                         </button>
+                        <button
+  onClick={() => {
+    setEditingEmployeeId(emp.id);
 
+    setEmployeeFullName(emp.full_name || "");
+    setEmployeePhone(emp.phone || "");
+    setEmployeeEmail(emp.email || "");
+    setEmployeeRole(emp.role || "employee");
+
+    setShowAddEmployee(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }}
+  className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
+>
+  Edit
+</button>
                         <button
                           onClick={() => deleteEmployee(emp.id)}
                           className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
