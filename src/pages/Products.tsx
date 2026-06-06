@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Search } from "lucide-react";
 
@@ -12,83 +8,56 @@ import { ProductCard } from "@/components/site/ProductCard";
 
 import { Input } from "@/components/ui/input";
 
-import { categories } from "@/data/products";
-
 import { fetchProducts } from "@/lib/productApi";
 
 import { cn } from "@/lib/utils";
 
 const Products = () => {
-  const [query, setQuery] =
-    useState("");
+  const [query, setQuery] = useState("");
 
-  const [active, setActive] =
-    useState<string>("All");
+  const [active, setActive] = useState<string>("All");
 
-  const [products, setProducts] =
-    useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts =
-    async () => {
-      setLoading(true);
+  const loadProducts = async () => {
+    setLoading(true);
 
-      const data =
-        await fetchProducts();
+    const data = await fetchProducts();
 
-      setProducts(data);
+    setProducts(data);
 
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
-  const filtered =
-    useMemo(() => {
-      const q =
-        query
-          .trim()
-          .toLowerCase();
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
 
-      return products.filter(
-        (p) => {
-          const matchesCat =
-            active === "All" ||
-            p.category ===
-              active;
+    return products.filter((p) => {
+      const matchesCat = active === "All" || p.category === active;
 
-          const matchesQ =
-            !q ||
-            p.name
-              .toLowerCase()
-              .includes(q) ||
-            p.tagline
-              .toLowerCase()
-              .includes(q) ||
-            p.composition
-              .toLowerCase()
-              .includes(q);
+      const matchesQ =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.tagline.toLowerCase().includes(q) ||
+        p.composition.toLowerCase().includes(q);
 
-          return (
-            matchesCat &&
-            matchesQ
-          );
-        },
-      );
-    }, [
-      query,
-      active,
-      products,
-    ]);
+      return matchesCat && matchesQ;
+    });
+  }, [query, active, products]);
 
-  const filters = [
-    "All",
-    ...categories,
-  ];
+  const filters = useMemo(() => {
+    const uniqueCategories = [
+      ...new Set(products.map((p) => p.category).filter(Boolean)),
+    ];
+
+    return ["All", ...uniqueCategories];
+  }, [products]);
 
   return (
     <>
@@ -101,28 +70,21 @@ const Products = () => {
       <section className="container-prose py-12 md:py-16">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2">
-            {filters.map(
-              (f) => (
-                <button
-                  key={f}
-                  onClick={() =>
-                    setActive(
-                      f,
-                    )
-                  }
-                  className={cn(
-                    "rounded-full border px-4 py-2 text-sm font-medium transition-smooth",
+            {filters.map((f) => (
+              <button
+                key={f}
+                onClick={() => setActive(f)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-medium transition-smooth",
 
-                    active ===
-                      f
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card text-foreground/80 hover:border-primary/40 hover:text-primary",
-                  )}
-                >
-                  {f}
-                </button>
-              ),
-            )}
+                  active === f
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground/80 hover:border-primary/40 hover:text-primary",
+                )}
+              >
+                {f}
+              </button>
+            ))}
           </div>
 
           <div className="relative w-full md:w-80">
@@ -130,20 +92,11 @@ const Products = () => {
 
             <Input
               value={query}
-              onChange={(
-                e,
-              ) =>
-                setQuery(
-                  e.target
-                    .value,
-                )
-              }
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products…"
               className="pl-9"
               aria-label="Search products"
-              maxLength={
-                80
-              }
+              maxLength={80}
             />
           </div>
         </div>
@@ -152,26 +105,15 @@ const Products = () => {
           <div className="flex items-center justify-center py-20">
             Loading products...
           </div>
-        ) : filtered.length ===
-          0 ? (
+        ) : filtered.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
-            No products match
-            your search.
+            No products match your search.
           </p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map(
-              (p) => (
-                <ProductCard
-                  key={
-                    p.slug
-                  }
-                  product={
-                    p
-                  }
-                />
-              ),
-            )}
+            {filtered.map((p) => (
+              <ProductCard key={p.slug} product={p} />
+            ))}
           </div>
         )}
       </section>

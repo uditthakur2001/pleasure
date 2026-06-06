@@ -511,6 +511,7 @@ export default function AdminDashboard() {
   const [productSearch, setProductSearch] = useState("");
   const productFormRef = useRef<HTMLDivElement>(null);
   const [showOnHome, setShowOnHome] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
 
   const filteredProducts = productsData.filter((product) =>
     [product.name, product.category, product.tagline, product.composition]
@@ -553,7 +554,8 @@ export default function AdminDashboard() {
 
       tagline: productTagline,
 
-      category: productCategory,
+      category:
+        productCategory === "__new__" ? newCategory.trim() : productCategory,
 
       composition: productComposition,
 
@@ -621,6 +623,7 @@ export default function AdminDashboard() {
 
     setProductVariants([]);
     setShowOnHome(false);
+    setNewCategory("");
   };
 
   // ADD EMPLOYEE STATES
@@ -924,14 +927,38 @@ export default function AdminDashboard() {
                   onChange={(e) => setProductCategory(e.target.value)}
                   className="w-full rounded-2xl border bg-white px-4 py-3"
                 >
-                  <option>Injection</option>
+                  <option value="Injection">Injection</option>
+                  <option value="Bolus">Bolus</option>
+                  <option value="Powder">Powder</option>
+                  <option value="Syrup">Syrup</option>
 
-                  <option>Bolus</option>
+                  {productsData
+                    .map((p) => p.category)
+                    .filter(
+                      (category, index, self) =>
+                        category &&
+                        !["Injection", "Bolus", "Powder", "Syrup"].includes(
+                          category,
+                        ) &&
+                        self.indexOf(category) === index,
+                    )
+                    .map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
 
-                  <option>Powder</option>
-
-                  <option>Syrup</option>
+                  <option value="__new__">+ Create New Category</option>
                 </select>
+                {productCategory === "__new__" && (
+                  <input
+                    type="text"
+                    placeholder="Enter new category"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="mt-3 w-full rounded-2xl border bg-white px-4 py-3"
+                  />
+                )}
               </div>
 
               {/* COMPOSITION */}
