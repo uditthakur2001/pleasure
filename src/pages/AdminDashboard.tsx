@@ -129,7 +129,9 @@ export default function AdminDashboard() {
   const [entrySearch, setEntrySearch] = useState("");
 
   const [sortOrder, setSortOrder] = useState("latest");
-  const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);
+  const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     checkAdmin();
@@ -284,34 +286,34 @@ export default function AdminDashboard() {
     fetchEntries();
   };
 
-const updateEmployee = async () => {
-  if (!editingEmployeeId) return;
+  const updateEmployee = async () => {
+    if (!editingEmployeeId) return;
 
-  const { error } = await supabase
-    .from("employee")
-    .update({
-      full_name: employeeFullName,
-      phone: employeePhone,
-      email: employeeEmail,
-      role: employeeRole,
-    })
-    .eq("id", editingEmployeeId);
+    const { error } = await supabase
+      .from("employee")
+      .update({
+        full_name: employeeFullName,
+        phone: employeePhone,
+        email: employeeEmail,
+        role: employeeRole,
+      })
+      .eq("id", editingEmployeeId);
 
-  if (error) {
-    errorAlert("Update Failed", error.message);
-    return;
-  }
+    if (error) {
+      errorAlert("Update Failed", error.message);
+      return;
+    }
 
-  successAlert("Employee Updated");
+    successAlert("Employee Updated");
 
-  setEditingEmployeeId(null);
-  setEmployeeFullName("");
-  setEmployeePhone("");
-  setEmployeeEmail("");
-  setEmployeeRole("employee");
+    setEditingEmployeeId(null);
+    setEmployeeFullName("");
+    setEmployeePhone("");
+    setEmployeeEmail("");
+    setEmployeeRole("employee");
 
-  fetchEmployees();
-};
+    fetchEmployees();
+  };
 
   // ADD EMPLOYEE
   const addEmployee = async () => {
@@ -472,6 +474,7 @@ const updateEmployee = async () => {
   };
   const [productSearch, setProductSearch] = useState("");
   const productFormRef = useRef<HTMLDivElement>(null);
+  const [showOnHome, setShowOnHome] = useState(false);
 
   const filteredProducts = productsData.filter((product) =>
     [product.name, product.category, product.tagline, product.composition]
@@ -529,7 +532,7 @@ const updateEmployee = async () => {
       image_urls: productImages,
 
       variants: productVariants,
-      show_on_home: false,
+      show_on_home: showOnHome,
     };
 
     let response;
@@ -578,6 +581,7 @@ const updateEmployee = async () => {
     setProductImages([]);
 
     setProductVariants([]);
+    setShowOnHome(false);
   };
 
   // ADD EMPLOYEE STATES
@@ -843,6 +847,16 @@ const updateEmployee = async () => {
                   onChange={(e) => setProductName(e.target.value)}
                   className="w-full rounded-2xl border bg-white px-4 py-3"
                 />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={showOnHome}
+                    onChange={(e) => setShowOnHome(e.target.checked)}
+                    className="h-5 w-5"
+                  />
+
+                  <label className="font-medium">Show on Homepage</label>
+                </div>
               </div>
 
               {/* TAGLINE */}
@@ -1205,6 +1219,11 @@ const updateEmployee = async () => {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {product.category}
                       </p>
+                      {product.show_on_home && (
+                        <span className="mt-2 inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          Homepage Product
+                        </span>
+                      )}
 
                       <p className="mt-2 line-clamp-2 text-sm">
                         {product.tagline}
@@ -1235,6 +1254,7 @@ const updateEmployee = async () => {
 
                             setProductImages(product.image_urls || []);
                             setProductVariants(product.variants || []);
+                            setShowOnHome(product.show_on_home || false);
 
                             setTimeout(() => {
                               productFormRef.current?.scrollIntoView({
@@ -1337,11 +1357,11 @@ const updateEmployee = async () => {
               </select>
 
               <button
-  onClick={editingEmployeeId ? updateEmployee : addEmployee}
-  className="rounded-xl bg-primary px-4 py-3 text-white"
->
-  {editingEmployeeId ? "Update Employee" : "Save Employee"}
-</button>
+                onClick={editingEmployeeId ? updateEmployee : addEmployee}
+                className="rounded-xl bg-primary px-4 py-3 text-white"
+              >
+                {editingEmployeeId ? "Update Employee" : "Save Employee"}
+              </button>
             </div>
           )}
 
@@ -1405,25 +1425,25 @@ const updateEmployee = async () => {
                           {emp.role === "admin" ? "Remove Admin" : "Make Admin"}
                         </button>
                         <button
-  onClick={() => {
-    setEditingEmployeeId(emp.id);
+                          onClick={() => {
+                            setEditingEmployeeId(emp.id);
 
-    setEmployeeFullName(emp.full_name || "");
-    setEmployeePhone(emp.phone || "");
-    setEmployeeEmail(emp.email || "");
-    setEmployeeRole(emp.role || "employee");
+                            setEmployeeFullName(emp.full_name || "");
+                            setEmployeePhone(emp.phone || "");
+                            setEmployeeEmail(emp.email || "");
+                            setEmployeeRole(emp.role || "employee");
 
-    setShowAddEmployee(true);
+                            setShowAddEmployee(true);
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }}
-  className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
->
-  Edit
-</button>
+                            window.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                            });
+                          }}
+                          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => deleteEmployee(emp.id)}
                           className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
