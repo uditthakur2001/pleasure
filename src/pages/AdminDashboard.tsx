@@ -364,12 +364,14 @@ export default function AdminDashboard() {
     fetchEmployees();
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    [emp.full_name, emp.phone, emp.email, emp.role]
-      .join(" ")
-      .toLowerCase()
-      .includes(employeeSearch.toLowerCase()),
-  );
+  const filteredEmployees = employees
+    .filter((emp) =>
+      [emp.full_name, emp.phone, emp.email, emp.role]
+        .join(" ")
+        .toLowerCase()
+        .includes(employeeSearch.toLowerCase()),
+    )
+    .sort((a, b) => (a.full_name || "").localeCompare(b.full_name || ""));
 
   const filteredEntries = [...entries]
     .filter((entry) =>
@@ -759,7 +761,12 @@ export default function AdminDashboard() {
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productAnalytics}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                  <CartesianGrid
+                    strokeDasharray="4 4"
+                    vertical={true}
+                    horizontal={true}
+                    stroke="#d1d5db"
+                  />
 
                   <XAxis
                     dataKey="name"
@@ -774,9 +781,10 @@ export default function AdminDashboard() {
                       <text
                         x={x}
                         y={y}
-                        dy={10}
+                        dx={10}
+                        dy={5}
                         textAnchor="end"
-                        transform={`rotate(-20, ${x}, ${y})`}
+                        transform={`rotate(-30, ${x}, ${y})`}
                         fill={COLORS[index % COLORS.length]}
                         fontSize={9}
                       >
@@ -797,7 +805,7 @@ export default function AdminDashboard() {
 
                   <Tooltip />
 
-                  <Bar dataKey="value" radius={[999, 999, 0, 0]}>
+                  <Bar dataKey="value">
                     {productAnalytics.map((entry, index) => (
                       <Cell key={index} fill={COLORS[index % COLORS.length]} />
                     ))}

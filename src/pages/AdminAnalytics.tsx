@@ -36,6 +36,9 @@ export default function AdminAnalytics() {
     "daily" | "weekly" | "monthly" | "yearly"
   >("daily");
   const [employeeSearch, setEmployeeSearch] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editSales, setEditSales] = useState("");
+  const [editCollection, setEditCollection] = useState("");
 
   useEffect(() => {
     loadAnalytics();
@@ -154,9 +157,18 @@ export default function AdminAnalytics() {
 
         case "weekly": {
           const startOfWeek = new Date(now);
-          startOfWeek.setDate(now.getDate() - now.getDay());
 
-          return date >= startOfWeek;
+          // Monday = first day of week
+          const day = now.getDay(); // Sun=0, Mon=1, Tue=2...
+          const diff = day === 0 ? -6 : 1 - day;
+
+          startOfWeek.setDate(now.getDate() + diff);
+          startOfWeek.setHours(0, 0, 0, 0);
+
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+          return date >= startOfWeek && date < endOfWeek;
         }
 
         case "monthly":
@@ -269,6 +281,37 @@ export default function AdminAnalytics() {
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 10);
   }, [visits]);
+
+  const updateSalesRecord = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from("employee_sales")
+        .update({
+          sales: Number(editSales),
+          collection: Number(editCollection),
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setEmployeeSales((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                sales: Number(editSales),
+                collection: Number(editCollection),
+              }
+            : item,
+        ),
+      );
+
+      setEditingId(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update");
+    }
+  };
 
   if (loading) {
     return (
@@ -429,6 +472,98 @@ export default function AdminAnalytics() {
           </Card>
         </div>
 
+        <Card title="Sales Records">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-3 text-left">Employee</th>
+                  <th className="py-3 text-left">Sales</th>
+                  <th className="py-3 text-left">Collection</th>
+                  <th className="py-3 text-left">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {[...filteredSales]
+                  .sort((a, b) => {
+                    const empA =
+                      employees.find(
+                        (e) => Number(e.id) === Number(a.employee_id),
+                      )?.full_name || "";
+
+                    const empB =
+                      employees.find(
+                        (e) => Number(e.id) === Number(b.employee_id),
+                      )?.full_name || "";
+
+                    return empA.localeCompare(empB);
+                  })
+                  .map((record) => {
+                    const employee = employees.find(
+                      (e) => Number(e.id) === Number(record.employee_id),
+                    );
+
+                    return (
+                      <tr key={record.id} className="border-b">
+                        <td className="py-3">{employee?.full_name}</td>
+
+                        <td className="py-3">
+                          {editingId === record.id ? (
+                            <input
+                              type="number"
+                              value={editSales}
+                              onChange={(e) => setEditSales(e.target.value)}
+                              className="rounded border px-2 py-1"
+                            />
+                          ) : (
+                            `₹${Number(record.sales).toLocaleString()}`
+                          )}
+                        </td>
+
+                        <td className="py-3">
+                          {editingId === record.id ? (
+                            <input
+                              type="number"
+                              value={editCollection}
+                              onChange={(e) =>
+                                setEditCollection(e.target.value)
+                              }
+                              className="rounded border px-2 py-1"
+                            />
+                          ) : (
+                            `₹${Number(record.collection).toLocaleString()}`
+                          )}
+                        </td>
+
+                        <td className="py-3">
+                          {editingId === record.id ? (
+                            <button
+                              onClick={() => updateSalesRecord(record.id)}
+                              className="rounded bg-green-600 px-3 py-1 text-white"
+                            >
+                              Save
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setEditingId(record.id);
+                                setEditSales(record.sales);
+                                setEditCollection(record.collection);
+                              }}
+                              className="rounded bg-blue-600 px-3 py-1 text-white"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
         {/* Middle */}
 
         {/* <div className="grid gap-6 lg:grid-cols-2">
