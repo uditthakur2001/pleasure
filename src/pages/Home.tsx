@@ -3,6 +3,8 @@ import { ArrowRight, Award, ShieldCheck, Sprout, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/ProductCard";
 import storeImg from "@/assets/store.webp";
+import storeImg500 from "@/assets/store_500.webp";
+import storeImg1028 from "@/assets/store_1028.webp";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -167,14 +169,23 @@ const Home = () => {
       {/* ABOUT PREVIEW */}
       <section className="container-prose grid gap-12 py-20 lg:grid-cols-2 lg:py-28">
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-tan shadow-card">
-          <img
-            src={storeImg}
-            alt="Healthy cow and buffalo in green field"
-            loading="lazy"
-            width={1600}
-            height={1024}
-            className="h-full w-full object-cover"
-          />
+         <img
+        src={storeImg} 
+        
+        // 2. Use template literals to inject the imported variables
+        srcSet={`
+          ${storeImg500} 500w,
+          ${storeImg1028} 1028w,
+          ${storeImg} 2000w
+        `}
+        
+        sizes="(max-width: 768px) 100vw, 625px"
+        alt="Healthy cow and buffalo in green field"
+        fetchPriority="high" // Use this if it's the top hero image!
+        width={1200}
+        height={900}
+        className="h-full w-full object-cover"
+      />
         </div>
         <div className="flex flex-col justify-center">
           <span className="eyebrow mb-4">Our Story</span>
@@ -227,27 +238,28 @@ const Home = () => {
             </Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {isLoading ? (
-        // Show skeleton loaders while waiting
-        [1, 2, 3, 4, 5, 6].map((n) => (
-          <div key={n} className="h-[300px] w-full animate-pulse rounded-xl bg-muted"></div>
-        ))
-      ) : (
-        // Show actual products when loaded
-        highlights.map((p) => (
-          <ProductCard
-            key={p.slug}
-            product={{
-              ...p,
-              images:
-                typeof p.image_urls === "string"
-                  ? JSON.parse(p.image_urls)
-                  : p.image_urls || [],
-            }}
-          />
-        ))
-      )}
-    </div>
+            {isLoading
+              ? // Show skeleton loaders while waiting
+                [1, 2, 3, 4, 5, 6].map((n) => (
+                  <div
+                    key={n}
+                    className="h-[300px] w-full animate-pulse rounded-xl bg-muted"
+                  ></div>
+                ))
+              : // Show actual products when loaded
+                highlights.map((p) => (
+                  <ProductCard
+                    key={p.slug}
+                    product={{
+                      ...p,
+                      images:
+                        typeof p.image_urls === "string"
+                          ? JSON.parse(p.image_urls)
+                          : p.image_urls || [],
+                    }}
+                  />
+                ))}
+          </div>
         </div>
       </section>
 
