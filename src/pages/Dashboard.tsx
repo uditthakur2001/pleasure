@@ -39,7 +39,6 @@ declare global {
 
 const today = new Date().toISOString().split("T")[0];
 
-
 export default function Dashboard() {
   const [rows, setRows] = useState<RowData[]>([
     {
@@ -53,7 +52,7 @@ export default function Dashboard() {
   const [contacts, setContacts] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [supportsContactPicker, setSupportsContactPicker] = useState(false);
-const [productOptions, setProductOptions] = useState<any[]>([]);
+  const [productOptions, setProductOptions] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [sales, setSales] = useState("");
@@ -90,7 +89,7 @@ const [productOptions, setProductOptions] = useState<any[]>([]);
     localStorage.setItem("employeeId", user.id);
 
     await fetchData(user.id);
-await fetchProductOptions();
+    await fetchProductOptions();
     await loadContacts();
   };
 
@@ -299,25 +298,27 @@ await fetchProductOptions();
 
   const saveSingleRow = async (row: RowData) => {
     if (saving) return;
+
     setSaving(true);
 
-    const currentHour = new Date().getHours();
+    try {
+      const currentHour = new Date().getHours();
 
-    // Block from 9 PM (21) to 6 AM (6)
-    if (currentHour >= 21 || currentHour < 6) {
-      setSaving(false);
+      // Block from 9 PM (21) to 6 AM (6)
+      if (currentHour >= 21 || currentHour < 6) {
+        setSaving(false);
 
-      warningAlert(
-        "Entry Not Allowed",
-        "Doctor visits can only be added between 6:00 AM and 9:00 PM.",
-      );
+        warningAlert(
+          "Entry Not Allowed",
+          "Doctor visits can only be added between 6:00 AM and 9:00 PM.",
+        );
 
-      return;
-    }
+        return;
+      }
 
-    Swal.fire({
-      title: "Saving Doctor Visit",
-      html: `
+      Swal.fire({
+        title: "Saving Doctor Visit",
+        html: `
     <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
       
       <div style="
@@ -353,150 +354,154 @@ await fetchProductOptions();
       }
     </style>
   `,
-      timer: 5000,
-      timerProgressBar: false, // removes bottom line
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
+        timer: 5000,
+        timerProgressBar: false, // removes bottom line
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
 
-      didOpen: () => {
-        const countdown = Swal.getHtmlContainer()?.querySelector("#countdown");
+        didOpen: () => {
+          const countdown =
+            Swal.getHtmlContainer()?.querySelector("#countdown");
 
-        const interval = setInterval(() => {
-          const timeLeft = Swal.getTimerLeft();
+          const interval = setInterval(() => {
+            const timeLeft = Swal.getTimerLeft();
 
-          if (countdown && timeLeft !== undefined) {
-            countdown.textContent = Math.ceil(timeLeft / 1000).toString();
-          }
-        }, 100);
+            if (countdown && timeLeft !== undefined) {
+              countdown.textContent = Math.ceil(timeLeft / 1000).toString();
+            }
+          }, 100);
 
-        Swal.getPopup()?.addEventListener("close", () => {
-          clearInterval(interval);
-        });
-      },
-
-      customClass: {
-        popup: "rounded-3xl shadow-2xl",
-      },
-    });
-
-    const employeeId = localStorage.getItem("employeeId");
-
-    if (!employeeId) {
-      errorAlert("Employee Not Found");
-      return;
-    }
-
-    if (
-      !row.date ||
-      !row.doctorName.trim() ||
-      !row.doctorPhone.trim() ||
-      row.product.length === 0
-    ) {
-      warningAlert(
-        "Incomplete Form",
-        "Doctor name, phone number and products are required",
-      );
-
-      return;
-    }
-
-    // VALID DOCTOR NAME
-    const doctorNameRegex = /^[A-Za-z\s.]+$/;
-
-    if (!doctorNameRegex.test(row.doctorName.trim())) {
-      warningAlert(
-        "Invalid Doctor Name",
-        "Doctor name should contain only letters",
-      );
-
-      return;
-    }
-
-    // VALID PHONE NUMBER
-    const cleanPhone = row.doctorPhone.replace(/\D/g, "");
-
-    // VALID INDIAN MOBILE NUMBER
-    const indianPhoneRegex = /^(91)?[6-9]\d{9}$/;
-    if (!indianPhoneRegex.test(cleanPhone)) {
-      warningAlert(
-        "Invalid Phone Number",
-        "Enter valid 10-digit Indian mobile number",
-      );
-
-      return;
-    }
-
-    if (row.id) {
-      const { error } = await supabase
-        .from("doctor_entries")
-        .update({
-          visit_date: row.date,
-          doctor_name: row.doctorName,
-          doctor_phone: row.doctorPhone,
-          products: row.product,
-        })
-        .eq("id", row.id);
-
-      if (error) {
-        errorAlert("Update Failed", error.message);
-        return;
-      }
-
-      successAlert("Updated Successfully");
-    } else {
-      let latitude = null;
-      let longitude = null;
-
-      try {
-        const position = await new Promise<GeolocationPosition>(
-          (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: false,
-              timeout: 5000,
-              maximumAge: 60000,
-            });
-          },
-        );
-
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
-      } catch (err) {
-        errorAlert(
-          "Location Required",
-          "Please allow location access before saving.",
-        );
-        return;
-      }
-
-      const { error } = await supabase.from("doctor_entries").insert([
-        {
-          employee_id: employeeId,
-          visit_date: row.date,
-          doctor_name: row.doctorName,
-          doctor_phone: row.doctorPhone,
-          products: row.product,
-          latitude,
-          longitude,
+          Swal.getPopup()?.addEventListener("close", () => {
+            clearInterval(interval);
+          });
         },
-      ]);
 
-      if (error) {
-        errorAlert("Add Failed", error.message);
+        customClass: {
+          popup: "rounded-3xl shadow-2xl",
+        },
+      });
+
+      const employeeId = localStorage.getItem("employeeId");
+
+      if (!employeeId) {
+        errorAlert("Employee Not Found");
         return;
       }
 
-      await createCalendarEvent(
-        row.doctorName,
-        row.doctorPhone,
-        row.product,
-        row.date,
-      );
+      if (
+        !row.date ||
+        !row.doctorName.trim() ||
+        !row.doctorPhone.trim() ||
+        row.product.length === 0
+      ) {
+        warningAlert(
+          "Incomplete Form",
+          "Doctor name, phone number and products are required",
+        );
 
-      successAlert("Added Successfully");
+        return;
+      }
+
+      // VALID DOCTOR NAME
+      const doctorNameRegex = /^[A-Za-z\s.]+$/;
+
+      if (!doctorNameRegex.test(row.doctorName.trim())) {
+        warningAlert(
+          "Invalid Doctor Name",
+          "Doctor name should contain only letters",
+        );
+
+        return;
+      }
+
+      // VALID PHONE NUMBER
+      const cleanPhone = row.doctorPhone.replace(/\D/g, "");
+
+      // VALID INDIAN MOBILE NUMBER
+      const indianPhoneRegex = /^(91)?[6-9]\d{9}$/;
+      if (!indianPhoneRegex.test(cleanPhone)) {
+        warningAlert(
+          "Invalid Phone Number",
+          "Enter valid 10-digit Indian mobile number",
+        );
+
+        return;
+      }
+
+      if (row.id) {
+        const { error } = await supabase
+          .from("doctor_entries")
+          .update({
+            visit_date: row.date,
+            doctor_name: row.doctorName,
+            doctor_phone: row.doctorPhone,
+            products: row.product,
+          })
+          .eq("id", row.id);
+
+        if (error) {
+          errorAlert("Update Failed", error.message);
+          return;
+        }
+
+        successAlert("Updated Successfully");
+      } else {
+        let latitude = null;
+        let longitude = null;
+
+        try {
+          const position = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: false,
+                timeout: 5000,
+                maximumAge: 60000,
+              });
+            },
+          );
+
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch (err) {
+          errorAlert(
+            "Location Required",
+            "Please allow location access before saving.",
+          );
+          return;
+        }
+
+        const { error } = await supabase.from("doctor_entries").insert([
+          {
+            employee_id: employeeId,
+            visit_date: row.date,
+            doctor_name: row.doctorName,
+            doctor_phone: row.doctorPhone,
+            products: row.product,
+            latitude,
+            longitude,
+          },
+        ]);
+
+        if (error) {
+          errorAlert("Add Failed", error.message);
+          return;
+        }
+
+        await createCalendarEvent(
+          row.doctorName,
+          row.doctorPhone,
+          row.product,
+          row.date,
+        );
+
+        successAlert("Added Successfully");
+      }
+      // setSaving(false);
+      fetchData();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    fetchData();
   };
 
   const visitDates = rows.filter((row) => row.id).map((row) => row.date);
@@ -611,25 +616,24 @@ await fetchProductOptions();
     fetchDailySales(selectedDate);
   }, [selectedDate]);
 
-
   const fetchProductOptions = async () => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("name")
-    .order("name");
+    const { data, error } = await supabase
+      .from("products")
+      .select("name")
+      .order("name");
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+    if (error) {
+      console.log(error);
+      return;
+    }
 
-  setProductOptions(
-    (data || []).map((product) => ({
-      value: product.name,
-      label: product.name,
-    }))
-  );
-};
+    setProductOptions(
+      (data || []).map((product) => ({
+        value: product.name,
+        label: product.name,
+      })),
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
@@ -787,6 +791,7 @@ await fetchProductOptions();
                               options={productOptions}
                               closeMenuOnSelect={false}
                               hideSelectedOptions={false}
+                              blurInputOnSelect={false}
                               menuPlacement="auto"
                               value={productOptions.filter((option) =>
                                 row.product.includes(option.value),
@@ -803,6 +808,16 @@ await fetchProductOptions();
                                   ...base,
                                   minHeight: 54,
                                   borderRadius: 14,
+                                }),
+
+                                menu: (base) => ({
+                                  ...base,
+                                  zIndex: 9999,
+                                }),
+
+                                option: (base) => ({
+                                  ...base,
+                                  padding: 16,
                                 }),
                               }}
                             />
