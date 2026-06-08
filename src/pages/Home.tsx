@@ -25,7 +25,7 @@ const Home = () => {
     // HOMEPAGE PRODUCTS
     const { data: homeProducts } = await supabase
       .from("products")
-      .select("*")
+      .select("id,name,tagline,image_urls")
       .eq("show_on_home", true)
       .order("home_order", { ascending: true });
 
@@ -156,7 +156,7 @@ const Home = () => {
               alt="Farmer caring for healthy cattle in a green pasture"
               width={1080}
               height={1920}
-              // fetchPriority="high"
+              fetchPriority="high"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
             />
