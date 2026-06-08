@@ -5,7 +5,7 @@ import Select from "react-select";
 import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
 
-import { products } from "@/data/products";
+// import { products } from "@/data/products";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
@@ -39,10 +39,6 @@ declare global {
 
 const today = new Date().toISOString().split("T")[0];
 
-const productOptions = products.map((product) => ({
-  value: product.name,
-  label: product.name,
-}));
 
 export default function Dashboard() {
   const [rows, setRows] = useState<RowData[]>([
@@ -57,7 +53,7 @@ export default function Dashboard() {
   const [contacts, setContacts] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [supportsContactPicker, setSupportsContactPicker] = useState(false);
-
+const [productOptions, setProductOptions] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [sales, setSales] = useState("");
@@ -94,7 +90,7 @@ export default function Dashboard() {
     localStorage.setItem("employeeId", user.id);
 
     await fetchData(user.id);
-
+await fetchProductOptions();
     await loadContacts();
   };
 
@@ -614,6 +610,26 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDailySales(selectedDate);
   }, [selectedDate]);
+
+
+  const fetchProductOptions = async () => {
+  const { data, error } = await supabase
+    .from("products")
+    .select("name")
+    .order("name");
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  setProductOptions(
+    (data || []).map((product) => ({
+      value: product.name,
+      label: product.name,
+    }))
+  );
+};
 
   return (
     <div className="min-h-screen bg-background px-3 py-4 sm:p-6">
