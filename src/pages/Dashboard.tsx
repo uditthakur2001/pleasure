@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
 import Swal from "sweetalert2";
 
 import { products } from "@/data/products";
@@ -151,16 +150,13 @@ export default function Dashboard() {
             summary: `Doctor Follow-up - ${doctorName}`,
 
             description: `
-Doctor Name: ${doctorName}
+            Doctor Name: ${doctorName}
 
-Doctor Phone: ${doctorPhone}
+            Doctor Phone: ${doctorPhone}
 
-Products:
-${products.join(", ")}
+            Products: ${products.join(", ")}
 
-Employee:
-${localStorage.getItem("employeeName")}
-            `,
+            Employee: ${localStorage.getItem("employeeName")} `,
 
             start: {
               date: finalDate,
@@ -303,38 +299,6 @@ ${localStorage.getItem("employeeName")}
       },
       ...rows,
     ]);
-  };
-
-  const deleteRow = async (index: number) => {
-    const result = await confirmAlert(
-      "Delete Entry?",
-      "This action cannot be undone",
-    );
-
-    if (!result.isConfirmed) return;
-
-    const row = rows[index];
-
-    // DELETE FROM DATABASE
-    if (row.id) {
-      const { error } = await supabase
-        .from("doctor_entries")
-        .delete()
-        .eq("id", row.id);
-
-      if (error) {
-        errorAlert("Delete Failed", error.message);
-
-        return;
-      }
-    }
-
-    // REMOVE FROM UI
-    const updatedRows = rows.filter((_, i) => i !== index);
-
-    setRows(updatedRows);
-
-    successAlert("Deleted Successfully");
   };
 
   const saveSingleRow = async (row: RowData) => {
@@ -884,7 +848,6 @@ ${localStorage.getItem("employeeName")}
                     </div>
 
                     {/* ACTIONS */}
-                    {/* <div className="mt-5 flex flex-wrap items-center justify-between gap-3"> */}
                     <div className="mt-5 flex flex-wrap gap-2">
                       {supportsContactPicker && (
                         <button
@@ -897,7 +860,6 @@ ${localStorage.getItem("employeeName")}
                       )}
                     </div>
                   </div>
-                  // </div>
                 ))}
             </div>
           </div>
@@ -907,10 +869,6 @@ ${localStorage.getItem("employeeName")}
           <div className="lg:col-span-4">
             <div className="h-full rounded-3xl border border-gray-100 bg-gradient-to-br from-white to-green-50 p-6 shadow-lg">
               <div className="mb-6 flex items-center gap-3">
-                {/* <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100">
-                  📅
-                </div> */}
-
                 <div>
                   <h2 className="text-xl font-bold">Visit Calendar</h2>
 

@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
-
-
 import { errorAlert } from "@/lib/alert";
 
 export default function Login() {

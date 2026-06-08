@@ -4,8 +4,6 @@ export default function Terms() {
       <div className="mx-auto max-w-5xl rounded-3xl border bg-card p-8 shadow-sm">
         <h1 className="mb-4 text-4xl font-bold">Terms & Conditions</h1>
 
-        {/* <p className="mb-8 text-muted-foreground">Last Updated: May 2026</p> */}
-
         <div className="space-y-8 text-sm leading-7 text-foreground/80">
           <section>
             <h2 className="mb-2 text-xl font-semibold">
@@ -31,22 +29,20 @@ export default function Terms() {
               does not constitute veterinary medical advice, diagnosis, or
               treatment.
             </p>
-           
           </section>
           <section>
-  <h2 className="mb-2 text-xl font-semibold">
-    2.2 No Online Sale of Prescription Drugs
-  </h2>
+            <h2 className="mb-2 text-xl font-semibold">
+              2.2 No Online Sale of Prescription Drugs
+            </h2>
 
-  <p>
-    The Company does not sell Schedule H/H1 veterinary pharmaceutical
-    products directly to consumers through the website. Any purchase or
-    supply of regulated products shall only be made through licensed
-    distributors and against valid veterinary authorization, wherever
-    applicable.
-  </p>
-</section>
-
+            <p>
+              The Company does not sell Schedule H/H1 veterinary pharmaceutical
+              products directly to consumers through the website. Any purchase
+              or supply of regulated products shall only be made through
+              licensed distributors and against valid veterinary authorization,
+              wherever applicable.
+            </p>
+          </section>
 
           <section>
             <h2 className="mb-2 text-xl font-semibold">

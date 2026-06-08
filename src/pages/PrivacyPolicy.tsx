@@ -2,18 +2,15 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto max-w-5xl rounded-3xl border bg-card p-8 shadow-sm">
-        <h1 className="mb-4 text-4xl font-bold">
-          Privacy Policy
-        </h1>
-
+        <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
 
         <div className="space-y-8 text-sm leading-7 text-foreground/80">
           <section>
             <h2 className="mb-2 text-xl font-semibold">1. About Us</h2>
             <p>
               Pleasure Pharmaceuticals Pvt. Ltd. is a veterinary pharmaceutical
-              manufacturer specializing in antibiotics, health supplements,
-              feed supplements, and deworming solutions.
+              manufacturer specializing in antibiotics, health supplements, feed
+              supplements, and deworming solutions.
             </p>
           </section>
 
@@ -62,21 +59,17 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              5. Data Sharing
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">5. Data Sharing</h2>
 
             <p>
-              We do not sell, rent, or trade your personal information. Data
-              may be shared only with trusted service providers, legal advisors,
-              or regulatory authorities when required by law.
+              We do not sell, rent, or trade your personal information. Data may
+              be shared only with trusted service providers, legal advisors, or
+              regulatory authorities when required by law.
             </p>
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              6. Data Security
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">6. Data Security</h2>
 
             <p>
               We implement reasonable technical and organizational safeguards,
@@ -86,9 +79,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              7. Data Retention
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">7. Data Retention</h2>
 
             <p>
               Personal information is retained only for as long as necessary to
@@ -97,9 +88,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              8. Your Rights
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">8. Your Rights</h2>
 
             <p>
               Under applicable Indian laws, including the Digital Personal Data
@@ -109,9 +98,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              9. Third-Party Links
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">9. Third-Party Links</h2>
 
             <p>
               Our website may contain links to third-party websites. We are not
@@ -120,9 +107,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold">
-              10. Contact Us
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">10. Contact Us</h2>
 
             <p>
               Pleasure Pharmaceuticals Pvt. Ltd.
@@ -146,4 +131,3 @@ export default function PrivacyPolicy() {
     </div>
   );
 }
-

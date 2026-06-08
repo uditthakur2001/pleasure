@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
 
 export const fetchProducts = async () => {
   const { data, error } = await supabase.from("products").select("*");
@@ -19,12 +18,7 @@ export const fetchProducts = async () => {
 
     category: product.category,
 
-images:
-  Array.isArray(
-    product.image_urls,
-  )
-    ? product.image_urls
-    : [],
+    images: Array.isArray(product.image_urls) ? product.image_urls : [],
     composition: product.composition,
 
     indications: product.indications || [],
@@ -63,12 +57,7 @@ export const getProductBySlug = async (slug: string) => {
 
     category: data.category,
 
-images:
-  Array.isArray(
-    data.image_urls,
-  )
-    ? data.image_urls
-    : [],
+    images: Array.isArray(data.image_urls) ? data.image_urls : [],
     composition: data.composition,
 
     indications: data.indications || [],

@@ -1,35 +1,24 @@
 import { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
-
 
 export default function Profile() {
   const navigate = useNavigate();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [userId, setUserId] =
-    useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
 
-  const [username, setUsername] =
-    useState("");
+  const [username, setUsername] = useState("");
 
-  const [fullName, setFullName] =
-    useState("");
+  const [fullName, setFullName] = useState("");
 
-  const [phone, setPhone] =
-    useState("");
+  const [phone, setPhone] = useState("");
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    const workerName =
-      localStorage.getItem("workerName");
+    const workerName = localStorage.getItem("workerName");
 
     if (!workerName) {
       navigate("/login");
@@ -39,15 +28,12 @@ export default function Profile() {
     fetchProfile(workerName);
   }, [navigate]);
 
-  const fetchProfile = async (
-    workerName: string
-  ) => {
-    const { data, error } =
-      await supabase
-        .from("employee")
-        .select("*")
-        .eq("username", workerName)
-        .single();
+  const fetchProfile = async (workerName: string) => {
+    const { data, error } = await supabase
+      .from("employee")
+      .select("*")
+      .eq("username", workerName)
+      .single();
 
     if (error || !data) {
       console.log(error);
@@ -90,30 +76,20 @@ export default function Profile() {
   };
 
   const deleteAccount = async () => {
-    const confirmDelete = window.confirm(
-      "Delete your account permanently?"
-    );
+    const confirmDelete = window.confirm("Delete your account permanently?");
 
-    if (!confirmDelete || !userId)
-      return;
+    if (!confirmDelete || !userId) return;
 
-    const { error } = await supabase
-      .from("employee")
-      .delete()
-      .eq("id", userId);
+    const { error } = await supabase.from("employee").delete().eq("id", userId);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    localStorage.removeItem(
-      "isLoggedIn"
-    );
+    localStorage.removeItem("isLoggedIn");
 
-    localStorage.removeItem(
-      "workerName"
-    );
+    localStorage.removeItem("workerName");
 
     alert("Account deleted");
 
@@ -123,9 +99,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background px-4 py-6">
       <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-lg">
-        <h1 className="mb-2 text-3xl font-bold">
-          Profile
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold">Profile</h1>
 
         <p className="mb-6 text-muted-foreground">
           Manage your account details
@@ -133,9 +107,7 @@ export default function Profile() {
 
         <div className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              Username
-            </label>
+            <label className="mb-2 block text-sm font-medium">Username</label>
 
             <input
               type="text"
@@ -146,19 +118,13 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              Full Name
-            </label>
+            <label className="mb-2 block text-sm font-medium">Full Name</label>
 
             <input
               type="text"
               placeholder="Enter full name"
               value={fullName}
-              onChange={(e) =>
-                setFullName(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setFullName(e.target.value)}
               className="w-full rounded-lg border border-border px-4 py-3"
             />
           </div>
@@ -172,11 +138,7 @@ export default function Profile() {
               type="text"
               placeholder="Enter phone number"
               value={phone}
-              onChange={(e) =>
-                setPhone(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full rounded-lg border border-border px-4 py-3"
             />
           </div>
@@ -190,11 +152,7 @@ export default function Profile() {
               type="email"
               placeholder="Enter email"
               value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-border px-4 py-3"
             />
           </div>
@@ -205,9 +163,7 @@ export default function Profile() {
               disabled={loading}
               className="rounded-lg bg-primary px-5 py-3 text-white"
             >
-              {loading
-                ? "Saving..."
-                : "Save Profile"}
+              {loading ? "Saving..." : "Save Profile"}
             </button>
 
             <button

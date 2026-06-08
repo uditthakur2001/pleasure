@@ -27,13 +27,11 @@ export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("isLoggedIn"),
   );
-  const [role, setRole] = useState(
-  localStorage.getItem("role") || "",
-);
-const dashboardLink = {
-  to: role === "admin" ? "/admin" : "/dashboard",
-  label: "Dashboard",
-};
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
+  const dashboardLink = {
+    to: role === "admin" ? "/admin" : "/dashboard",
+    label: "Dashboard",
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -49,10 +47,10 @@ const dashboardLink = {
     };
   }, []);
 
-useEffect(() => {
-  setIsLoggedIn(!!localStorage.getItem("isLoggedIn"));
-  setRole(localStorage.getItem("role") || "");
-}, [location]);
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("isLoggedIn"));
+    setRole(localStorage.getItem("role") || "");
+  }, [location]);
 
   const logout = async () => {
     const result = await confirmAlert(
@@ -85,21 +83,21 @@ useEffect(() => {
       navigate("/login");
     }, 1000);
   };
-const analyticsLink = {
-  to: "/analytics",
-  label: "Analytics",
-};
+  const analyticsLink = {
+    to: "/analytics",
+    label: "Analytics",
+  };
 
-const adminAnalyticsLink = {
-  to: "/adminAnalytics",
-  label: "Analytics",
-};
+  const adminAnalyticsLink = {
+    to: "/adminAnalytics",
+    label: "Analytics",
+  };
 
-const links = isLoggedIn
-  ? role === "admin"
-    ? [...publicLinks, dashboardLink, adminAnalyticsLink]
-    : [...publicLinks, dashboardLink, analyticsLink]
-  : publicLinks;
+  const links = isLoggedIn
+    ? role === "admin"
+      ? [...publicLinks, dashboardLink, adminAnalyticsLink]
+      : [...publicLinks, dashboardLink, analyticsLink]
+    : publicLinks;
   return (
     <header
       className={cn(

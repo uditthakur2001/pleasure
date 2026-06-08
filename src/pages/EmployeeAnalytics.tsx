@@ -3,8 +3,6 @@
 import { ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
-// const { supabase } = await import("../lib/supabase");
-
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
@@ -67,30 +65,30 @@ export default function EmployeeAnalytics() {
     loadAnalytics();
   }, []);
 
-  const weeklyData = useMemo(() => {
-    const counts: Record<string, number> = {
-      Mon: 0,
-      Tue: 0,
-      Wed: 0,
-      Thu: 0,
-      Fri: 0,
-      Sat: 0,
-      Sun: 0,
-    };
+  // const weeklyData = useMemo(() => {
+  //   const counts: Record<string, number> = {
+  //     Mon: 0,
+  //     Tue: 0,
+  //     Wed: 0,
+  //     Thu: 0,
+  //     Fri: 0,
+  //     Sat: 0,
+  //     Sun: 0,
+  //   };
 
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  //   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    visits.forEach((visit) => {
-      const day = days[new Date(visit.created_at).getDay()];
+  //   visits.forEach((visit) => {
+  //     const day = days[new Date(visit.created_at).getDay()];
 
-      counts[day]++;
-    });
+  //     counts[day]++;
+  //   });
 
-    return Object.entries(counts).map(([day, visits]) => ({
-      day,
-      visits,
-    }));
-  }, [visits]);
+  //   return Object.entries(counts).map(([day, visits]) => ({
+  //     day,
+  //     visits,
+  //   }));
+  // }, [visits]);
   const COLORS = [
     "#22c55e", // Green
     "#3b82f6", // Blue
@@ -145,16 +143,6 @@ export default function EmployeeAnalytics() {
 
         setAllSales(salesData || []);
       }
-
-      // Load ONLY current employee sales for cards
-      // if (currentEmployee) {
-      //   const { data: salesData } = await supabase
-      //     .from("employee_sales")
-      //     .select("*")
-      //     .eq("employee_id", currentEmployee.id);
-
-      //   setAllSales(salesData || []);
-      // }
 
       if (error) throw error;
 
@@ -234,38 +222,6 @@ export default function EmployeeAnalytics() {
   const productsPromoted = new Set(visits.flatMap((v) => v.products || []))
     .size;
 
-  const thisMonthVisits = visits.filter((v) => {
-    const d = new Date(v.created_at);
-    const now = new Date();
-
-    return (
-      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    );
-  }).length;
-  const monthlyTarget = 100;
-
-  const progressData = [
-    {
-      name: "Progress",
-      value: Math.min((thisMonthVisits / monthlyTarget) * 100, 100),
-    },
-  ];
-
-  const visitTrend = useMemo(() => {
-    const grouped: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      const day = new Date(visit.created_at).toLocaleDateString();
-
-      grouped[day] = (grouped[day] || 0) + 1;
-    });
-
-    return Object.entries(grouped).map(([day, count]) => ({
-      day,
-      visits: count,
-    }));
-  }, [visits]);
-
   const productData = useMemo(() => {
     const counts: Record<string, number> = {};
 
@@ -283,22 +239,6 @@ export default function EmployeeAnalytics() {
       .sort((a, b) => b.count - a.count);
   }, [visits]);
 
-  const monthlyData = useMemo(() => {
-    const counts: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      const month = new Date(visit.created_at).toLocaleString("default", {
-        month: "short",
-      });
-
-      counts[month] = (counts[month] || 0) + 1;
-    });
-
-    return Object.entries(counts).map(([month, visits]) => ({
-      month,
-      visits,
-    }));
-  }, [visits]);
 
   const topDoctors = useMemo(() => {
     const counts: Record<string, number> = {};

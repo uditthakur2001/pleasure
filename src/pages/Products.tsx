@@ -1,24 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { Search } from "lucide-react";
-
 import { PageHeader } from "@/components/site/PageHeader";
-
 import { ProductCard } from "@/components/site/ProductCard";
-
 import { Input } from "@/components/ui/input";
-
 import { fetchProducts } from "@/lib/productApi";
-
 import { cn } from "@/lib/utils";
 
 const Products = () => {
   const [query, setQuery] = useState("");
-
   const [active, setActive] = useState<string>("All");
-
   const [products, setProducts] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
-
 import { DndContext, closestCenter } from "@dnd-kit/core";
 
 import {
@@ -35,7 +31,6 @@ import { successAlert, errorAlert, confirmAlert } from "@/lib/alert";
 interface Employee {
   id: string;
   google_id?: string;
-  // username: string;
   full_name: string;
   phone: string;
   email: string;
@@ -48,7 +43,6 @@ interface DoctorEntry {
   doctor_name: string;
   doctor_phone: string;
   employee_name?: string;
-  // employee_username?: string;
   employee_email?: string;
   products: string[];
   latitude?: number;
@@ -329,8 +323,6 @@ export default function AdminDashboard() {
     }
     const { error } = await supabase.from("employee").insert([
       {
-        // username: employeeUsername,
-
         full_name: employeeFullName,
 
         phone: employeePhone,
@@ -348,8 +340,6 @@ export default function AdminDashboard() {
     }
 
     successAlert("Employee Added");
-
-    // setEmployeeUsername("");
 
     setEmployeeFullName("");
 
@@ -417,21 +407,6 @@ export default function AdminDashboard() {
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
-  }, [entries]);
-
-  const dailyAnalytics = useMemo(() => {
-    const counts: Record<string, number> = {};
-
-    entries.forEach((entry) => {
-      counts[entry.visit_date] = (counts[entry.visit_date] || 0) + 1;
-    });
-
-    return Object.entries(counts)
-      .map(([date, count]) => ({
-        date,
-        count,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
   }, [entries]);
 
   //product details
@@ -630,8 +605,6 @@ export default function AdminDashboard() {
 
   // ADD EMPLOYEE STATES
   const [showAddEmployee, setShowAddEmployee] = useState(false);
-
-  // const [employeeUsername, setEmployeeUsername] = useState("");
 
   const [employeeFullName, setEmployeeFullName] = useState("");
 

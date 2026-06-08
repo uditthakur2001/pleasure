@@ -19,7 +19,6 @@ const Certifications = lazy(() => import("./pages/Certifications"));
 const Careers = lazy(() => import("./pages/Careers"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Login = lazy(() => import("./pages/Login"));
-// const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -173,8 +172,6 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              {/* <Route path="/signup" element={<Signup />} /> */}
-
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
 

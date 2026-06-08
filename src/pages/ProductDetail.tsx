@@ -1,46 +1,27 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-
 import { cn } from "@/lib/utils";
-
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
-
 import { fetchProducts, getProductBySlug } from "@/lib/productApi";
-
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
-
 import "yet-another-react-lightbox/styles.css";
-
 import "./lightbox.css";
 
 const Lightbox = lazy(() => import("yet-another-react-lightbox"));
 
 const ProductDetail = () => {
   const { slug } = useParams();
-
   const [product, setProduct] = useState<any>(null);
-
   const [related, setRelated] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(true);
-
   const [selected, setSelected] = useState(0);
-
   const [showZoom, setShowZoom] = useState(false);
-
   const [openLightbox, setOpenLightbox] = useState(false);
-
   const zoomRef = useRef<HTMLImageElement | null>(null);
-
   const lensRef = useRef<HTMLDivElement | null>(null);
-
   const rectRef = useRef<DOMRect | null>(null);
-
   const frameRef = useRef<number | null>(null);
-
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   useEffect(() => {

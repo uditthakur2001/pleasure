@@ -1,9 +1,4 @@
-// import injectionImg from "@/assets/product-injection.jpg";
-// import bolusImg from "@/assets/product-bolus.jpg";
-// import powderImg from "@/assets/product-powder.jpg";
-// import syrupImg from "@/assets/product-syrup.jpg";
-// import pecImg from "@/assets/p-cef.png";
-// import zoonilImg from "@/assets/zoonil.png";
+
 // Category images
 import injectionImg from "@/assets/product-injection.jpg";
 import bolusImg from "@/assets/product-bolus.jpg";

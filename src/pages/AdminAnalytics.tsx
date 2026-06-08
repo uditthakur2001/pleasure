@@ -1,16 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 
-function StatCard({ title, value }: { title: string; value: string | number }) {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <p className="text-sm text-gray-500">{title}</p>
-
-      <h2 className="mt-2 text-4xl font-bold text-green-900">{value}</h2>
-    </div>
-  );
-}
-
 function Card({
   title,
   children,
@@ -79,71 +69,6 @@ export default function AdminAnalytics() {
       setLoading(false);
     }
   };
-  const totalVisits = visits.length;
-
-  const totalEmployees = employees.length;
-
-  const activeEmployees = new Set(
-    visits
-      .filter((v) => {
-        const d = new Date(v.created_at);
-        const now = new Date();
-
-        return (
-          d.getMonth() === now.getMonth() &&
-          d.getFullYear() === now.getFullYear()
-        );
-      })
-      .map((v) => v.employee_id),
-  ).size;
-
-  const doctorsCovered = new Set(visits.map((v) => v.doctor_name)).size;
-
-  const productsPromoted = new Set(visits.flatMap((v) => v.products || []))
-    .size;
-
-  const thisMonthVisits = visits.filter((v) => {
-    const d = new Date(v.created_at);
-    const now = new Date();
-
-    return (
-      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    );
-  }).length;
-
-  const productData = useMemo(() => {
-    const counts: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      (visit.products || []).forEach((product: string) => {
-        counts[product] = (counts[product] || 0) + 1;
-      });
-    });
-
-    return Object.entries(counts)
-      .map(([name, count]) => ({
-        name,
-        count,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [visits]);
-
-  const monthlyData = useMemo(() => {
-    const counts: Record<string, number> = {};
-
-    visits.forEach((visit) => {
-      const month = new Date(visit.created_at).toLocaleString("default", {
-        month: "short",
-      });
-
-      counts[month] = (counts[month] || 0) + 1;
-    });
-
-    return Object.entries(counts).map(([month, visits]) => ({
-      month,
-      visits,
-    }));
-  }, [visits]);
 
   const filteredSales = useMemo(() => {
     const now = new Date();
@@ -331,22 +256,6 @@ export default function AdminAnalytics() {
 
           <p className="mt-2 text-gray-600">Employee Performance Dashboard</p>
         </div>
-
-        {/* KPI */}
-
-        {/* <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-          <StatCard title="Employees" value={totalEmployees} />
-
-          <StatCard title="Active Employees" value={activeEmployees} />
-
-          <StatCard title="Total Visits" value={totalVisits} />
-
-          <StatCard title="Doctors Covered" value={doctorsCovered} />
-
-          <StatCard title="Products Promoted" value={productsPromoted} />
-
-          <StatCard title="This Month" value={thisMonthVisits} />
-        </div> */}
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-3">
@@ -564,32 +473,6 @@ export default function AdminAnalytics() {
             </table>
           </div>
         </Card>
-        {/* Middle */}
-
-        {/* <div className="grid gap-6 lg:grid-cols-2">
-          
-<Card title="Top Doctors">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-3 text-left">Doctor</th>
-
-                  <th className="py-3 text-right">Visits</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {topDoctors.map((doctor) => (
-                  <tr key={doctor.doctor} className="border-b">
-                    <td className="py-3">{doctor.doctor}</td>
-
-                    <td className="py-3 text-right">{doctor.visits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        </div> */}
       </div>
     </div>
   );
