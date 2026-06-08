@@ -156,7 +156,7 @@ const Home = () => {
               alt="Farmer caring for healthy cattle in a green pasture"
               width={1080}
               height={1920}
-              fetchPriority="high"
+              // fetchPriority="high"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
             />
