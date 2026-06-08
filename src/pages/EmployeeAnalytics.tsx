@@ -39,7 +39,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="h-full w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <h3 className="mb-4 text-xl font-semibold text-green-900">{title}</h3>
 
       {children}
@@ -56,9 +56,9 @@ export default function EmployeeAnalytics() {
   const [chartView, setChartView] = useState<"weekly" | "monthly">("monthly");
   const [allSales, setAllSales] = useState<any[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [statsRange, setStatsRange] = useState<"week" | "month" | "year">(
-    "month",
-  );
+  const [statsRange, setStatsRange] = useState<
+    "day" | "week" | "month" | "year"
+  >("month");
   const [leaderboardSales, setLeaderboardSales] = useState<any[]>([]);
 
   useEffect(() => {
@@ -160,10 +160,27 @@ export default function EmployeeAnalytics() {
     const filtered = leaderboardSales.filter((row) => {
       const d = new Date(row.report_date);
 
+      if (statsRange === "day") {
+        return d.toDateString() === now.toDateString();
+      }
       if (statsRange === "week") {
-        const weekAgo = new Date();
-        weekAgo.setDate(now.getDate() - 7);
-        return d >= weekAgo;
+        const today = new Date();
+
+        const day = today.getDay(); // 0=Sun, 1=Mon
+
+        const monday = new Date(today);
+
+        monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+
+        monday.setHours(0, 0, 0, 0);
+
+        const sunday = new Date(monday);
+
+        sunday.setDate(monday.getDate() + 6);
+
+        sunday.setHours(23, 59, 59, 999);
+
+        return d >= monday && d <= sunday;
       }
 
       if (statsRange === "month") {
@@ -238,7 +255,6 @@ export default function EmployeeAnalytics() {
       }))
       .sort((a, b) => b.count - a.count);
   }, [visits]);
-
 
   const topDoctors = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -393,6 +409,7 @@ export default function EmployeeAnalytics() {
 
           <div className="flex rounded-full bg-gray-100 p-1 shadow-sm">
             {[
+              { key: "day", label: "Today" },
               { key: "week", label: "Week" },
               { key: "month", label: "Month" },
               { key: "year", label: "Year" },
@@ -413,10 +430,37 @@ export default function EmployeeAnalytics() {
         </div>
 
         {/* KPI */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <StatCard title="Visits" value={rangeVisits} color="#22c55e" />
 
-        <div className="grid gap-6 lg:grid-cols-12">
+          <StatCard
+            title="Doctors Covered"
+            value={rangeDoctors}
+            color="#3b82f6"
+          />
+
+          <StatCard
+            title="Products Promoted"
+            value={productsPromoted}
+            color="#f97316"
+          />
+
+          <StatCard
+            title="Sales"
+            value={`₹${totalSalesAmount.toLocaleString()}`}
+            color="#8b5cf6"
+          />
+
+          <StatCard
+            title="Collection"
+            value={`₹${totalCollectionAmount.toLocaleString()}`}
+            color="#ec4899"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-stretch">
           {/* Leaderboard */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-6 flex">
             <Card title="🏆 Top Performers">
               <div className="space-y-3">
                 {leaderboard.slice(0, 5).map((employee, index) => (
@@ -440,11 +484,11 @@ export default function EmployeeAnalytics() {
                       </div>
 
                       <div>
-                        <div className="font-semibold">
+                        <div className="text-lg font-bold">
                           {getEmployeeName(employee.employee_id)}
                         </div>
 
-                        <div className="text-xs text-gray-500">
+                        <div className="text-s text-gray-500">
                           Rank #{index + 1}
                         </div>
                       </div>
@@ -455,7 +499,7 @@ export default function EmployeeAnalytics() {
                 <div className="my-4 border-t" />
 
                 <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
-                  <div className="mb-2 text-sm font-medium text-green-700">
+                  <div className="mb-2 text-m font-medium text-green-700">
                     🎯 Your Rank
                   </div>
 
@@ -465,7 +509,7 @@ export default function EmployeeAnalytics() {
                         {myRank > 0 ? `#${myRank}` : "Not Ranked"}
                       </div>
 
-                      <div className="text-sm text-gray-600">
+                      <div className="text-lg font-semibold text-gray-800">
                         {currentUserName}
                       </div>
                     </div>
@@ -475,35 +519,100 @@ export default function EmployeeAnalytics() {
             </Card>
           </div>
 
-          {/* KPI Cards */}
-          <div className="lg:col-span-7">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <StatCard title="Visits" value={rangeVisits} color="#22c55e" />
+          <div className="lg:col-span-6 flex">
+            <Card title="">
+              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    📅 Visit Attendance
+                  </h2>
 
-              <StatCard
-                title="Doctors Covered"
-                value={rangeDoctors}
-                color="#3b82f6"
-              />
+                  <p className="mt-1 text-sm text-gray-500">
+                    Track your daily doctor visit activity and consistency
+                  </p>
+                </div>
+              </div>
 
-              <StatCard
-                title="Products Promoted"
-                value={productsPromoted}
-                color="#f97316"
-              />
+              <div className="mb-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl bg-green-50 p-4">
+                  <p className="text-xs text-gray-500">Total Visits</p>
 
-              <StatCard
-                title="Sales"
-                value={`₹${totalSalesAmount.toLocaleString()}`}
-                color="#8b5cf6"
-              />
+                  <p className="mt-1 text-3xl font-bold text-green-700">
+                    {totalVisits}
+                  </p>
+                </div>
 
-              <StatCard
-                title="Collection"
-                value={`₹${totalCollectionAmount.toLocaleString()}`}
-                color="#ec4899"
-              />
-            </div>
+                <div className="rounded-2xl bg-blue-50 p-4">
+                  <p className="text-xs text-gray-500">Doctors Covered</p>
+
+                  <p className="mt-1 text-3xl font-bold text-blue-700">
+                    {doctorsCovered}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-orange-50 p-4">
+                  <p className="text-xs text-gray-500">Products Promoted</p>
+
+                  <p className="mt-1 text-3xl font-bold text-orange-700">
+                    {productsPromoted}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-100 bg-white p-2 flex justify-center">
+                <DayPicker
+                  className="w-full"
+                  classNames={{
+                    months: "w-full",
+                    month: "w-full",
+                    table: "w-full",
+                    head_row: "grid grid-cols-7",
+                    row: "grid grid-cols-7",
+                    cell: "flex justify-center",
+                  }}
+                  mode="single"
+                  month={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                  modifiers={{
+                    visited: (date) => {
+                      const formatted = `${date.getFullYear()}-${String(
+                        date.getMonth() + 1,
+                      ).padStart(2, "0")}-${String(date.getDate()).padStart(
+                        2,
+                        "0",
+                      )}`;
+
+                      return visitDatesSet.has(formatted);
+                    },
+                  }}
+                  modifiersStyles={{
+                    visited: {
+                      backgroundColor: "#22c55e",
+                      color: "white",
+                      borderRadius: "999px",
+                    },
+                  }}
+                />
+              </div>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-green-50 p-4">
+                  <p className="text-xs text-gray-500">Days Worked</p>
+
+                  <p className="mt-1 text-3xl font-bold text-green-700">
+                    {daysWorked}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-blue-50 p-4">
+                  <p className="text-xs text-gray-500">This Month Visits</p>
+
+                  <p className="mt-1 text-3xl font-bold text-blue-700">
+                    {monthVisits.length}
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
         {/* Middle */}
@@ -588,91 +697,6 @@ export default function EmployeeAnalytics() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </Card>
-
-          <Card title="">
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  📅 Visit Attendance
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-500">
-                  Track your daily doctor visit activity and consistency
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl bg-green-50 p-4">
-                <p className="text-xs text-gray-500">Total Visits</p>
-
-                <p className="mt-1 text-3xl font-bold text-green-700">
-                  {totalVisits}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-blue-50 p-4">
-                <p className="text-xs text-gray-500">Doctors Covered</p>
-
-                <p className="mt-1 text-3xl font-bold text-blue-700">
-                  {doctorsCovered}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-orange-50 p-4">
-                <p className="text-xs text-gray-500">Products Promoted</p>
-
-                <p className="mt-1 text-3xl font-bold text-orange-700">
-                  {productsPromoted}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 bg-white p-4">
-              <DayPicker
-                mode="single"
-                month={selectedMonth}
-                onMonthChange={setSelectedMonth}
-                modifiers={{
-                  visited: (date) => {
-                    const formatted = `${date.getFullYear()}-${String(
-                      date.getMonth() + 1,
-                    ).padStart(2, "0")}-${String(date.getDate()).padStart(
-                      2,
-                      "0",
-                    )}`;
-
-                    return visitDatesSet.has(formatted);
-                  },
-                }}
-                modifiersStyles={{
-                  visited: {
-                    backgroundColor: "#22c55e",
-                    color: "white",
-                    borderRadius: "999px",
-                  },
-                }}
-              />
-            </div>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-green-50 p-4">
-                <p className="text-xs text-gray-500">Days Worked</p>
-
-                <p className="mt-1 text-3xl font-bold text-green-700">
-                  {daysWorked}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-blue-50 p-4">
-                <p className="text-xs text-gray-500">This Month Visits</p>
-
-                <p className="mt-1 text-3xl font-bold text-blue-700">
-                  {monthVisits.length}
-                </p>
-              </div>
             </div>
           </Card>
         </div>
