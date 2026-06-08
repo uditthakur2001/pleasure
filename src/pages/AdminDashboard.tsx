@@ -126,6 +126,15 @@ export default function AdminDashboard() {
   const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(
     null,
   );
+  const [updatePeriod, setUpdatePeriod] = useState<
+    "daily" | "weekly" | "monthly" | "yearly"
+  >("daily");
+
+  const [expandedEmployeeUpdate, setExpandedEmployeeUpdate] = useState<
+    string | null
+  >(null);
+
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     checkAdmin();
@@ -675,6 +684,54 @@ export default function AdminDashboard() {
     });
   };
 
+  const filteredEntriesByPeriod = useMemo(() => {
+    const now = new Date();
+
+    return filteredEntries.filter((entry) => {
+      const date = new Date(entry.visit_date);
+
+      switch (updatePeriod) {
+        case "daily":
+          return date.toDateString() === now.toDateString();
+
+        case "weekly": {
+          const start = new Date(now);
+          const day = now.getDay();
+          const diff = day === 0 ? -6 : 1 - day;
+
+          start.setDate(now.getDate() + diff);
+          start.setHours(0, 0, 0, 0);
+
+          const end = new Date(start);
+          end.setDate(start.getDate() + 7);
+
+          return date >= start && date < end;
+        }
+
+        case "monthly":
+          return (
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+          );
+
+        case "yearly":
+          return date.getFullYear() === now.getFullYear();
+
+        default:
+          return true;
+      }
+    });
+  }, [filteredEntries, updatePeriod]);
+
+  const groupedUpdates = employees
+    .map((employee) => ({
+      employee,
+      records: filteredEntriesByPeriod.filter(
+        (entry) => entry.employee_name === employee.full_name,
+      ),
+    }))
+    .filter((group) => group.records.length > 0);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
       <div className="mx-auto max-w-7xl">
@@ -750,20 +807,32 @@ export default function AdminDashboard() {
                     angle={-20}
                     textAnchor="end"
                     height={60}
-                    tick={({ x, y, payload, index }) => (
-                      <text
-                        x={x}
-                        y={y}
-                        dx={10}
-                        dy={5}
-                        textAnchor="end"
-                        transform={`rotate(-30, ${x}, ${y})`}
-                        fill={COLORS[index % COLORS.length]}
-                        fontSize={9}
-                      >
-                        {payload.value}
-                      </text>
-                    )}
+                    tick={({ x, y, payload, index }) => {
+                      const shortName =
+                        payload.value === "ZOONIL PLUS BOLUS"
+                          ? "ZOONIL"
+                          : payload.value === "F-STAR PLUS"
+                            ? "F-STAR"
+                            : payload.value === "P-CEF 3"
+                              ? "P-CEF"
+                              : payload.value;
+
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          dx={10}
+                          dy={5}
+                          textAnchor="end"
+                          transform={`rotate(-25, ${x}, ${y})`}
+                          fill={COLORS[index % COLORS.length]}
+                          fontSize={10}
+                          fontWeight={500}
+                        >
+                          {shortName}
+                        </text>
+                      );
+                    }}
                   />
 
                   <YAxis
@@ -791,17 +860,50 @@ export default function AdminDashboard() {
           <div className="rounded-2xl border border-white/20 bg-white/60 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)] backdrop-blur-xl">
             <h2 className="mb-3 text-lg font-semibold">Product Distribution</h2>
 
-            <div className="h-[260px]">
+            <div className="h-[320px] md:h-[340px]">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 60, bottom: 20, left: 60 }}>
                   <Pie
                     data={productAnalytics}
                     dataKey="value"
                     nameKey="name"
-                    cx="40%"
+                    cx="50%"
                     cy="50%"
-                    outerRadius={65}
-                    innerRadius={35}
+                    outerRadius={85}
+                    innerRadius={50}
+                    paddingAngle={2}
+                    labelLine={false}
+                    label={({
+                      cx,
+                      cy,
+                      midAngle,
+                      innerRadius,
+                      outerRadius,
+                      percent,
+                    }) => {
+                      const radius =
+                        innerRadius + (outerRadius - innerRadius) * 0.6;
+
+                      const x =
+                        cx + radius * Math.cos((-midAngle * Math.PI) / 180);
+
+                      const y =
+                        cy + radius * Math.sin((-midAngle * Math.PI) / 180);
+
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill="white"
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          fontSize={12}
+                          fontWeight={600}
+                        >
+                          {`${(percent * 100).toFixed(0)}%`}
+                        </text>
+                      );
+                    }}
                   >
                     {productAnalytics.map((entry, index) => (
                       <Cell key={index} fill={COLORS[index % COLORS.length]} />
@@ -811,12 +913,13 @@ export default function AdminDashboard() {
                   <Tooltip />
 
                   <Legend
-                    layout="vertical"
-                    verticalAlign="middle"
-                    align="right"
-                    formatter={(value, entry: any) =>
-                      `${value} (${entry.payload.value})`
-                    }
+                    verticalAlign="bottom"
+                    align="center"
+                    layout="horizontal"
+                    wrapperStyle={{
+                      fontSize: "12px",
+                      paddingTop: "12px",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -1395,14 +1498,6 @@ export default function AdminDashboard() {
 
           {showAddEmployee && (
             <div className="mb-5 grid gap-4 rounded-2xl border bg-white p-4 md:grid-cols-2">
-              {/* <input
-                type="text"
-                placeholder="Username"
-                value={employeeUsername}
-                onChange={(e) => setEmployeeUsername(e.target.value)}
-                className="rounded-xl border px-4 py-3"
-              /> */}
-
               <input
                 type="text"
                 placeholder="Full Name"
@@ -1456,20 +1551,15 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[850px]">
               <thead>
                 <tr className="border-b border-border">
-                  {/* <th className="p-2.5 text-left text-sm">Username</th> */}
-
                   <th className="p-2.5 text-left text-sm">Name</th>
-
                   <th className="p-2.5 text-left text-sm">Phone</th>
-
                   <th className="p-2.5 text-left text-sm">Email</th>
-
                   <th className="p-2.5 text-left text-sm">Role</th>
-
                   <th className="p-2.5 text-left text-sm">Actions</th>
                 </tr>
               </thead>
@@ -1477,12 +1567,8 @@ export default function AdminDashboard() {
               <tbody>
                 {filteredEmployees.map((emp) => (
                   <tr key={emp.id} className="border-b border-border">
-                    {/* <td className="p-2.5 text-sm">{emp.username}</td> */}
-
                     <td className="p-2.5 text-sm">{emp.full_name || "-"}</td>
-
                     <td className="p-2.5 text-sm">{emp.phone || "-"}</td>
-
                     <td className="p-2.5 text-sm">{emp.email || "-"}</td>
 
                     <td className="p-2.5 text-sm">
@@ -1501,19 +1587,18 @@ export default function AdminDashboard() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => updateEmployeeRole(emp.id, emp.role)}
-                          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+                          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white"
                         >
                           {emp.role === "admin" ? "Remove Admin" : "Make Admin"}
                         </button>
+
                         <button
                           onClick={() => {
                             setEditingEmployeeId(emp.id);
-
                             setEmployeeFullName(emp.full_name || "");
                             setEmployeePhone(emp.phone || "");
                             setEmployeeEmail(emp.email || "");
                             setEmployeeRole(emp.role || "employee");
-
                             setShowAddEmployee(true);
 
                             window.scrollTo({
@@ -1525,9 +1610,10 @@ export default function AdminDashboard() {
                         >
                           Edit
                         </button>
+
                         <button
                           onClick={() => deleteEmployee(emp.id)}
-                          className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
+                          className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white"
                         >
                           Delete
                         </button>
@@ -1537,6 +1623,79 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="space-y-3 md:hidden">
+            {filteredEmployees.map((emp) => (
+              <div
+                key={emp.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-lg font-semibold">
+                      {emp.full_name || "-"}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-slate-600">
+                      📞 {emp.phone || "-"}
+                    </p>
+
+                    <p className="mt-1 break-all text-sm text-slate-600">
+                      ✉️ {emp.email || "-"}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      emp.role === "admin"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {emp.role}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => updateEmployeeRole(emp.id, emp.role)}
+                    className={`rounded-xl px-3 py-2 text-xs text-white ${
+                      emp.role === "admin" ? "bg-orange-500" : "bg-blue-600"
+                    }`}
+                  >
+                    {emp.role === "admin" ? "Remove Admin" : "Make Admin"}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingEmployeeId(emp.id);
+                      setEmployeeFullName(emp.full_name || "");
+                      setEmployeePhone(emp.phone || "");
+                      setEmployeeEmail(emp.email || "");
+                      setEmployeeRole(emp.role || "employee");
+                      setShowAddEmployee(true);
+
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                    }}
+                    className="rounded-xl bg-amber-500 px-3 py-2 text-xs text-white"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => deleteEmployee(emp.id)}
+                    className="rounded-xl bg-red-500 px-3 py-2 text-xs text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -1564,106 +1723,154 @@ export default function AdminDashboard() {
             </select>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px]">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="p-2.5 text-left text-sm">Date</th>
+          <div className="mb-6 flex w-fit rounded-xl bg-gray-100 p-1">
+            {[
+              ["daily", "Today"],
+              ["weekly", "Week"],
+              ["monthly", "Month"],
+              ["yearly", "Year"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setUpdatePeriod(value as any)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  updatePeriod === value
+                    ? "bg-white text-green-700 shadow"
+                    : "text-gray-600"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-                  <th className="p-2.5 text-left text-sm">Doctor</th>
+          <div className="space-y-3">
+            {groupedUpdates.map(({ employee, records }) => (
+              <div
+                key={employee.id}
+                className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+              >
+                <button
+                  onClick={() =>
+                    setExpandedEmployeeUpdate(
+                      expandedEmployeeUpdate === employee.id
+                        ? null
+                        : employee.id,
+                    )
+                  }
+                  className="flex w-full items-center justify-between p-4"
+                >
+                  <div className="text-left">
+                    <h4 className="font-semibold">{employee.full_name}</h4>
 
-                  <th className="p-2.5 text-left text-sm">Employee</th>
+                    <p className="text-sm text-gray-500">
+                      {records.length} Updates
+                    </p>
+                  </div>
 
-                  <th className="p-2.5 text-left text-sm">Products</th>
+                  <span>
+                    {expandedEmployeeUpdate === employee.id ? "▼" : "▶"}
+                  </span>
+                </button>
 
-                  <th className="p-2.5 text-left text-sm">Location</th>
-
-                  <th className="p-2.5 text-left text-sm">Created</th>
-                  <th className="p-2.5 text-left text-sm">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredEntries.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className="border-b border-border align-top"
-                  >
-                    <td className="p-2.5 text-sm">{entry.visit_date}</td>
-
-                    <td className="p-2.5 text-sm">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{entry.doctor_name}</span>
-
-                        <span className="text-xs text-muted-foreground">
-                          {entry.doctor_phone || "No Number"}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="p-2.5 text-sm">
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          {entry.employee_name || "-"}
-                        </span>
-
-                        <span className="text-xs text-muted-foreground">
-                          {entry.employee_email || "-"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-2.5 text-sm">
-                      <div className="flex flex-wrap gap-2">
-                        {entry.products?.map((product, index) => (
-                          <span
-                            key={index}
-                            className="rounded-full bg-secondary px-2.5 py-1 text-xs"
-                          >
-                            {product}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td>
-                      {entry.latitude && entry.longitude ? (
-                        <a
-                          href={`https://maps.google.com/?q=${entry.latitude},${entry.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
+                {expandedEmployeeUpdate === employee.id && (
+                  <div className="border-t bg-slate-50 p-4">
+                    <div className="space-y-4">
+                      {records.map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
                         >
-                          <button
-                            onClick={() =>
-                              window.open(
-                                `https://maps.google.com/?q=${entry.latitude},${entry.longitude}`,
-                                "_blank",
-                              )
-                            }
-                          >
-                            View Map
-                          </button>
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
+                          <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+                            {/* LEFT SIDE */}
+                            <div>
+                              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+                                Doctor
+                              </p>
 
-                    <td className="p-2.5 text-sm">
-                      {new Date(entry.created_at).toLocaleString()}
-                    </td>
+                              <h3 className="text-lg font-semibold text-slate-900">
+                                {entry.doctor_name}
+                              </h3>
 
-                    <td className="p-2.5 text-sm">
-                      <button
-                        onClick={() => deleteDoctorEntry(entry.id)}
-                        className="rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                              <p className="mt-1 text-slate-600">
+                                {entry.doctor_phone || "No Number"}
+                              </p>
+
+                              <div className="mt-5 space-y-3">
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                                    Visit Date
+                                  </p>
+
+                                  <p className="font-medium">
+                                    {entry.visit_date}
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                                    Created
+                                  </p>
+
+                                  <p>
+                                    {new Date(
+                                      entry.created_at,
+                                    ).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* RIGHT SIDE */}
+                            <div className="flex flex-col justify-between">
+                              <div>
+                                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-500">
+                                  Products
+                                </p>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {entry.products?.map((product, index) => (
+                                    <span
+                                      key={index}
+                                      className="rounded-full bg-green-100 px-3 py-1.5 text-sm font-medium text-green-700"
+                                    >
+                                      {product}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="mt-6 flex flex-wrap gap-3">
+                                {entry.latitude && entry.longitude && (
+                                  <button
+                                    onClick={() =>
+                                      window.open(
+                                        `https://maps.google.com/?q=${entry.latitude},${entry.longitude}`,
+                                        "_blank",
+                                      )
+                                    }
+                                    className="rounded-xl bg-blue-600 px-5 py-2.5 font-medium text-white transition hover:bg-blue-700"
+                                  >
+                                    📍 View Map
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => deleteDoctorEntry(entry.id)}
+                                  className="rounded-xl bg-red-500 px-5 py-2.5 font-medium text-white transition hover:bg-red-600"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

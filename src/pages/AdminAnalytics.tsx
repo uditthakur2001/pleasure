@@ -29,6 +29,7 @@ export default function AdminAnalytics() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editSales, setEditSales] = useState("");
   const [editCollection, setEditCollection] = useState("");
+  const [expandedEmployee, setExpandedEmployee] = useState<number | null>(null);
 
   useEffect(() => {
     loadAnalytics();
@@ -238,6 +239,33 @@ export default function AdminAnalytics() {
     }
   };
 
+  const deleteSalesRecord = async (id: number) => {
+    if (!confirm("Delete this record?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("employee_sales")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setEmployeeSales((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete");
+    }
+  };
+
+  const groupedSales = employees
+    .map((employee) => ({
+      employee,
+      records: filteredSales.filter(
+        (s) => Number(s.employee_id) === Number(employee.id),
+      ),
+    }))
+    .filter((group) => group.records.length > 0);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -382,95 +410,144 @@ export default function AdminAnalytics() {
         </div>
 
         <Card title="Sales Records">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-3 text-left">Employee</th>
-                  <th className="py-3 text-left">Sales</th>
-                  <th className="py-3 text-left">Collection</th>
-                  <th className="py-3 text-left">Action</th>
-                </tr>
-              </thead>
+          <div className="mb-6 flex w-fit rounded-xl bg-gray-100 p-1">
+            {[
+              ["daily", "Today"],
+              ["weekly", "Week"],
+              ["monthly", "Month"],
+              ["yearly", "Year"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setRankingPeriod(value as any)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  rankingPeriod === value
+                    ? "bg-white text-green-700 shadow"
+                    : "text-gray-600"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-3">
+            {groupedSales.map(({ employee, records }) => (
+              <div
+                key={employee.id}
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+              >
+                <button
+                  onClick={() =>
+                    setExpandedEmployee(
+                      expandedEmployee === employee.id ? null : employee.id,
+                    )
+                  }
+                  className="flex w-full items-center justify-between p-4 text-left transition hover:bg-gray-50"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-900">
+                      {employee.full_name}
+                    </h4>
 
-              <tbody>
-                {[...filteredSales]
-                  .sort((a, b) => {
-                    const empA =
-                      employees.find(
-                        (e) => Number(e.id) === Number(a.employee_id),
-                      )?.full_name || "";
+                    <p className="mt-1 text-sm text-gray-500">
+                      {records.length} Records
+                    </p>
+                  </div>
 
-                    const empB =
-                      employees.find(
-                        (e) => Number(e.id) === Number(b.employee_id),
-                      )?.full_name || "";
+                  <div
+                    className={`transition-transform ${
+                      expandedEmployee === employee.id ? "rotate-90" : ""
+                    }`}
+                  >
+                    ▶
+                  </div>
+                </button>
 
-                    return empA.localeCompare(empB);
-                  })
-                  .map((record) => {
-                    const employee = employees.find(
-                      (e) => Number(e.id) === Number(record.employee_id),
-                    );
+                {expandedEmployee === employee.id && (
+                  <div className="border-t bg-gray-50 p-4">
+                    <div className="space-y-3">
+                      {records.map((record) => (
+                        <div
+                          key={record.id}
+                          className="rounded-xl border bg-white p-4"
+                        >
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-gray-500">
+                                Sales
+                              </p>
 
-                    return (
-                      <tr key={record.id} className="border-b">
-                        <td className="py-3">{employee?.full_name}</td>
+                              {editingId === record.id ? (
+                                <input
+                                  type="number"
+                                  value={editSales}
+                                  onChange={(e) => setEditSales(e.target.value)}
+                                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                                />
+                              ) : (
+                                <p className="text-lg font-semibold text-green-700">
+                                  ₹{Number(record.sales).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
 
-                        <td className="py-3">
-                          {editingId === record.id ? (
-                            <input
-                              type="number"
-                              value={editSales}
-                              onChange={(e) => setEditSales(e.target.value)}
-                              className="rounded border px-2 py-1"
-                            />
-                          ) : (
-                            `₹${Number(record.sales).toLocaleString()}`
-                          )}
-                        </td>
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-gray-500">
+                                Collection
+                              </p>
 
-                        <td className="py-3">
-                          {editingId === record.id ? (
-                            <input
-                              type="number"
-                              value={editCollection}
-                              onChange={(e) =>
-                                setEditCollection(e.target.value)
-                              }
-                              className="rounded border px-2 py-1"
-                            />
-                          ) : (
-                            `₹${Number(record.collection).toLocaleString()}`
-                          )}
-                        </td>
+                              {editingId === record.id ? (
+                                <input
+                                  type="number"
+                                  value={editCollection}
+                                  onChange={(e) =>
+                                    setEditCollection(e.target.value)
+                                  }
+                                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                                />
+                              ) : (
+                                <p className="text-lg font-semibold text-blue-700">
+                                  ₹{Number(record.collection).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
 
-                        <td className="py-3">
-                          {editingId === record.id ? (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {editingId === record.id ? (
+                              <button
+                                onClick={() => updateSalesRecord(record.id)}
+                                className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white"
+                              >
+                                Save
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingId(record.id);
+                                  setEditSales(record.sales);
+                                  setEditCollection(record.collection);
+                                }}
+                                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white"
+                              >
+                                Edit
+                              </button>
+                            )}
+
                             <button
-                              onClick={() => updateSalesRecord(record.id)}
-                              className="rounded bg-green-600 px-3 py-1 text-white"
+                              onClick={() => deleteSalesRecord(record.id)}
+                              className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white"
                             >
-                              Save
+                              Delete
                             </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setEditingId(record.id);
-                                setEditSales(record.sales);
-                                setEditCollection(record.collection);
-                              }}
-                              className="rounded bg-blue-600 px-3 py-1 text-white"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </Card>
       </div>
