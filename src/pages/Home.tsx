@@ -2,19 +2,15 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Award, ShieldCheck, Sprout, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/ProductCard";
-import { fetchProducts } from "@/lib/productApi";
-import heroImg from "@/assets/hero-farmer-cattle.webp";
-// import cattleImg from "@/assets/cattle-field.jpg";
 import storeImg from "@/assets/store.webp";
 import { useEffect, useState } from "react";
-
 import { supabase } from "@/lib/supabase";
-// const { supabase } = await import("@/lib/supabase");
 
 const Home = () => {
   const [productsData, setProductsData] = useState<any[]>([]);
 
   const [allProductsCount, setAllProductsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const highlights = productsData.slice(0, 6);
 
@@ -23,6 +19,7 @@ const Home = () => {
   }, []);
 
   const loadProducts = async () => {
+    setIsLoading(true);
     // HOMEPAGE PRODUCTS
     const { data: homeProducts } = await supabase
       .from("products")
@@ -39,6 +36,7 @@ const Home = () => {
     });
 
     setAllProductsCount(count || 0);
+    setIsLoading(false);
   };
   const stats = [
     {
@@ -152,7 +150,7 @@ const Home = () => {
           {/* RIGHT IMAGE */}
           <div className="relative h-[320px] lg:h-[500px]">
             <img
-              src={heroImg}
+              src="/hero.webp"
               alt="Farmer caring for healthy cattle in a green pasture"
               width={1080}
               height={1920}
@@ -229,20 +227,27 @@ const Home = () => {
             </Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {highlights.map((p) => (
-              <ProductCard
-                key={p.slug}
-                product={{
-                  ...p,
-
-                  images:
-                    typeof p.image_urls === "string"
-                      ? JSON.parse(p.image_urls)
-                      : p.image_urls || [],
-                }}
-              />
-            ))}{" "}
-          </div>
+      {isLoading ? (
+        // Show skeleton loaders while waiting
+        [1, 2, 3, 4, 5, 6].map((n) => (
+          <div key={n} className="h-[300px] w-full animate-pulse rounded-xl bg-muted"></div>
+        ))
+      ) : (
+        // Show actual products when loaded
+        highlights.map((p) => (
+          <ProductCard
+            key={p.slug}
+            product={{
+              ...p,
+              images:
+                typeof p.image_urls === "string"
+                  ? JSON.parse(p.image_urls)
+                  : p.image_urls || [],
+            }}
+          />
+        ))
+      )}
+    </div>
         </div>
       </section>
 
