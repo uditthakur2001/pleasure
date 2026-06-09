@@ -730,7 +730,10 @@ export default function AdminDashboard() {
         (entry) => entry.employee_name === employee.full_name,
       ),
     }))
-    .filter((group) => group.records.length > 0);
+    .filter((group) => group.records.length > 0)
+    .sort((a, b) =>
+      (a.employee.full_name || "").localeCompare(b.employee.full_name || ""),
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] px-4 py-5">
