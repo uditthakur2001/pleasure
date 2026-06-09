@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 
+import Swal from "sweetalert2";
+
 function Card({
   title,
   children,
@@ -233,14 +235,24 @@ export default function AdminAnalytics() {
       );
 
       setEditingId(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to update");
+      alert(err?.message || "Failed to delete");
     }
   };
 
   const deleteSalesRecord = async (id: number) => {
-    if (!confirm("Delete this record?")) return;
+    const result = await Swal.fire({
+      title: "Delete Record?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Delete",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const { error } = await supabase
@@ -251,9 +263,22 @@ export default function AdminAnalytics() {
       if (error) throw error;
 
       setEmployeeSales((prev) => prev.filter((item) => item.id !== id));
-    } catch (err) {
+
+      await Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Record deleted successfully",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to delete");
+
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: err?.message || "Something went wrong",
+      });
     }
   };
 
