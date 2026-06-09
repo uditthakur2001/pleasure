@@ -257,21 +257,35 @@ export default function Dashboard() {
   };
 
   const pickPhoneContact = async (index: number) => {
-    try {
-      // @ts-ignore
-      const contacts = await navigator.contacts.select(["name", "tel"], {
+  try {
+    // @ts-ignore
+    const contacts = await navigator.contacts.select(
+      ["name", "tel"],
+      {
         multiple: false,
-      });
-
-      if (contacts.length > 0) {
-        handleChange(index, "doctorName", contacts[0].name?.[0] || "");
-
-        handleChange(index, "doctorPhone", contacts[0].tel?.[0] || "");
       }
-    } catch (err) {
-      errorAlert("Contact Access Failed");
-    }
-  };
+    );
+
+    if (!contacts?.length) return;
+
+    const contact = contacts[0];
+
+    setRows((prev) => {
+      const updated = [...prev];
+
+      updated[index] = {
+        ...updated[index],
+        doctorName: contact.name?.[0] || "",
+        doctorPhone: contact.tel?.[0] || "",
+      };
+
+      return updated;
+    });
+  } catch (err) {
+    console.log(err);
+    errorAlert("Contact Access Failed");
+  }
+};
 
   const handleChange = (index: number, field: keyof RowData, value: any) => {
     const updatedRows = [...rows];
