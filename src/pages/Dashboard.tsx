@@ -692,7 +692,6 @@ export default function Dashboard() {
         </div>
 
         {/* ROWS */}
-        {/* <div className="grid gap-6 lg:grid-cols-12 mb-6 "> */}
         <div className="grid gap-4 mb-6">
           <div>
             <div>
@@ -703,124 +702,153 @@ export default function Dashboard() {
                     key={index}
                     className="overflow-visible rounded-3xl border border-border bg-card/90 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
                   >
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Doctor Visit
-                    </div>
-                    <div className="grid items-end gap-4 xl:grid-cols-[1.4fr_1.4fr_3fr_4fr]">
-                      {/* DOCTOR */}
+                    <div className="grid gap-5 lg:grid-cols-12">
+                      <div className="lg:col-span-8">
+                        <div className="rounded-2xl border border-border bg-white/50 p-4">
+                          <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Doctor Visit
+                          </div>
 
-                      <div>
-                        <label className="mb-1 block text-sm font-medium">
-                          Doctor Name
-                        </label>
+                          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.4fr_1.4fr_3fr]">
+                            {/* DOCTOR */}
 
-                        <input
-                          list={`doctor-list-${index}`}
-                          type="text"
-                          placeholder="Doctor name"
-                          value={row.doctorName}
-                          disabled={!!row.id}
-                          autoCapitalize="words"
-                          autoComplete="off"
-                          spellCheck={false}
-                          onChange={(e) => {
-                            // REMOVE NUMBERS & SPECIAL CHARS
-                            const cleaned = e.target.value
-                              .replace(/[^A-Za-z\s.]/g, "")
-                              .replace(/\b\w/g, (char) => char.toUpperCase());
+                            <div>
+                              <label className="mb-1 block text-sm font-medium">
+                                Doctor Name
+                              </label>
 
-                            handleChange(index, "doctorName", cleaned);
-                          }}
-                          onBlur={() => {
-                            const matched = contacts.find(
-                              (c) => c.name === row.doctorName,
-                            );
+                              <input
+                                list={`doctor-list-${index}`}
+                                type="text"
+                                placeholder="Doctor name"
+                                value={row.doctorName}
+                                disabled={!!row.id}
+                                autoCapitalize="words"
+                                autoComplete="off"
+                                spellCheck={false}
+                                onChange={(e) => {
+                                  // REMOVE NUMBERS & SPECIAL CHARS
+                                  const cleaned = e.target.value
+                                    .replace(/[^A-Za-z\s.]/g, "")
+                                    .replace(/\b\w/g, (char) =>
+                                      char.toUpperCase(),
+                                    );
 
-                            if (matched) {
-                              handleChange(index, "doctorPhone", matched.phone);
-                            }
-                          }}
-                          className="w-full rounded-xl border border-border px-4 py-3"
-                        />
+                                  handleChange(index, "doctorName", cleaned);
+                                }}
+                                onBlur={() => {
+                                  const matched = contacts.find(
+                                    (c) => c.name === row.doctorName,
+                                  );
 
-                        <datalist id={`doctor-list-${index}`}>
-                          {contacts.map((contact, i) => (
-                            <option key={i} value={contact.name} />
-                          ))}
-                        </datalist>
-                      </div>
+                                  if (matched) {
+                                    handleChange(
+                                      index,
+                                      "doctorPhone",
+                                      matched.phone,
+                                    );
+                                  }
+                                }}
+                                className="w-full rounded-xl border border-border px-4 py-3"
+                              />
 
-                      {/* PHONE */}
-                      <div>
-                        <label className="mb-1 block text-sm font-medium">
-                          Phone
-                        </label>
+                              <datalist id={`doctor-list-${index}`}>
+                                {contacts.map((contact, i) => (
+                                  <option key={i} value={contact.name} />
+                                ))}
+                              </datalist>
+                            </div>
 
-                        <input
-                          type="tel"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={15}
-                          placeholder="Phone number"
-                          value={row.doctorPhone}
-                          disabled={!!row.id}
-                          onChange={(e) => {
-                            const onlyNumbers = e.target.value.replace(
-                              /\D/g,
-                              "",
-                            );
+                            {/* PHONE */}
+                            <div>
+                              <label className="mb-1 block text-sm font-medium">
+                                Phone
+                              </label>
 
-                            handleChange(index, "doctorPhone", onlyNumbers);
-                          }}
-                          className="w-full rounded-xl border border-border px-4 py-3"
-                        />
-                      </div>
+                              <input
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                maxLength={15}
+                                placeholder="Phone number"
+                                value={row.doctorPhone}
+                                disabled={!!row.id}
+                                onChange={(e) => {
+                                  const onlyNumbers = e.target.value.replace(
+                                    /\D/g,
+                                    "",
+                                  );
 
-                      <div>
-                        <label className="mb-1 block text-sm font-medium">
-                          Products
-                        </label>
+                                  handleChange(
+                                    index,
+                                    "doctorPhone",
+                                    onlyNumbers,
+                                  );
+                                }}
+                                className="w-full rounded-xl border border-border px-4 py-3"
+                              />
+                            </div>
 
-                        <div className="flex items-end gap-3">
-                          <div className="flex-1">
-                            <Select
-                              isMulti
-                              isDisabled={!!row.id}
-                              menuPortalTarget={document.body}
-                              menuPosition="fixed"
-                              options={productOptions}
-                              closeMenuOnSelect={false}
-                              hideSelectedOptions={false}
-                              blurInputOnSelect={false}
-                              menuPlacement="auto"
-                              value={productOptions.filter((option) =>
-                                row.product.includes(option.value),
-                              )}
-                              onChange={(selected) =>
-                                handleChange(
-                                  index,
-                                  "product",
-                                  selected.map((item) => item.value),
-                                )
-                              }
-                              styles={{
-                                control: (base) => ({
-                                  ...base,
-                                  minHeight: 54,
-                                  borderRadius: 14,
-                                }),
+                            <div>
+                              <label className="mb-1 block text-sm font-medium">
+                                Products
+                              </label>
 
-                                menu: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
+                              <div className="flex items-end gap-3">
+                                <div className="flex-1">
+                                  <Select
+                                    isMulti
+                                    isDisabled={!!row.id}
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    options={productOptions}
+                                    closeMenuOnSelect={false}
+                                    hideSelectedOptions={false}
+                                    blurInputOnSelect={false}
+                                    menuPlacement="auto"
+                                    value={productOptions.filter((option) =>
+                                      row.product.includes(option.value),
+                                    )}
+                                    onChange={(selected) =>
+                                      handleChange(
+                                        index,
+                                        "product",
+                                        selected.map((item) => item.value),
+                                      )
+                                    }
+                                    styles={{
+                                      control: (base) => ({
+                                        ...base,
+                                        minHeight: 54,
+                                        borderRadius: 14,
+                                      }),
 
-                                option: (base) => ({
-                                  ...base,
-                                  padding: 16,
-                                }),
-                              }}
-                            />
+                                      menu: (base) => ({
+                                        ...base,
+                                        zIndex: 9999,
+                                      }),
+
+                                      option: (base) => ({
+                                        ...base,
+                                        padding: 16,
+                                      }),
+                                    }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="mt-5 flex flex-wrap gap-2">
+                                {supportsContactPicker && (
+                                  <button
+                                    type="button"
+                                    onClick={() => pickPhoneContact(index)}
+                                    className="rounded-xl border border-border bg-white px-4 py-2 text-sm"
+                                  >
+                                    Pick Contact
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
 
                           {!row.id && (
@@ -832,63 +860,51 @@ export default function Dashboard() {
                             </button>
                           )}
                         </div>
-                        {/* </div> */}
                       </div>
-                      <div>
-                        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                          Daily Reporting
-                        </div>
-
-                        <div className="flex items-end gap-3">
-                          <div className="flex-1">
-                            <label className="mb-1 block text-sm font-medium">
-                              Sales
-                            </label>
-
-                            <input
-                              type="number"
-                              value={sales}
-                              onChange={(e) => setSales(e.target.value)}
-                              placeholder="Sales"
-                              className="h-[56px] w-full rounded-xl border px-4"
-                            />
+                      <div className="lg:col-span-4">
+                        <div className="rounded-2xl border border-green-100 bg-gradient-to-br from-green-50 to-white p-4 shadow-sm">
+                          <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Daily Sales & Collection
                           </div>
 
-                          <div className="flex-1">
-                            <label className="mb-1 block text-sm font-medium">
-                              Collection
-                            </label>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="mb-1 block text-sm font-medium">
+                                Sales
+                              </label>
 
-                            <input
-                              type="number"
-                              value={collections}
-                              onChange={(e) => setCollections(e.target.value)}
-                              placeholder="Collection"
-                              className="h-[56px] w-full rounded-xl border px-4"
-                            />
+                              <input
+                                type="number"
+                                value={sales}
+                                onChange={(e) => setSales(e.target.value)}
+                                placeholder="Sales"
+                                className="h-[56px] w-full rounded-xl border px-4"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="mb-1 block text-sm font-medium">
+                                Collection
+                              </label>
+
+                              <input
+                                type="number"
+                                value={collections}
+                                onChange={(e) => setCollections(e.target.value)}
+                                placeholder="Collection"
+                                className="h-[56px] w-full rounded-xl border px-4"
+                              />
+                            </div>
+
+                            <button
+                              onClick={saveSalesCollection}
+                              className="h-[56px] w-full rounded-xl bg-green-800 font-medium text-white"
+                            >
+                              Save Sales & Collection
+                            </button>
                           </div>
-
-                          <button
-                            onClick={saveSalesCollection}
-                            className="h-[56px] w-[56px] shrink-0 rounded-xl bg-green-600 text-xl text-white"
-                          >
-                            ✓
-                          </button>
                         </div>
                       </div>
-                    </div>
-
-                    {/* ACTIONS */}
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {supportsContactPicker && (
-                        <button
-                          type="button"
-                          onClick={() => pickPhoneContact(index)}
-                          className="rounded-xl border border-border bg-white px-4 py-2 text-sm transition-all duration-200 hover:shadow-md"
-                        >
-                          Pick Contact
-                        </button>
-                      )}
                     </div>
                   </div>
                 ))}
